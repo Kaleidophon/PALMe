@@ -59,7 +59,7 @@ public static class IntSumReducer extends Reducer<Text,IntWritable,Text,IntWrita
     	result.set(sum);
     	context.write(key, result);
     	}
-  }
+  	}
 
 public static void main(String[] args) throws Exception {
 	
