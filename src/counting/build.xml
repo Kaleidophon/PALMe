@@ -6,6 +6,8 @@
   <property name="build.dir" location="../../../jars/toupload/bin" />
   <property name="lib.dir" location="../../../jars" />
   <property name="dist.dir" location="../../../jars/toupload/dist/" />
+  <property name="target" value="1.7"/>
+  <property name="source" value="1.7"/>
 
   <path id="build.classpath">
     <fileset dir="lib">
@@ -42,7 +44,7 @@
 
   <!-- Compiles the java code (including the usage of library for JUnit -->
   <target name="compile" depends="clean, makedir">
-    <javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="build.classpath" debug="on" fork="yes">
+    <javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="build.classpath" debug="on" fork="yes" source="${source}" target="${target}">
     </javac>
 
   </target>
