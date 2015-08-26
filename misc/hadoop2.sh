@@ -1,4 +1,5 @@
 cd ~/Desktop
+rm -r ./wordcount
 mkdir ./wordcount
 hadoop fs -rm -r wordcount/default_out
 hadoop jar ~/Desktop/WordCount.jar wordcount/default/ wordcount/default_out/
