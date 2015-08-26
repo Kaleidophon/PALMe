@@ -19,6 +19,9 @@ package counting;
 
 import java.io.IOException;
 import java.util.StringTokenizer;
+import java.util.ArrayList;
+import java.util.List;
+import java.lang.StringBuilder;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -36,14 +39,27 @@ public class WordCount {
 	public static class TokenizerMapper extends Mapper<Object, Text, Text, IntWritable>{
     
     private final static IntWritable one = new IntWritable(1);
-    private Text word = new Text();
+    private Text ngram = new Text();
+    private final int n = 5;
       
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
     	StringTokenizer itr = new StringTokenizer(value.toString());
-    	while (itr.hasMoreTokens()) {	
-    		word.set(itr.nextToken());
-    		context.write(word, one);
+    	List<String> tokens = new ArrayList<>();
+    	while (itr.hasMoreTokens()) {
+    		tokens.add(itr.nextToken());
     	}
+    	for (int i = n-1; i < tokens.size(); i++) {
+    		ngram.set(concat(tokens.subList(i-n+1, i+1)));
+    		context.write(ngram, one);
+    	}
+    }
+    
+    private String concat(List<String> stringlist) {
+    	StringBuilder sb = new StringBuilder();
+    	for (int i = 0; i < stringlist.size(); i++) {
+    		sb.append(stringlist.get(i) + " ");
+    	}
+    	return sb.toString();
     }
 }
   
