@@ -40,26 +40,34 @@ public class WordCount {
     
     private final static IntWritable one = new IntWritable(1);
     private Text ngram = new Text();
-    private final int n = 5;
+    private static int n = 1;
       
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
     	StringTokenizer itr = new StringTokenizer(value.toString());
     	List<String> tokens = new ArrayList<>();
+    	// Collecting all sentence tokens
     	while (itr.hasMoreTokens()) {
     		tokens.add(itr.nextToken());
     	}
+    	// Emitting ngrams
     	for (int i = n-1; i < tokens.size(); i++) {
     		ngram.set(concat(tokens.subList(i-n+1, i+1)));
     		context.write(ngram, one);
     	}
     }
     
+    /** Efficient Concatenation with StringBuilder */
     private String concat(List<String> stringlist) {
     	StringBuilder sb = new StringBuilder();
     	for (int i = 0; i < stringlist.size(); i++) {
     		sb.append(stringlist.get(i) + " ");
     	}
     	return sb.toString();
+    }
+    
+    /** Setting the ngram length */
+    public static void setN(int new_n) {
+    	n = new_n;
     }
 }
   
@@ -82,22 +90,25 @@ public static class IntSumReducer extends Reducer<Text,IntWritable,Text,IntWrita
 		Configuration conf = new Configuration();
 	    String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 	    
-	    if (otherArgs.length < 2) {
-	    	System.err.println("Usage: wordcount <in> [<in>...] <out>");
+	    if (otherArgs.length < 3) {
+	    	System.err.println("Usage: wordcount <in> [<in>...] <out> <ngram>");
 	    	System.exit(2);
 	    }
 	    
 	    Job job = Job.getInstance(conf, "word count");
 	    job.setJarByClass(WordCount.class);
+	    TokenizerMapper.setN(Integer.parseInt(otherArgs[otherArgs.length-1])); // Set ngram length
 	    job.setMapperClass(TokenizerMapper.class);
 	    job.setCombinerClass(IntSumReducer.class);
 	    job.setReducerClass(IntSumReducer.class);
 	    job.setOutputKeyClass(Text.class);
 	    job.setOutputValueClass(IntWritable.class);
-	    for (int i = 0; i < otherArgs.length - 1; ++i) {
+	    // Input paths
+	    for (int i = 0; i < otherArgs.length - 2; ++i) {
 	    	FileInputFormat.addInputPath(job, new Path(otherArgs[i]));
 	    }
-	    FileOutputFormat.setOutputPath(job, new Path(otherArgs[otherArgs.length - 1]));
+	    // Output paths
+	    FileOutputFormat.setOutputPath(job, new Path(otherArgs[otherArgs.length - 2]));
 	    System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
 }
