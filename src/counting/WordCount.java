@@ -90,25 +90,27 @@ public static class IntSumReducer extends Reducer<Text,IntWritable,Text,IntWrita
 		Configuration conf = new Configuration();
 	    String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 	    
-	    if (otherArgs.length < 3) {
-	    	System.err.println("Usage: wordcount <in> [<in>...] <out> <ngram>");
+	    if (otherArgs.length < 4) {
+	    	System.err.println("Usage: wordcount <in> [<in>...] <out> <ngram> <combiner:yes/no>");
 	    	System.exit(2);
 	    }
 	    
 	    Job job = Job.getInstance(conf, "word count");
 	    job.setJarByClass(WordCount.class);
-	    TokenizerMapper.setN(Integer.parseInt(otherArgs[otherArgs.length-1])); // Set ngram length
+	    TokenizerMapper.setN(Integer.parseInt(otherArgs[otherArgs.length-2])); // Set ngram length
 	    job.setMapperClass(TokenizerMapper.class);
-	    job.setCombinerClass(IntSumReducer.class);
+	    if (otherArgs[otherArgs.length-1] == "yes") {
+	    	job.setCombinerClass(IntSumReducer.class);
+	    }
 	    job.setReducerClass(IntSumReducer.class);
 	    job.setOutputKeyClass(Text.class);
 	    job.setOutputValueClass(IntWritable.class);
 	    // Input paths
-	    for (int i = 0; i < otherArgs.length - 2; ++i) {
+	    for (int i = 0; i < otherArgs.length - 3; ++i) {
 	    	FileInputFormat.addInputPath(job, new Path(otherArgs[i]));
 	    }
 	    // Output paths
-	    FileOutputFormat.setOutputPath(job, new Path(otherArgs[otherArgs.length - 2]));
+	    FileOutputFormat.setOutputPath(job, new Path(otherArgs[otherArgs.length - 3]));
 	    System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
 }
