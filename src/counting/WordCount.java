@@ -30,6 +30,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.Partitioner;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
@@ -70,6 +72,22 @@ public class WordCount {
     	n = new_n;
     }
 }
+	
+public class MyPartitioner extends Partitioner<IntWritable,Text> {
+	@Override
+	public int getPartition(IntWritable key, Text value, int numPartitions) {
+		/* Pretty ugly hard coded partitioning function. Don't do that in practice, it is just for the sake of understanding. */
+		int nbOccurences = key.get();
+
+		if (nbOccurences < 3 ) {
+			return 0;
+		}
+		else {
+			return 1;
+		}
+	}
+
+}
   
 public static class IntSumReducer extends Reducer<Text,IntWritable,Text,IntWritable> {
    
@@ -90,27 +108,30 @@ public static class IntSumReducer extends Reducer<Text,IntWritable,Text,IntWrita
 		Configuration conf = new Configuration();
 	    String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 	    
-	    if (otherArgs.length < 4) {
-	    	System.err.println("Usage: wordcount <in> [<in>...] <out> <ngram> <combiner:yes/no>");
+	    if (otherArgs.length < 5) {
+	    	System.err.println("Usage: wordcount <in> [<in>...] <out> <ngram> <combiner:yes/no> <custom partioner:yes/no>");
 	    	System.exit(2);
 	    }
 	    
 	    Job job = Job.getInstance(conf, "word count");
 	    job.setJarByClass(WordCount.class);
-	    TokenizerMapper.setN(Integer.parseInt(otherArgs[otherArgs.length-2])); // Set ngram length
+	    TokenizerMapper.setN(Integer.parseInt(otherArgs[otherArgs.length-3])); // Set ngram length
 	    job.setMapperClass(TokenizerMapper.class);
-	    if (otherArgs[otherArgs.length-1] == "yes") {
+	    if (otherArgs[otherArgs.length-2] == "yes") {
 	    	job.setCombinerClass(IntSumReducer.class);
+	    }
+	    if (otherArgs[otherArgs.length-1] == "yes") {
+	    	job.setPartitionerClass(MyPartitioner.class);
 	    }
 	    job.setReducerClass(IntSumReducer.class);
 	    job.setOutputKeyClass(Text.class);
 	    job.setOutputValueClass(IntWritable.class);
 	    // Input paths
-	    for (int i = 0; i < otherArgs.length - 3; ++i) {
+	    for (int i = 0; i < otherArgs.length - 4; ++i) {
 	    	FileInputFormat.addInputPath(job, new Path(otherArgs[i]));
 	    }
 	    // Output paths
-	    FileOutputFormat.setOutputPath(job, new Path(otherArgs[otherArgs.length - 3]));
+	    FileOutputFormat.setOutputPath(job, new Path(otherArgs[otherArgs.length - 4]));
 	    System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
 }
