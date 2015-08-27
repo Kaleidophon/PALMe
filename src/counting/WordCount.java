@@ -109,6 +109,7 @@ public static class IntSumReducer extends Reducer<Text,IntWritable,Text,IntWrita
 	    String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 	    final int NUMBER_OF_NODES = 24;
 	    final int MAX_NUMBER_OF_TASKS = 1000;
+	    final double REDUCER_CONSTANT = 0.95; // oder 0.75
 	    
 	    if (otherArgs.length < 5) {
 	    	System.err.println("Usage: wordcount <in> [<in>...] <out> <ngram> <combiner:yes/no> <custom partioner:yes/no>");
@@ -121,7 +122,7 @@ public static class IntSumReducer extends Reducer<Text,IntWritable,Text,IntWrita
 	    Job job = Job.getInstance(conf, "word count");
 	    
 	    //conf.setNumMapTasks(5); // Not possible with code in line?
-	    //job.setNumReduceTasks((int) 0.95 * NUMBER_OF_NODES * MAX_NUMBER_OF_TASKS);
+	    //job.setNumReduceTasks((int) REDUCER_CONSTANT * NUMBER_OF_NODES * MAX_NUMBER_OF_TASKS);
 	    
 	    job.setJarByClass(WordCount.class);
 	    TokenizerMapper.setN(Integer.parseInt(otherArgs[otherArgs.length-3])); // Set ngram length
