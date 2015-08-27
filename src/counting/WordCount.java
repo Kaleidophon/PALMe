@@ -79,7 +79,7 @@ public class MyPartitioner extends Partitioner<IntWritable,Text> {
 		/* Pretty ugly hard coded partitioning function. Don't do that in practice, it is just for the sake of understanding. */
 		int nbOccurences = key.get();
 
-		if (nbOccurences < 3 ) {
+		if (nbOccurences > 3 ) {
 			return 0;
 		}
 		else {
@@ -107,13 +107,22 @@ public static class IntSumReducer extends Reducer<Text,IntWritable,Text,IntWrita
 		
 		Configuration conf = new Configuration();
 	    String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
+	    final int NUMBER_OF_NODES = 24;
+	    final int MAX_NUMBER_OF_TASKS = 1000;
 	    
 	    if (otherArgs.length < 5) {
 	    	System.err.println("Usage: wordcount <in> [<in>...] <out> <ngram> <combiner:yes/no> <custom partioner:yes/no>");
 	    	System.exit(2);
 	    }
 	    
+	    // Setting map and reduce tasks
+	    
+	    
 	    Job job = Job.getInstance(conf, "word count");
+	    
+	    //conf.setNumMapTasks(5); // Not possible with code in line?
+	    //job.setNumReduceTasks((int) 0.95 * NUMBER_OF_NODES * MAX_NUMBER_OF_TASKS);
+	    
 	    job.setJarByClass(WordCount.class);
 	    TokenizerMapper.setN(Integer.parseInt(otherArgs[otherArgs.length-3])); // Set ngram length
 	    job.setMapperClass(TokenizerMapper.class);
@@ -132,6 +141,7 @@ public static class IntSumReducer extends Reducer<Text,IntWritable,Text,IntWrita
 	    }
 	    // Output paths
 	    FileOutputFormat.setOutputPath(job, new Path(otherArgs[otherArgs.length - 4]));
+
 	    System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
 }
