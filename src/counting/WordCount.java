@@ -39,41 +39,44 @@ import org.apache.hadoop.util.GenericOptionsParser;
 public class WordCount {
 
 	public static class TokenizerMapper extends Mapper<Object, Text, Text, IntWritable>{
-    
-    private final static IntWritable one = new IntWritable(1);
-    private Text ngram = new Text();
-    private static int n = 1;
-      
-    public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-    	StringTokenizer itr = new StringTokenizer(value.toString());
-    	List<String> tokens = new ArrayList<>();
-    	// Collecting all sentence tokens
-    	while (itr.hasMoreTokens()) {
-    		tokens.add(itr.nextToken());
-    	}
-    	// Emitting ngrams
-    	for (int i = n-1; i < tokens.size(); i++) {
-    		ngram.set(concat(tokens.subList(i-n+1, i+1)));
-    		context.write(ngram, one);
-    	}
-    }
-    
-    /** Efficient Concatenation with StringBuilder */
-    private String concat(List<String> stringlist) {
-    	StringBuilder sb = new StringBuilder();
-    	for (int i = 0; i < stringlist.size(); i++) {
-    		sb.append(stringlist.get(i) + " ");
-    	}
-    	return sb.toString();
-    }
-    
-    /** Setting the ngram length */
-    public static void setN(int new_n) {
-    	n = new_n;
-    }
+	    
+	    private final static IntWritable one = new IntWritable(1);
+	    private Text ngram = new Text();
+	    private static int n = 1;
+	      
+	    public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+	    	StringTokenizer itr = new StringTokenizer(value.toString());
+	    	List<String> tokens = new ArrayList<>();
+	    	// Collecting all sentence tokens
+	    	while (itr.hasMoreTokens()) {
+	    		tokens.add(itr.nextToken());
+	    	}
+	    	// Emitting ngrams
+	    	for (int i = n-1; i < tokens.size(); i++) {
+	    		ngram.set(concat(tokens.subList(i-n+1, i+1)));
+	    		context.write(ngram, one);
+	    	}
+	    }
+	    
+	    /** Efficient Concatenation with StringBuilder */
+	    private String concat(List<String> stringlist) {
+	    	StringBuilder sb = new StringBuilder();
+	    	for (int i = 0; i < stringlist.size(); i++) {
+	    		sb.append(stringlist.get(i) + " ");
+	    	}
+	    	return sb.toString();
+	    }
+	    
+	    /** Setting the ngram length */
+	    public static void setN(int new_n) {
+	    	n = new_n;
+	    }
 }
 	
-public class MyPartitioner extends Partitioner<IntWritable,Text> {
+public static class ZipfPartitioner extends Partitioner<IntWritable,Text> {
+	
+	private static int NUMBER_OF_REDUCERS = 1;
+	
 	@Override
 	public int getPartition(IntWritable key, Text value, int numPartitions) {
 		/* Pretty ugly hard coded partitioning function. Don't do that in practice, it is just for the sake of understanding. */
@@ -85,6 +88,10 @@ public class MyPartitioner extends Partitioner<IntWritable,Text> {
 		else {
 			return 1;
 		}
+	}
+	
+	public static void setNumberOfReducers(int num) {
+		NUMBER_OF_REDUCERS = num;
 	}
 
 }
@@ -122,7 +129,8 @@ public static class IntSumReducer extends Reducer<Text,IntWritable,Text,IntWrita
 	    Job job = Job.getInstance(conf, "word count");
 	    
 	    //conf.setNumMapTasks(5); // Not possible with code in line?
-	    //job.setNumReduceTasks((int) REDUCER_CONSTANT * NUMBER_OF_NODES * MAX_NUMBER_OF_TASKS);
+	    int NUMBER_OF_REDUCERS = (int) REDUCER_CONSTANT * NUMBER_OF_NODES * MAX_NUMBER_OF_TASKS;
+	    job.setNumReduceTasks(NUMBER_OF_REDUCERS);
 	    
 	    job.setJarByClass(WordCount.class);
 	    TokenizerMapper.setN(Integer.parseInt(otherArgs[otherArgs.length-3])); // Set ngram length
@@ -131,7 +139,8 @@ public static class IntSumReducer extends Reducer<Text,IntWritable,Text,IntWrita
 	    	job.setCombinerClass(IntSumReducer.class);
 	    }
 	    if (otherArgs[otherArgs.length-1] == "yes") {
-	    	job.setPartitionerClass(MyPartitioner.class);
+	    	job.setPartitionerClass(ZipfPartitioner.class);
+	    	ZipfPartitioner.setNumberOfReducers(NUMBER_OF_REDUCERS);
 	    }
 	    job.setReducerClass(IntSumReducer.class);
 	    job.setOutputKeyClass(Text.class);
