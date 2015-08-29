@@ -73,12 +73,13 @@ public class WordCount {
 	    }
 	}
 	
-	public static class ZipfPartitioner extends Partitioner<IntWritable,Text> {
+	public static class CustomPartitioner extends Partitioner<IntWritable,Text> {
 		
 		private static int NUMBER_OF_REDUCERS = 1;
 		private static int max = 0;
-		private static int total = 0;
 		private static double k = 2;
+		private static int denominator;
+		private static double[] boundaries;
 		
 		@Override
 		public int getPartition(IntWritable key, Text value, int numPartitions) {
@@ -87,41 +88,41 @@ public class WordCount {
 				return 0;
 			}
 			
-			int word_occurences = key.get();
-			total++;
+			int word_occurrences = key.get();
 			
-			if (word_occurences > max) {
-				max = word_occurences;
+			if (word_occurrences > max) {
+				max = word_occurrences;
+				for (int i = 1; i <= NUMBER_OF_REDUCERS; i++) {
+					boundaries[i-1] = max - i * 1.0 / denominator * max;
+				}
 			}
 			
-			// If haven't encountered a high maximum, a special partition doesn't make much sense
+			int res = 0;
+			// If yet to encounter a high maximum, a special partition doesn't make much sense
 			if (max < 100) {
-				return word_occurences % NUMBER_OF_REDUCERS;
+				res =  word_occurrences % NUMBER_OF_REDUCERS;
 			}
-			
-			// For higher maxima
-			double[] boundaries = new double[NUMBER_OF_REDUCERS];
-			double min_x = 2 / max;
-			double interval = (total - min_x) / NUMBER_OF_REDUCERS;
-			for (int i = 0; i < boundaries.length; i++) {
-				boundaries[i] = zipfFunction((i*interval + min_x), k);
+			else {
+				for (int i = 0; i < boundaries.length; i++) {
+					if (word_occurrences >= boundaries[i]) {
+						res = i;
+					}
+				}
 			}
-			
-			return 1;
+			return res;
 		}
 		
 		public static void setNumberOfReducers(int num) {
 			NUMBER_OF_REDUCERS = num;
+			for (int n = 1; n <= NUMBER_OF_REDUCERS; n++) {
+				denominator += n;
+			}
+			double[] boundaries = new double[NUMBER_OF_REDUCERS];	
 		}
 		
 		public static void setK(double k_) {
 			k = k_;
 		}
-		
-		private static double zipfFunction(double x, double k) {
-			return (k * Math.pow(x,k)) / Math.pow(x, k+1);
-		}
-	
 	}
   
 	public static class IntSumReducer extends Reducer<Text,IntWritable,Text,IntWritable> {
@@ -159,7 +160,7 @@ public class WordCount {
 	    //conf.setNumMapTasks(5); // Not possible with code in line?
 	    int NUMBER_OF_REDUCERS = (int) REDUCER_CONSTANT * NUMBER_OF_NODES * MAX_NUMBER_OF_TASKS;
 	    System.out.println("Number of Reducers: " + NUMBER_OF_REDUCERS);
-	    job.setNumReduceTasks(5);
+	    job.setNumReduceTasks(5); // Placeholder
 	    
 	    job.setJarByClass(WordCount.class);
 	    TokenizerMapper.setN(Integer.parseInt(otherArgs[otherArgs.length-3])); // Set ngram length
