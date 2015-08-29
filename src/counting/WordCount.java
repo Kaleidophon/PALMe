@@ -71,44 +71,72 @@ public class WordCount {
 	    public static void setN(int new_n) {
 	    	n = new_n;
 	    }
-}
+	}
 	
-public static class ZipfPartitioner extends Partitioner<IntWritable,Text> {
-	
-	private static int NUMBER_OF_REDUCERS = 1;
-	
-	@Override
-	public int getPartition(IntWritable key, Text value, int numPartitions) {
-		/* Pretty ugly hard coded partitioning function. Don't do that in practice, it is just for the sake of understanding. */
-		int nbOccurences = key.get();
-
-		if (nbOccurences > 3 ) {
-			return 0;
-		}
-		else {
+	public static class ZipfPartitioner extends Partitioner<IntWritable,Text> {
+		
+		private static int NUMBER_OF_REDUCERS = 1;
+		private static int max = 0;
+		private static int total = 0;
+		private static double k = 2;
+		
+		@Override
+		public int getPartition(IntWritable key, Text value, int numPartitions) {
+			
+			if (NUMBER_OF_REDUCERS == 0) {
+				return 0;
+			}
+			
+			int word_occurences = key.get();
+			total++;
+			
+			if (word_occurences > max) {
+				max = word_occurences;
+			}
+			
+			// If haven't encountered a high maximum, a special partition doesn't make much sense
+			if (max < 100) {
+				return word_occurences % NUMBER_OF_REDUCERS;
+			}
+			
+			// For higher maxima
+			double[] boundaries = new double[NUMBER_OF_REDUCERS];
+			double min_x = 2 / max;
+			double interval = (total - min_x) / NUMBER_OF_REDUCERS;
+			for (int i = 0; i < boundaries.length; i++) {
+				boundaries[i] = zipfFunction((i*interval + min_x), k);
+			}
+			
 			return 1;
 		}
-	}
+		
+		public static void setNumberOfReducers(int num) {
+			NUMBER_OF_REDUCERS = num;
+		}
+		
+		public static void setK(double k_) {
+			k = k_;
+		}
+		
+		private static double zipfFunction(double x, double k) {
+			return (k * Math.pow(x,k)) / Math.pow(x, k+1);
+		}
 	
-	public static void setNumberOfReducers(int num) {
-		NUMBER_OF_REDUCERS = num;
 	}
-
-}
   
-public static class IntSumReducer extends Reducer<Text,IntWritable,Text,IntWritable> {
-   
-	private IntWritable result = new IntWritable();
-
-    public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
-    	int sum = 0;
-    	for (IntWritable val : values) {
-    		sum += val.get();
-    	}
-    	result.set(sum);
-    	context.write(key, result);
-    	}
-  	}
+	public static class IntSumReducer extends Reducer<Text,IntWritable,Text,IntWritable> {
+	   
+		private IntWritable result = new IntWritable();
+	
+	    public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+	    	int sum = 0;
+	    	for (IntWritable val : values) {
+	    		sum += val.get();
+	    	}
+	    	result.set(sum);
+	    	context.write(key, result);
+	    }
+	}
 
 	public static void main(String[] args) throws Exception {
 		
@@ -116,7 +144,7 @@ public static class IntSumReducer extends Reducer<Text,IntWritable,Text,IntWrita
 	    String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 	    final int NUMBER_OF_NODES = 24;
 	    final int MAX_NUMBER_OF_TASKS = 1000;
-	    final double REDUCER_CONSTANT = 0.95; // oder 0.75
+	    final double REDUCER_CONSTANT = 0.95; // or 1.75
 	    
 	    if (otherArgs.length < 5) {
 	    	System.err.println("Usage: wordcount <in> [<in>...] <out> <ngram> <combiner:yes/no> <custom partioner:yes/no>");
@@ -126,11 +154,12 @@ public static class IntSumReducer extends Reducer<Text,IntWritable,Text,IntWrita
 	    // Setting map and reduce tasks
 	    
 	    
-	    Job job = Job.getInstance(conf, "word count");
+	    Job job = Job.getInstance(conf, "Word count");
 	    
 	    //conf.setNumMapTasks(5); // Not possible with code in line?
 	    int NUMBER_OF_REDUCERS = (int) REDUCER_CONSTANT * NUMBER_OF_NODES * MAX_NUMBER_OF_TASKS;
-	    job.setNumReduceTasks(NUMBER_OF_REDUCERS);
+	    System.out.println("Number of Reducers: " + NUMBER_OF_REDUCERS);
+	    job.setNumReduceTasks(5);
 	    
 	    job.setJarByClass(WordCount.class);
 	    TokenizerMapper.setN(Integer.parseInt(otherArgs[otherArgs.length-3])); // Set ngram length
