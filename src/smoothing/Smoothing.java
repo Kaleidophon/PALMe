@@ -1,5 +1,6 @@
 package smoothing;
 
-interface Smoothing {
+public interface Smoothing {
+	
 	public double getFrequency();
 }

@@ -1,8 +1,12 @@
 package freqs;
 
-public class Probabilities {
+import smoothing.*;
 
-	public Probabilities() {
-		
+public class Probabilities {
+	
+	private Smoothing smoothing;
+
+	public Probabilities(Smoothing smoothing) {
+		this.smoothing = smoothing;
 	}
 }
