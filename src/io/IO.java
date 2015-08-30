@@ -17,7 +17,6 @@ public class IO {
 		try {
 			if(mode == "out") {
 				reader = new BufferedReader(new FileReader(FILE_PATH));
-			
 			}
 			else if(mode == "in") {
 				writer = new BufferedWriter(new FileWriter(FILE_PATH));

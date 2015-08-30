@@ -2,5 +2,5 @@ package smoothing;
 
 public interface Smoothing {
 	
-	public double getFrequency();
+	public double getFrequency(String[] tokens);
 }
