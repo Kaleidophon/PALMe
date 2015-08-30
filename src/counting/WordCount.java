@@ -152,11 +152,9 @@ public class WordCount {
 	    	System.exit(2);
 	    }
 	    
-	    // Setting map and reduce tasks
-	    
-	    
 	    Job job = Job.getInstance(conf, "Word count");
 	    
+	    // Setting map and reduce tasks
 	    //conf.setNumMapTasks(5); // Not possible with code in line?
 	    int NUMBER_OF_REDUCERS = (int) REDUCER_CONSTANT * NUMBER_OF_NODES * MAX_NUMBER_OF_TASKS;
 	    System.out.println("Number of Reducers: " + NUMBER_OF_REDUCERS);
@@ -169,8 +167,8 @@ public class WordCount {
 	    	job.setCombinerClass(IntSumReducer.class);
 	    }
 	    if (otherArgs[otherArgs.length-1] == "yes") {
-	    	job.setPartitionerClass(ZipfPartitioner.class);
-	    	ZipfPartitioner.setNumberOfReducers(NUMBER_OF_REDUCERS);
+	    	job.setPartitionerClass(CustomPartitioner.class);
+	    	CustomPartitioner.setNumberOfReducers(NUMBER_OF_REDUCERS);
 	    }
 	    job.setReducerClass(IntSumReducer.class);
 	    job.setOutputKeyClass(Text.class);
