@@ -32,4 +32,34 @@ public class DataLoader {
 		return freqs;
 	}
 	
+	public void dumpIndexing(Indexing indexing, String OUT_PATH, boolean validateState) {
+		try {
+			if (validateState) {
+				indexing.validateState();
+			}
+			FileOutputStream fos = new FileOutputStream(OUT_PATH);
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(indexing);
+			oos.close();
+			fos.close();
+		}
+		catch (Exception e) { e.printStackTrace(); }
+	}
+	
+	public Indexing loadIndexing(String IN_PATH, boolean validateState) {
+		Indexing indexing = null;
+		try {
+			FileInputStream fis = new FileInputStream(IN_PATH);
+			ObjectInputStream ois = new ObjectInputStream(fis);
+			indexing = (Indexing) ois.readObject();
+			ois.close();
+			fis.close();
+			if (validateState) {
+				indexing.validateState();
+			}
+		}
+		catch(Exception e) {e.printStackTrace(); }
+		return indexing;
+	}
+	
 }

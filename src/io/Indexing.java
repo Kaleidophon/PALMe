@@ -3,9 +3,9 @@ package io;
 import java.io.*;
 import java.util.*;
 
-public class Indexing <V extends Number> {
+public class Indexing <V extends Number> implements Serializable {
 	
-	Map<Integer, ?> indices;
+	Map<Integer, V> indices;
 	Map<Integer, String> lexicon;
 	BufferedReader reader;
 	BufferedWriter writer;
@@ -40,7 +40,7 @@ public class Indexing <V extends Number> {
 		this.lexicon = lexicon;
 	}
 	
-	public Map<Integer, ?> getIndices() {
+	public Map<Integer, ? extends Number> getIndices() {
 		return this.indices;
 	}
 	
@@ -58,15 +58,15 @@ public class Indexing <V extends Number> {
 		this.lexicon = this.readLexicon(IN_PATH + "lexicon.txt");
 	}
 	
-	private Map<Integer, Double> readIndices(String INFILE_PATH) {
-		Map<Integer, Double> indices = new HashMap<>();
+	private Map<Integer, V> readIndices(String INFILE_PATH) {
+		Map<Integer, V> indices = new HashMap<>();
 		try {
 			reader = new BufferedReader(new FileReader(INFILE_PATH));
 			try {
 				String current_line = reader.readLine().trim();
 				while (current_line != "") {
 					String[] line_parts = current_line.trim().split("\t");
-					indices.put(Integer.parseInt(line_parts[0]), Double.parseDouble(line_parts[1]));
+					indices.put(Integer.parseInt(line_parts[0]), this.cast(Double.parseDouble(line_parts[1])));
 					current_line = reader.readLine();
 				}
 			}
@@ -120,5 +120,46 @@ public class Indexing <V extends Number> {
 	        sortedHashMap.put(entry.getKey(), entry.getValue());
 	    } 
 	    return sortedHashMap;
+	}
+	
+	public void validateState() throws IllegalArgumentException {
+		this.validateIndices();
+		this.validateLexicon();
+	}
+	
+	private void validateLexicon() {
+		Set<Integer> keys = this.lexicon.keySet();
+		if (!(keys.size() > 0)) {
+			throw new IllegalArgumentException("The Lexicon is empty.");
+		}
+		for (int key : keys) {
+			String value = this.lexicon.get(key);
+			if (key < 0) {
+				throw new IllegalArgumentException("Invalid Key: " + key);
+			}
+			else if (!(value.length() > 0) || value == null) {
+				throw new IllegalArgumentException("Invalid Value: " + value);
+			}
+		}
+	}
+	
+	private void validateIndices() {
+		Set<Integer> keys = this.indices.keySet();
+		if (!(keys.size() > 0)) {
+			throw new IllegalArgumentException("The Lexicon is empty.");
+		}
+		for (int key : keys) {
+			V value = this.indices.get(key);
+			if (key < 0) {
+				throw new IllegalArgumentException("Invalid Key: " + key);
+			}
+			else if (value.doubleValue() <= 0) {
+				throw new IllegalArgumentException("Invalid Value: " + value);
+			}
+		}
+	}
+	
+	private V cast(Double d)  {
+		return (V) d;
 	}
 }

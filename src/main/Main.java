@@ -9,9 +9,10 @@ public class Main {
 		
 		DataLoader dl = new DataLoader("./rsc/freqs/1/res.txt");
 
-		//Map<String, Integer> freqs = dl.readFrequencies();
-		Indexing indexing = new BinaryIndexing("./rsc/indices/1/");
-		System.out.println(indexing.getIndices());
-		//indexing.dump("./rsc/indices/1/");
+		Map<String, Integer> freqs = dl.readFrequencies();
+		Indexing<Integer> indexing = new Indexing<>(freqs);
+		dl.dumpIndexing(indexing, "./rsc/indices/1/index.ser", true);
+		Indexing<Integer> new_indexing = dl.loadIndexing("./rsc/indices/1/index.ser", true);
+		System.out.println(new_indexing.getIndices());
 	}
 }
