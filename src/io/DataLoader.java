@@ -13,6 +13,8 @@ public class DataLoader {
 		this.INFILE_PATH = file_path;
 	}
 	
+	public DataLoader() {}
+	
 	public Map<String, Integer> readFrequencies() {
 		Map<String, Integer> freqs = new HashMap<>();
 		
