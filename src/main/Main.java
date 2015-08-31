@@ -1,22 +1,17 @@
 package main;
 
 import io.*;
+import java.util.Map;
 
 public class Main {
 	
 	public static void main(String[] args) {
-//		IO io_in = new IO("./rsc/dewiki_plain_1000k_train.txt", "out");
-//		for(int i = 0; i <= 100; i++) {
-//			try {
-//				System.out.println(io_in.next());
-//			}
-//			catch(Exception e) {
-//				e.printStackTrace();
-//			}
-//		}
 		
 		DataLoader dl = new DataLoader("./rsc/freqs/1/res.txt");
-		System.out.println(dl.readFrequencies());
+
+		Map<String, Integer> freqs = dl.readFrequencies();
+		Indexing indexing = dl.createIndicies(freqs);
+		dl.writeIndexing(indexing, "./rsc/indices/1/");
 		
 	}
 }
