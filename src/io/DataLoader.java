@@ -33,20 +33,6 @@ public class DataLoader {
 		              
 	}
 	
-	public Indexing createIndicies(Map<String, Integer> data) {
-		Map<Integer, Integer> indices = new HashMap<>();
-		Map<Integer, String> lexicon = new HashMap<>();
-		Map<String, Integer> data_ = sortByValues(data);
-		
-		int index = 0;
-		for (String key : data_.keySet()) {
-			indices.put(index, data.get(key));
-			lexicon.put(index, key);
-			index++;
-		}
-		return new Indexing(indices, lexicon);
-	}
-	
 	public <K, V> void writeMap(Map<K, V> data, String OUTFILE_PATH) {
 		try {
 			writer = new BufferedWriter(new FileWriter(OUTFILE_PATH));
@@ -63,20 +49,4 @@ public class DataLoader {
 		writeMap(indexing.getLexicon(), OUTFILE_PATH + "lexicon.txt");
 	}
 	
-	private static <K, V, E> HashMap<K, V> sortByValues(Map<K, V> map) { 
-		List<E> list = new LinkedList(map.entrySet());
-
-	    Collections.sort(list, new Comparator() {
-	    	public int compare(Object o1, Object o2) {
-	    		return ((Comparable) ((Map.Entry) (o2)).getValue()).compareTo(((Map.Entry) (o1)).getValue());
-	        }
-	    });
-
-	    HashMap sortedHashMap = new LinkedHashMap<>();
-	    for (Iterator it = list.iterator(); it.hasNext();) {
-	    	Map.Entry entry = (Map.Entry) it.next();
-	        sortedHashMap.put(entry.getKey(), entry.getValue());
-	    } 
-	    return sortedHashMap;
-	}
 }
