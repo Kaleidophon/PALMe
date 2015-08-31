@@ -32,24 +32,4 @@ public class DataLoader {
 		return freqs;
 	}
 	
-	public void saveData(String OUTFILE_PATH) {
-		              
-	}
-	
-	public <K, V> void writeMap(Map<K, V> data, String OUTFILE_PATH) {
-		try {
-			writer = new BufferedWriter(new FileWriter(OUTFILE_PATH));
-			for (K key : data.keySet()) {
-				writer.write(key + "\t" + data.get(key) + "\n");
-			}
-			writer.close();
-		}
-		catch (Exception e) { e.printStackTrace(); }
-	}
-	
-	public void writeIndexing(Indexing indexing, String OUTFILE_PATH) {
-		writeMap(indexing.getIndices(), OUTFILE_PATH + "indices.txt");
-		writeMap(indexing.getLexicon(), OUTFILE_PATH + "lexicon.txt");
-	}
-	
 }
