@@ -3,17 +3,16 @@ package io;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BinaryIndexing <K, V> extends Indexing {
+public class BinaryIndexing extends Indexing {
 	
-	Map<String, String> indices;
-	Map<String, String> lexicon;
+	Map<String, String> binary_indices;
+	Map<String, String> binary_lexicon;
 
 	public BinaryIndexing(Map<String, Integer> data) {
-		super(data);
+		this.createBinaryIndices(data);
 	}
 	
-	@Override
-	public void createIndices(Map<String, Integer> data) {
+	public void createBinaryIndices(Map<String, Integer> data) {
 		Map<String, String> indices = new HashMap<>();
 		Map<String, String> lexicon = new HashMap<>();
 		Map<String, Integer> data_ = sortByValues(data);
@@ -24,7 +23,16 @@ public class BinaryIndexing <K, V> extends Indexing {
 			lexicon.put(Integer.toBinaryString(index), key);
 			index++;
 		}
-		this.indices = indices;
-		this.lexicon = lexicon;
+		
+		this.binary_indices = indices;
+		this.binary_lexicon = lexicon;
+	}
+	
+	public Map<String, String> getIndices() {
+		return this.binary_indices;
+	}
+	
+	public Map<String, String> getLexicon() {
+		return this.binary_lexicon;
 	}
 }

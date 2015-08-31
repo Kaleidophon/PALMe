@@ -3,6 +3,7 @@ package io;
 import java.util.*;
 
 public class Indexing <V extends Number> {
+	
 	Map<Integer, V> indices;
 	Map<Integer, String> lexicon;
 	
@@ -14,6 +15,8 @@ public class Indexing <V extends Number> {
 	public Indexing(Map<String, V> data) {
 		this.createIndices(data);
 	}
+	
+	public Indexing() {}
 	
 	public void createIndices(Map<String, V> data) {
 		Map<Integer, V> indices = new HashMap<>();

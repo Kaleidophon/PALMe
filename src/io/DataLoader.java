@@ -19,13 +19,16 @@ public class DataLoader {
 		try {
 			reader = new BufferedReader(new FileReader(this.INFILE_PATH));
 			String current_line = reader.readLine().trim();
-			while (current_line != "") {
-				String[] line_parts = current_line.split("\t");
-				freqs.put(line_parts[0], Integer.parseInt(line_parts[1]));
-				current_line = reader.readLine().trim();
-			}
+			try {
+				while (current_line != "") {
+					String[] line_parts = current_line.trim().split("\t");
+					freqs.put(line_parts[0], Integer.parseInt(line_parts[1]));
+					current_line = reader.readLine();
+				}
+			} 
+			catch (NullPointerException e) {}
 		}
-		catch (Exception e) { e.printStackTrace(); }	
+		catch (IOException e) { e.printStackTrace(); }	
 		return freqs;
 	}
 	
