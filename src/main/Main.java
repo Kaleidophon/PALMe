@@ -2,20 +2,20 @@ package main;
 
 import io.*;
 import java.util.*;
+import languagemodel.*;
+import smoothing.*;
 
 public class Main {
 	
 	public static void main(String[] args) {
 		
-		//DataLoader dl = new DataLoader("./rsc/freqs/1/res.txt");
-
-
+		//DataLoader dl = new DataLoader("./rsc/freqs/5/res.txt");
+		//Indexing<Integer> indexing = new Indexing(dl.readFrequencies());
+		//indexing.dump("./rsc/indices/2/");
+		//dl.dumpIndexing(indexing, "./rsc/indices/5/index.ser", true);
 		
-		//Map<String, Integer> freqs = dl.readFrequencies();
-		//Indexing<Integer> indexing = new Indexing<>("./rsc/indices/1/");
-		//dl.dumpIndexing(indexing, "./rsc/indices/1/index.ser", true);
-		//Indexing<Integer> new_indexing = dl.loadIndexing("./rsc/indices/1/index.ser", true);
-		//System.out.println(new_indexing.getIndices());
+		LanguageModel lm = new LanguageModel(1, "./rsc/", new MaximumFrequencyEstimation(), new DataLoader());
+		System.out.println(lm.getNGramFrequencies().size());
 	}
 	
 }

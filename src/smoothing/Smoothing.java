@@ -1,6 +1,9 @@
 package smoothing;
 
+import java.util.Map;
+import java.util.List;
+
 public interface Smoothing {
 	
-	public double getFrequency(String[] tokens);
+	public Map<String, Double> calculateNgramProbabilities(List<Map<String, Integer>> frequencies);
 }

@@ -2,15 +2,16 @@ package io;
 
 import java.io.*;
 import java.util.*;
+import java.lang.StringBuilder;
 
 public class Indexing <V extends Number> implements Serializable {
 	
-	Map<Integer, V> indices;
+	Map<Integer[], V> indices;
 	Map<Integer, String> lexicon;
 	BufferedReader reader;
 	BufferedWriter writer;
 	
-	public Indexing(Map<Integer, V> indices, Map<Integer, String> lexicon) {
+	public Indexing(Map<Integer[], V> indices, Map<Integer, String> lexicon) {
 		this.indices = indices;
 		this.lexicon = lexicon;
 	}
@@ -26,21 +27,43 @@ public class Indexing <V extends Number> implements Serializable {
 	public Indexing() {}
 	
 	public void createIndices(Map<String, V> data) {
-		Map<Integer, V> indices = new HashMap<>();
+		Map<Integer[], V> indices = new HashMap<>();
 		Map<Integer, String> lexicon = new HashMap<>();
+		Map<String, Integer> reversed_lexicon = new HashMap<>();
 		Map<String, V> data_ = sortByValues(data);
 		
 		int index = 0;
 		for (String key : data_.keySet()) {
-			indices.put(index, data.get(key));
-			lexicon.put(index, key);
-			index++;
+			key = key.trim();
+			String[] key_parts = key.split(" ");
+			if (key_parts.length > 1) {
+				Integer[] token_indices = new Integer[key_parts.length];
+				int ti_index = 0;
+				for (String token : key_parts) {
+					if(!(reversed_lexicon.keySet().contains(token))) {
+						lexicon.put(index, token);
+						reversed_lexicon.put(token, index);
+						token_indices[ti_index] = index;
+						index++;
+					}
+					else {
+						token_indices[ti_index] = reversed_lexicon.get(token);
+					}
+					ti_index++;
+				}
+				indices.put(token_indices, data.get(key + " "));
+			}
+			else {
+				indices.put(new Integer[index], data.get(key));
+				lexicon.put(index, key);
+				index++;
+			}
 		}
 		this.indices = indices;
 		this.lexicon = lexicon;
 	}
 	
-	public Map<Integer, ? extends Number> getIndices() {
+	public Map<Integer[], ? extends Number> getIndices() {
 		return this.indices;
 	}
 	
@@ -49,30 +72,40 @@ public class Indexing <V extends Number> implements Serializable {
 	}
 	
 	public void dump(String OUTFILE_PATH) {
-		this.writeMap(this.getIndices(), OUTFILE_PATH + "indices.txt");
+		this.writeArrayMap(this.getIndices(), OUTFILE_PATH + "indices.txt");
 		this.writeMap(this.getLexicon(), OUTFILE_PATH + "lexicon.txt");
 	}
 	
 	public void load(String IN_PATH) {
 		this.indices = this.readIndices(IN_PATH + "indices.txt");
-		this.lexicon = this.readLexicon(IN_PATH + "lexicon.txt");
+		//this.lexicon = this.readLexicon(IN_PATH + "lexicon.txt");
 	}
 	
-	private Map<Integer, V> readIndices(String INFILE_PATH) {
-		Map<Integer, V> indices = new HashMap<>();
+	private Map<Integer[], V> readIndices(String INFILE_PATH) {
+		Map<Integer[], V> indices = new HashMap<>();
 		try {
 			reader = new BufferedReader(new FileReader(INFILE_PATH));
 			try {
 				String current_line = reader.readLine().trim();
 				while (current_line != "") {
-					String[] line_parts = current_line.trim().split("\t");
-					indices.put(Integer.parseInt(line_parts[0]), this.cast(Double.parseDouble(line_parts[1])));
-					current_line = reader.readLine();
+					String[] line_parts = current_line.split("\t");
+					String[] string_key_indices = line_parts[0].split(" ");
+					Integer[] key_indices = new Integer[string_key_indices.length];
+					for (int i = 0; i < string_key_indices.length; i++) {
+						key_indices[i] = Integer.parseInt(string_key_indices[i]);
+					}
+					try {
+						indices.put(key_indices, this.intCast(Integer.parseInt(line_parts[1])));
+					}
+					catch (NumberFormatException nfe) {
+						indices.put(key_indices, this.doubleCast(Double.parseDouble(line_parts[1])));
+					}
+					current_line = reader.readLine().trim();
 				}
 			}
-			catch (NullPointerException npe) {}
+			catch (NullPointerException npe) { }
 		}
-		catch (IOException ioe) {}
+		catch (IOException ioe) { ioe.printStackTrace(); }
 		return indices;
 	}
 	
@@ -99,6 +132,17 @@ public class Indexing <V extends Number> implements Serializable {
 			writer = new BufferedWriter(new FileWriter(OUTFILE_PATH));
 			for (K key : data.keySet()) {
 				writer.write(key + "\t" + data.get(key) + "\n");
+			}
+			writer.close();
+		}
+		catch (Exception e) { e.printStackTrace(); }
+	}
+	
+	public <K, V> void writeArrayMap(Map<K[], V> data, String OUTFILE_PATH) {
+		try {
+			writer = new BufferedWriter(new FileWriter(OUTFILE_PATH));
+			for (K[] key : data.keySet()) {
+				writer.write(this.njoin(" ", key) + "\t" + data.get(key) + "\n");
 			}
 			writer.close();
 		}
@@ -144,22 +188,53 @@ public class Indexing <V extends Number> implements Serializable {
 	}
 	
 	private void validateIndices() {
-		Set<Integer> keys = this.indices.keySet();
+		Set<Integer[]> keys = this.indices.keySet();
 		if (!(keys.size() > 0)) {
 			throw new IllegalArgumentException("The Lexicon is empty.");
 		}
-		for (int key : keys) {
+		for (Integer[] key : keys) {
 			V value = this.indices.get(key);
-			if (key < 0) {
-				throw new IllegalArgumentException("Invalid Key: " + key);
+			for (int index : key) {
+				if (index < 0) {
+					throw new IllegalArgumentException("Invalid Index: " + index);
+				}
 			}
-			else if (value.doubleValue() <= 0) {
+			if (value.doubleValue() <= 0) {
 				throw new IllegalArgumentException("Invalid Value: " + value);
 			}
 		}
 	}
 	
-	private V cast(Double d)  {
+	private V doubleCast(Double d)  {
 		return (V) d;
+	}
+	
+	private V intCast(Integer i) {
+		return (V) i;
+	}
+	
+	protected <T> String njoin(String delimiter, T[] a) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(a[0]);
+		for (int i = 1; i < a.length; i++) {
+			sb.append(delimiter + a[i]);
+		}
+		return sb.toString();
+	}
+	
+	private <T> String pA(T[] a) {
+		StringBuilder sb = new StringBuilder("[");
+		sb.append(a[0]);
+		for (int i = 1; i < a.length; i++) {
+			sb.append(", " + a[i].toString());
+		}
+		sb.append("]");
+		return sb.toString();
+	}
+	
+	public <K, V> void pAH(Map<K[], V> map) {
+		for (K[] key : map.keySet()) {
+			System.out.println(this.pA(key) + " : " + map.get(key));
+		}
 	}
 }
