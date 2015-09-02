@@ -12,6 +12,7 @@ public class Indexing <V extends Number> implements Serializable {
 	Map<Integer, String> lexicon;
 	BufferedReader reader;
 	BufferedWriter writer;
+	String prefix = "";
 	
 	public Indexing(Map<Integer[], V> indices, Map<Integer, String> lexicon) {
 		this.indices = indices;
@@ -79,14 +80,14 @@ public class Indexing <V extends Number> implements Serializable {
 	
 	public void dump(String OUTFILE_PATH, boolean zipped) {
 		String ext = (zipped) ? ".gz" : ".txt";
-		this.writeArrayMap(this.getIndices(), OUTFILE_PATH + "indices" + ext, zipped);
-		this.writeMap(this.getLexicon(), OUTFILE_PATH + "lexicon" + ext, zipped);
+		this.writeArrayMap(this.getIndices(), OUTFILE_PATH + prefix + "indices" + ext, zipped);
+		this.writeMap(this.getLexicon(), OUTFILE_PATH + prefix + "lexicon" + ext, zipped);
 	}
 	
 	public void load(String IN_PATH, boolean zipped) {
 		String ext = (zipped) ? ".gz" : ".txt";
-		this.indices = this.readIndices(IN_PATH + "indices" + ext, zipped);
-		this.lexicon = this.readLexicon(IN_PATH + "lexicon" + ext, zipped);
+		this.indices = this.readIndices(IN_PATH + prefix + "indices" + ext, zipped);
+		this.lexicon = this.readLexicon(IN_PATH + prefix + "lexicon" + ext, zipped);
 	}
 	
 	private Map<Integer[], V> readIndices(String INFILE_PATH, boolean zipped) {
