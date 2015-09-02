@@ -14,8 +14,8 @@ public class BinaryIndexing extends Indexing {
 		this.createIndices(data);
 	}
 	
-	public BinaryIndexing(String IN_PATH) {
-		super(IN_PATH);
+	public BinaryIndexing(String IN_PATH, boolean zipped) {
+		super(IN_PATH, zipped);
 	}
 
 	public void dump(String OUTFILE_PATH) {

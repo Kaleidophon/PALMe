@@ -3,6 +3,8 @@ package io;
 import java.io.*;
 import java.util.*;
 import java.lang.StringBuilder;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public class Indexing <V extends Number> implements Serializable {
 	
@@ -20,8 +22,8 @@ public class Indexing <V extends Number> implements Serializable {
 		this.createIndices(data);
 	}
 	
-	public Indexing(String IN_PATH) {
-		this.load(IN_PATH);
+	public Indexing(String IN_PATH, boolean zipped) {
+		this.load(IN_PATH, zipped);
 	}
 	
 	public Indexing() {}
@@ -30,14 +32,17 @@ public class Indexing <V extends Number> implements Serializable {
 		Map<Integer[], V> indices = new HashMap<>();
 		Map<Integer, String> lexicon = new HashMap<>();
 		Map<String, Integer> reversed_lexicon = new HashMap<>();
-		Map<String, V> data_ = sortByValues(data);
+		data = sortByValues(data);
+		
+		String sample_key = data.keySet().iterator().next();
+		int n = sample_key.split(" ").length;
 		
 		int index = 0;
-		for (String key : data_.keySet()) {
+		for (String key : data.keySet()) {
 			key = key.trim();
-			String[] key_parts = key.split(" ");
-			if (key_parts.length > 1) {
-				Integer[] token_indices = new Integer[key_parts.length];
+			Integer[] token_indices = new Integer[n];
+			if (n > 1) {
+				String[] key_parts = key.split(" ");
 				int ti_index = 0;
 				for (String token : key_parts) {
 					if(!(reversed_lexicon.keySet().contains(token))) {
@@ -54,7 +59,8 @@ public class Indexing <V extends Number> implements Serializable {
 				indices.put(token_indices, data.get(key + " "));
 			}
 			else {
-				indices.put(new Integer[index], data.get(key));
+				token_indices[0] = index;;
+				indices.put(token_indices, data.get(key));
 				lexicon.put(index, key);
 				index++;
 			}
@@ -71,20 +77,29 @@ public class Indexing <V extends Number> implements Serializable {
 		return this.lexicon;
 	}
 	
-	public void dump(String OUTFILE_PATH) {
-		this.writeArrayMap(this.getIndices(), OUTFILE_PATH + "indices.txt");
-		this.writeMap(this.getLexicon(), OUTFILE_PATH + "lexicon.txt");
+	public void dump(String OUTFILE_PATH, boolean zipped) {
+		String ext = (zipped) ? ".gz" : ".txt";
+		this.writeArrayMap(this.getIndices(), OUTFILE_PATH + "indices" + ext, zipped);
+		this.writeMap(this.getLexicon(), OUTFILE_PATH + "lexicon" + ext, zipped);
 	}
 	
-	public void load(String IN_PATH) {
-		this.indices = this.readIndices(IN_PATH + "indices.txt");
-		//this.lexicon = this.readLexicon(IN_PATH + "lexicon.txt");
+	public void load(String IN_PATH, boolean zipped) {
+		String ext = (zipped) ? ".gz" : ".txt";
+		this.indices = this.readIndices(IN_PATH + "indices" + ext, zipped);
+		this.lexicon = this.readLexicon(IN_PATH + "lexicon" + ext, zipped);
 	}
 	
-	private Map<Integer[], V> readIndices(String INFILE_PATH) {
+	private Map<Integer[], V> readIndices(String INFILE_PATH, boolean zipped) {
 		Map<Integer[], V> indices = new HashMap<>();
 		try {
-			reader = new BufferedReader(new FileReader(INFILE_PATH));
+			BufferedReader reader;
+			if (zipped) {
+				GZIPInputStream gis = new GZIPInputStream(new FileInputStream(INFILE_PATH));
+				reader = new BufferedReader(new InputStreamReader(gis));
+			}
+			else {
+				reader = new BufferedReader(new FileReader(INFILE_PATH));
+			}
 			try {
 				String current_line = reader.readLine().trim();
 				while (current_line != "") {
@@ -109,10 +124,17 @@ public class Indexing <V extends Number> implements Serializable {
 		return indices;
 	}
 	
-	private Map<Integer, String> readLexicon(String INFILE_PATH) {
+	private Map<Integer, String> readLexicon(String INFILE_PATH, boolean zipped) {
 		Map<Integer, String> lexicon = new HashMap<>();
 		try {
-			reader = new BufferedReader(new FileReader(INFILE_PATH));
+			BufferedReader reader;
+			if (zipped) {
+				GZIPInputStream gis = new GZIPInputStream(new FileInputStream(INFILE_PATH));
+				reader = new BufferedReader(new InputStreamReader(gis));
+			}
+			else {
+				reader = new BufferedReader(new FileReader(INFILE_PATH));
+			}
 			try {
 				String current_line = reader.readLine().trim();
 				while (current_line != "") {
@@ -127,22 +149,46 @@ public class Indexing <V extends Number> implements Serializable {
 		return lexicon;
 	}
 	
-	public <K, V> void writeMap(Map<K, V> data, String OUTFILE_PATH) {
+	public <K, V> void writeMap(Map<K, V> data, String OUTFILE_PATH, boolean zipped) {
 		try {
-			writer = new BufferedWriter(new FileWriter(OUTFILE_PATH));
+			BufferedWriter writer;
+			if (zipped) {
+				GZIPOutputStream gos = new GZIPOutputStream(new FileOutputStream(OUTFILE_PATH));
+				writer = new BufferedWriter(new OutputStreamWriter(gos, "UTF-8"));
+			}
+			else {
+				writer = new BufferedWriter(new FileWriter(OUTFILE_PATH));
+			}
 			for (K key : data.keySet()) {
-				writer.write(key + "\t" + data.get(key) + "\n");
+				if (zipped) {
+					writer.append(key + "\t" + data.get(key) + "\n");
+				}
+				else {
+					writer.write(key + "\t" + data.get(key) + "\n");
+				}
 			}
 			writer.close();
 		}
 		catch (Exception e) { e.printStackTrace(); }
 	}
 	
-	public <K, V> void writeArrayMap(Map<K[], V> data, String OUTFILE_PATH) {
+	public <K, V> void writeArrayMap(Map<K[], V> data, String OUTFILE_PATH, boolean zipped) {
 		try {
-			writer = new BufferedWriter(new FileWriter(OUTFILE_PATH));
+			BufferedWriter writer;
+			if (zipped) {
+				GZIPOutputStream gos = new GZIPOutputStream(new FileOutputStream(OUTFILE_PATH));
+				writer = new BufferedWriter(new OutputStreamWriter(gos, "UTF-8"));
+			}
+			else {
+				writer = new BufferedWriter(new FileWriter(OUTFILE_PATH));
+			}
 			for (K[] key : data.keySet()) {
-				writer.write(this.njoin(" ", key) + "\t" + data.get(key) + "\n");
+				if (zipped) {
+					writer.append(this.njoin(" ", key) + "\t" + data.get(key) + "\n");
+				}
+				else {
+					writer.write(this.njoin(" ", key) + "\t" + data.get(key) + "\n");
+				}
 			}
 			writer.close();
 		}

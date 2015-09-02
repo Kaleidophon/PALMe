@@ -5,24 +5,25 @@ import io.*;
 public class Testing {
 
 	public static void main(String[] args) {
-		timeIndexing(0, "./rsc/indices/", true);
-		timeIndexing(1, "./rsc/indices/", false);
-		timeIndexing(1, "./rsc/indices/", true);
+		timeIndexing(0, "./rsc/indices/2/", false);
+		timeIndexing(0, "./rsc/indices/2/", true);
+		//timeIndexing(2, "./rsc/indices/5/", false);
+		//timeIndexing(2, "./rsc/indices/5/", true);
 	}
 	
-	private static void timeIndexing(int mode, String IN_PATH, boolean validateState) {
-		System.out.println("Path: " + IN_PATH + " | Mode: " + mode + " | Validate State? " + validateState);
+	private static void timeIndexing(int mode, String IN_PATH, boolean para) {
+		System.out.println("Path: " + IN_PATH + " | Mode: " + mode + " | Para (ValidateState / Zipped)? " + para);
 		DataLoader dl = new DataLoader();
 		long startTime = System.nanoTime();
 		switch (mode) {
 			case (0):
-				Indexing<Integer> indexing1 = new Indexing<>(IN_PATH);
+				Indexing<Integer> indexing1 = new Indexing<>(IN_PATH, para);
 				break;
 			case (1):
-				Indexing indexing2 = new BinaryIndexing(IN_PATH);
+				Indexing indexing2 = new BinaryIndexing(IN_PATH, para);
 				break;
 			case (2):
-				Indexing<Integer> indexing3 = dl.loadIndexing(IN_PATH + "index.ser", validateState);
+				Indexing<Integer> indexing3 = dl.loadIndexing(IN_PATH + "index.ser", para);
 				break;
 		}
 		long endTime = System.nanoTime();
