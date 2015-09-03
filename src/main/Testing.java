@@ -1,24 +1,34 @@
 package main;
 
 import io.*;
+
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class Testing {
 
 	public static void main(String[] args) {
-		timeIndexing(0, "./rsc/indices/2/", false, 10);
-		timeIndexing(0, "./rsc/indices/2/", true, 10);
-		timeIndexing(1, "./rsc/indices/2/", false, 10);
-		timeIndexing(1, "./rsc/indices/2/", true, 10);
-		timeIndexing(2, "./rsc/indices/2/", false, 10);
-		timeIndexing(2, "./rsc/indices/2/", true, 10);
-		timeIndexing(3, "./rsc/indices/2/", false, 10);
-		timeIndexing(3, "./rsc/indices/2/", true, 10);
-		timeIndexing(4, "./rsc/indices/2/", false, 10);
-		timeIndexing(4, "./rsc/indices/2/", true, 10);
-		timeIndexing(5, "./rsc/indices/2/", false, 10);
-		timeIndexing(5, "./rsc/indices/2/", true, 10);
+		int n = 5;
+		for (int c = 0; c <= 5; c++) {
+			timeIndexing(c, "./rsc/indices/" + n + "/", false, 10);
+			timeIndexing(c, "./rsc/indices/" + n + "/", true, 10);
+		}
+	}
+	
+	private static void createTestData(int n, String IN_PATH) {
+		List<Indexing> indexings = new ArrayList<>();
+		DataLoader dl = new DataLoader("./rsc/freqs/" + n + "/res.txt");
+		Map<String, Integer> freqs = dl.readFrequencies();
+		indexings.add(new Indexing(freqs));
+		indexings.add(new BinaryIndexing(freqs));
+		indexings.add(new HexadecimalIndexing(freqs));
+		
+		for (Indexing indexing : indexings) {
+			indexing.dump("./rsc/indices/" + n + "/", false);
+			indexing.dump("./rsc/indices/" + n + "/", true);
+			dl.dumpIndexing(indexing, "./rsc/indices/" + n + "/", true);
+		}
 	}
 	
 	private static void timeIndexing(int mode, String IN_PATH, boolean para, int iterations) {

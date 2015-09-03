@@ -25,6 +25,10 @@ public class BinaryIndexing extends Indexing {
 	public BinaryIndexing(String IN_PATH, boolean zipped) {
 		super(IN_PATH, zipped);
 	}
+	
+	public BinaryIndexing() {
+		super();
+	}
 
 	public void dump(String OUTFILE_PATH, boolean zipped) {
 		String ext = (zipped) ? ".gz" : ".txt";

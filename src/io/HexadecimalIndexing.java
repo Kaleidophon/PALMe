@@ -25,6 +25,10 @@ public class HexadecimalIndexing extends Indexing {
 	public HexadecimalIndexing(String IN_PATH, boolean zipped) {
 		super(IN_PATH, zipped);
 	}
+	
+	public HexadecimalIndexing() {
+		super();
+	}
 
 	public void dump(String OUTFILE_PATH, boolean zipped) {
 		String ext = (zipped) ? ".gz" : ".txt";

@@ -35,6 +35,17 @@ public class DataLoader {
 	}
 	
 	public void dumpIndexing(Indexing indexing, String OUT_PATH, boolean validateState) {
+		String filename = "";
+		if (indexing instanceof BinaryIndexing) {
+			filename = "bin_index.ser";
+		}
+		else if (indexing instanceof HexadecimalIndexing) {
+			filename = "hex_index.ser";
+		}
+		else if (indexing instanceof Indexing) {
+			filename = "index.ser";
+		}
+		
 		try {
 			if (validateState) {
 				indexing.validateState();
