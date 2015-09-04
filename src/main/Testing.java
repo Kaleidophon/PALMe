@@ -1,6 +1,6 @@
 package main;
 
-import io.*;
+import inout.*;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -9,24 +9,34 @@ import java.util.Map;
 public class Testing {
 
 	public static void main(String[] args) {
-		int n = 5;
+		createTestData(1);
+		/*int n = 5;
 		for (int c = 0; c <= 5; c++) {
 			timeIndexing(c, "./rsc/indices/" + n + "/", false, 10);
 			timeIndexing(c, "./rsc/indices/" + n + "/", true, 10);
-		}
+		}*/
 	}
 	
-	private static void createTestData(int n, String IN_PATH) {
+	private static void createTestData(int n) {
 		List<Indexing> indexings = new ArrayList<>();
 		DataLoader dl = new DataLoader("./rsc/freqs/" + n + "/res.txt");
 		Map<String, Integer> freqs = dl.readFrequencies();
-		indexings.add(new Indexing(freqs));
-		indexings.add(new BinaryIndexing(freqs));
-		indexings.add(new HexadecimalIndexing(freqs));
+		indexings.add(new Indexing<Integer>());
+		indexings.add(new BinaryIndexing());
+		indexings.add(new HexadecimalIndexing());
 		
 		for (Indexing indexing : indexings) {
-			indexing.dump("./rsc/indices/" + n + "/", false);
-			indexing.dump("./rsc/indices/" + n + "/", true);
+			if (indexing instanceof BinaryIndexing) {
+				indexing = new BinaryIndexing(freqs, "./rsc/indices/");
+			}
+			else if (indexing instanceof HexadecimalIndexing) {
+				indexing = new HexadecimalIndexing(freqs, "./rsc/indices/");
+			}
+			else if (indexing instanceof Indexing) {
+				indexing = new Indexing<Integer>(freqs, "./rsc/indices/");
+			}
+			indexing.dump("./rsc/indices/", false);
+			indexing.dump("./rsc/indices/", true);
 			dl.dumpIndexing(indexing, "./rsc/indices/" + n + "/", true);
 		}
 	}
@@ -74,10 +84,10 @@ public class Testing {
 					Indexing<Integer> indexing4 = dl.loadIndexing(IN_PATH + "index.ser", para);
 					break;
 				case (5):
-					Indexing<Integer> indexing5 = dl.loadIndexing(IN_PATH + "bin_index.ser", para);
+					Indexing indexing5 = dl.loadIndexing(IN_PATH + "bin_index.ser", para);
 					break;
 				case (6):
-					Indexing<Integer> indexing6 = dl.loadIndexing(IN_PATH + "hex_index.ser", para);
+					Indexing indexing6 = dl.loadIndexing(IN_PATH + "hex_index.ser", para);
 					break;
 			}
 			long endTime = System.nanoTime();

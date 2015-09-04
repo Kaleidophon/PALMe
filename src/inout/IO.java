@@ -1,4 +1,4 @@
-package io;
+package inout;
 
 import java.io.*;
 import custom_exceptions.IOModeException;

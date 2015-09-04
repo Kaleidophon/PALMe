@@ -1,4 +1,4 @@
-package io;
+package inout;
 
 import java.util.*;
 import java.io.*;
@@ -45,6 +45,7 @@ public class DataLoader {
 		else if (indexing instanceof Indexing) {
 			filename = "index.ser";
 		}
+		OUT_PATH += filename;
 		
 		try {
 			if (validateState) {
