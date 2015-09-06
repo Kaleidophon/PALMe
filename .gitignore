@@ -1,6 +1,7 @@
-/bin/*
+bin/*
 src/counting/lib/
 rsc/
 misc/*.xml
 .DS_Store
 /exp/**/~$*.xlsx
+*.class
