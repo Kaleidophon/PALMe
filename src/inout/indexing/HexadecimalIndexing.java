@@ -1,4 +1,4 @@
-package inout;
+package inout.indexing;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -17,23 +17,21 @@ import java.util.zip.GZIPOutputStream;
 
 import custom_exceptions.IncompleteLexiconException;
 
-public class BinaryIndexing extends Indexing {
+public class HexadecimalIndexing extends Indexing {
+
+	String prefix = "hex_";
 	
-	String prefix = "bin_";
-	
-	public BinaryIndexing(Map<String, Integer> data, String IN_PATH) {
+	public HexadecimalIndexing(Map<String, Integer> data, String IN_PATH) {
 		super(data, IN_PATH);
 	}
 	
-	public BinaryIndexing(String IN_PATH, boolean zipped) {
+	public HexadecimalIndexing(String IN_PATH, boolean zipped) {
 		super(IN_PATH, zipped);
 	}
 	
-	public BinaryIndexing() {
-		super();
-	}
+	public HexadecimalIndexing() {}
 	
 	private void setMode() {
-		this.mode = "binary";
+		this.mode = "hexadecimal";
 	}
 }

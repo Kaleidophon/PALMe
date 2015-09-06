@@ -1,4 +1,4 @@
-package inout;
+package inout.indexing;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -31,13 +31,18 @@ public class Indexing <V extends Number> implements Serializable {
 	Map<Integer[], V> indices;
 	Map<Integer, String> lexicon;
 	Map<String, Integer> reversed_lexicon;
+	
 	BufferedReader reader;
 	BufferedWriter writer;
-	String prefix = "";
+	
 	String IN_PATH;
+	String mode;
+	String prefix = "";
+	
 	boolean create_lexicons;
 	int n;
-	String mode;
+	
+	// ------------------------------------------------- Constructor -------------------------------------------------
 	
 	public Indexing(Map<String, V> data, String IN_PATH) {
 		try {
@@ -60,6 +65,8 @@ public class Indexing <V extends Number> implements Serializable {
 	}
 	
 	public Indexing() {}
+	
+	// ------------------------------------------------- Main methods ------------------------------------------------
 	
 	public void createIndices(Map<String, V> data, String mode) throws IncompleteLexiconException {
 		Map<Integer[], V> indices = new HashMap<>();
@@ -124,34 +131,6 @@ public class Indexing <V extends Number> implements Serializable {
 		this.reversed_lexicon = reversed_lexicon;
 	}
 	
-	public Map<Integer[], ? extends Number> getIndices() {
-		return this.indices;
-	}
-	
-	public Map<Integer, String> getLexicon() {
-		return this.lexicon;
-	}
-	
-	public Map<String, Integer> getReversedLexicon() {
-		return this.reversed_lexicon;
-	}
-	
-	public boolean createLexicons() {
-		return this.create_lexicons;
-	}
-	
-	public int getN() {
-		return this.n;
-	}
-	
-	public String getMode() {
-		return this.mode;
-	}
-	
-	private void setMode() {
-		this.mode = "default";
-	}
-	
 	public void dump(String OUTFILE_PATH, boolean zipped) {
 		String ext = (zipped) ? ".gz" : ".txt";
 		this.writeIndices(this.getIndices(), OUTFILE_PATH + "/" + this.n + "/" + prefix + "indices" + ext, zipped, this.getMode());
@@ -172,6 +151,47 @@ public class Indexing <V extends Number> implements Serializable {
 			fnfe.printStackTrace();
 		}
 	}
+	
+	public void validateState() throws IllegalArgumentException {
+		this.validateIndices();
+		this.validateLexicon();
+	}
+	
+	private void validateLexicon() {
+		Set<Integer> keys = this.lexicon.keySet();
+		if (!(keys.size() > 0)) {
+			throw new IllegalArgumentException("The Lexicon is empty.");
+		}
+		for (int key : keys) {
+			String value = this.lexicon.get(key);
+			if (key < 0) {
+				throw new IllegalArgumentException("Invalid Key: " + key);
+			}
+			else if (!(value.length() > 0) || value == null) {
+				throw new IllegalArgumentException("Invalid Value: " + value);
+			}
+		}
+	}
+	
+	private void validateIndices() {
+		Set<Integer[]> keys = this.indices.keySet();
+		if (!(keys.size() > 0)) {
+			throw new IllegalArgumentException("The Lexicon is empty.");
+		}
+		for (Integer[] key : keys) {
+			V value = this.indices.get(key);
+			for (int index : key) {
+				if (index < 0) {
+					throw new IllegalArgumentException("Invalid Index: " + index);
+				}
+			}
+			if (value.doubleValue() <= 0) {
+				throw new IllegalArgumentException("Invalid Value: " + value);
+			}
+		}
+	}
+	
+	// ----------------------------------------------- Reading & Writing ---------------------------------------------
 	
 	protected Map<Integer[], V> readIndices(String INFILE_PATH, boolean zipped, String mode) throws FileNotFoundException{
 		Map<Integer[], V> indices = new HashMap<>();
@@ -292,6 +312,50 @@ public class Indexing <V extends Number> implements Serializable {
 		return reversed_lexicon;
 	}
 	
+	protected <V> void writeIndices(Map<Integer[], V> data, String OUTFILE_PATH, boolean zipped, String mode) {
+		try {
+			BufferedWriter writer;
+			if (zipped) {
+				GZIPOutputStream gos = new GZIPOutputStream(new FileOutputStream(OUTFILE_PATH));
+				writer = new BufferedWriter(new OutputStreamWriter(gos, "UTF-8"));
+			}
+			else {
+				writer = new BufferedWriter(new FileWriter(OUTFILE_PATH));
+			}
+			for (Integer[] key : data.keySet()) {
+				String[] new_key = new String[key.length];
+				switch (mode) {
+					case ("binary"):
+						String[] binary_key = new String[key.length];
+						for (int i = 0; i < key.length; i++) {
+							binary_key[i] = Integer.toBinaryString(key[i]);
+						}
+						new_key = binary_key;
+						break;
+					case ("hexadecimal"):
+						String[] hexadecimal_key = new String[key.length];
+						for (int i = 0; i < key.length; i++) {
+							hexadecimal_key[i] = Integer.toHexString(key[i]);
+						}
+						new_key = hexadecimal_key;
+						break;
+					default:
+						for (int i = 0; i < key.length; i++) {
+							new_key[i] = "" + key[i];
+						}
+				}
+				if (zipped) {
+					writer.append(this.njoin(" ", new_key) + "\t" + data.get(key) + "\n");
+				}
+				else {
+					writer.write(this.njoin(" ", new_key) + "\t" + data.get(key) + "\n");
+				}
+			}
+			writer.close();
+		}
+		catch (Exception e) { e.printStackTrace(); }
+	}
+	
 	protected void writeLexicon(Map<Integer, String> data, String OUTFILE_PATH, boolean zipped, String mode) {
 		try {
 			BufferedWriter writer;
@@ -362,49 +426,37 @@ public class Indexing <V extends Number> implements Serializable {
 		catch (Exception e) { e.printStackTrace(); }
 	}
 	
-	protected <V> void writeIndices(Map<Integer[], V> data, String OUTFILE_PATH, boolean zipped, String mode) {
-		try {
-			BufferedWriter writer;
-			if (zipped) {
-				GZIPOutputStream gos = new GZIPOutputStream(new FileOutputStream(OUTFILE_PATH));
-				writer = new BufferedWriter(new OutputStreamWriter(gos, "UTF-8"));
-			}
-			else {
-				writer = new BufferedWriter(new FileWriter(OUTFILE_PATH));
-			}
-			for (Integer[] key : data.keySet()) {
-				String[] new_key = new String[key.length];
-				switch (mode) {
-					case ("binary"):
-						String[] binary_key = new String[key.length];
-						for (int i = 0; i < key.length; i++) {
-							binary_key[i] = Integer.toBinaryString(key[i]);
-						}
-						new_key = binary_key;
-						break;
-					case ("hexadecimal"):
-						String[] hexadecimal_key = new String[key.length];
-						for (int i = 0; i < key.length; i++) {
-							hexadecimal_key[i] = Integer.toHexString(key[i]);
-						}
-						new_key = hexadecimal_key;
-						break;
-					default:
-						for (int i = 0; i < key.length; i++) {
-							new_key[i] = "" + key[i];
-						}
-				}
-				if (zipped) {
-					writer.append(this.njoin(" ", new_key) + "\t" + data.get(key) + "\n");
-				}
-				else {
-					writer.write(this.njoin(" ", new_key) + "\t" + data.get(key) + "\n");
-				}
-			}
-			writer.close();
-		}
-		catch (Exception e) { e.printStackTrace(); }
+	// ----------------------------------------------- Getter & Setter -----------------------------------------------
+	
+	public Map<Integer[], ? extends Number> getIndices() {
+		return this.indices;
 	}
+	
+	public Map<Integer, String> getLexicon() {
+		return this.lexicon;
+	}
+	
+	public Map<String, Integer> getReversedLexicon() {
+		return this.reversed_lexicon;
+	}
+	
+	public boolean createLexicons() {
+		return this.create_lexicons;
+	}
+	
+	public int getN() {
+		return this.n;
+	}
+	
+	public String getMode() {
+		return this.mode;
+	}
+	
+	private void setMode() {
+		this.mode = "default";
+	}
+	
+	// ------------------------------------------------ Other methods- -----------------------------------------------
 	
 	protected static <K, V, E> HashMap<K, V> sortByValues(Map<K, V> map) { 
 		List<E> list = new LinkedList(map.entrySet());
@@ -423,53 +475,6 @@ public class Indexing <V extends Number> implements Serializable {
 	    return sortedHashMap;
 	}
 	
-	public void validateState() throws IllegalArgumentException {
-		this.validateIndices();
-		this.validateLexicon();
-	}
-	
-	private void validateLexicon() {
-		Set<Integer> keys = this.lexicon.keySet();
-		if (!(keys.size() > 0)) {
-			throw new IllegalArgumentException("The Lexicon is empty.");
-		}
-		for (int key : keys) {
-			String value = this.lexicon.get(key);
-			if (key < 0) {
-				throw new IllegalArgumentException("Invalid Key: " + key);
-			}
-			else if (!(value.length() > 0) || value == null) {
-				throw new IllegalArgumentException("Invalid Value: " + value);
-			}
-		}
-	}
-	
-	private void validateIndices() {
-		Set<Integer[]> keys = this.indices.keySet();
-		if (!(keys.size() > 0)) {
-			throw new IllegalArgumentException("The Lexicon is empty.");
-		}
-		for (Integer[] key : keys) {
-			V value = this.indices.get(key);
-			for (int index : key) {
-				if (index < 0) {
-					throw new IllegalArgumentException("Invalid Index: " + index);
-				}
-			}
-			if (value.doubleValue() <= 0) {
-				throw new IllegalArgumentException("Invalid Value: " + value);
-			}
-		}
-	}
-	
-	private V doubleCast(Double d)  {
-		return (V) d;
-	}
-	
-	private V intCast(Integer i) {
-		return (V) i;
-	}
-	
 	protected <T> String njoin(String delimiter, T[] a) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(a[0]);
@@ -479,19 +484,11 @@ public class Indexing <V extends Number> implements Serializable {
 		return sb.toString();
 	}
 	
-	private <T> String pA(T[] a) {
-		StringBuilder sb = new StringBuilder("[");
-		sb.append(a[0]);
-		for (int i = 1; i < a.length; i++) {
-			sb.append(", " + a[i].toString());
-		}
-		sb.append("]");
-		return sb.toString();
+	private V intCast(Integer i) {
+		return (V) i;
 	}
 	
-	public <K, V> void pAH(Map<K[], V> map) {
-		for (K[] key : map.keySet()) {
-			System.out.println(this.pA(key) + " : " + map.get(key));
-		}
-	}
+	private V doubleCast(Double d)  {
+		return (V) d;
+	}	
 }

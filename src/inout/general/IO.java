@@ -1,4 +1,4 @@
-package inout;
+package inout.general;
 
 import java.io.*;
 import custom_exceptions.IOModeException;
@@ -16,10 +16,10 @@ public class IO {
 		
 		try {
 			if(mode == "out") {
-				reader = new BufferedReader(new FileReader(FILE_PATH));
+				this.reader = new BufferedReader(new FileReader(FILE_PATH));
 			}
-			else if(mode == "in") {
-				writer = new BufferedWriter(new FileWriter(FILE_PATH));
+			else if(mode == "into") {
+				this.writer = new BufferedWriter(new FileWriter(FILE_PATH));
 			}
 		}
 		catch(IOException ioe) {
@@ -28,26 +28,27 @@ public class IO {
 	}
 	
 	public void next(String line) throws IOModeException, IOException {
-		if(MODE != "in") {
+		if(MODE != "into") {
 			throw new IOModeException();
 		}
-		writer.write(line);
+		this.writer.write(line);
 	}
 	
 	public String next() throws IOModeException, IOException {
 		if(MODE != "out") {
 			throw new IOModeException();
 		}
-		return reader.readLine();
+		String line = this.reader.readLine();
+		return line;
 	}
 	
 	public void finish() {
 		try {
-			if(MODE == "in") {
-				writer.close();
+			if(MODE == "into") {
+				this.writer.close();
 			}
 			else if(MODE == "out") {
-				reader.close();
+				this.reader.close();
 			}
 		}
 		catch(IOException ioe) {

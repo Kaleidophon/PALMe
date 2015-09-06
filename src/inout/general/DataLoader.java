@@ -1,4 +1,8 @@
-package inout;
+package inout.general;
+
+import inout.indexing.BinaryIndexing;
+import inout.indexing.HexadecimalIndexing;
+import inout.indexing.Indexing;
 
 import java.util.*;
 import java.io.*;
