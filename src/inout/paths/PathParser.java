@@ -76,10 +76,10 @@ public class PathParser {
 					
 					if (this.contains(current_tag, "/")) {
 						// Closing tag
-						if (this.demanding_keywords.contains(current_keyword.replace("/", ""))) {
+						if (this.demanding_keywords.contains(current_keyword.replace("/", "")) && enclosed_text.equals("")) {
 							// Extract text
-							enclosed_text = line.substring(0, line.indexOf(current_tag));
-							System.out.println(enclosed_text);
+							enclosed_text = line.substring(0, line.indexOf(current_tag)).trim();
+							line = line.replaceFirst(enclosed_text, "");
 						}
 						
 						// Preparing wrapping up
@@ -91,8 +91,6 @@ public class PathParser {
 						}
 						
 						if (last_keyword.equals("path")) {
-							String res = "Type: " + type + " | Subtype: " + subtype + " | Directory: " + directory + " | Coding: " + coding;
-							System.out.println(res);
 							path = new Path(type, subtype, directory, coding);
 							if (subtype.equals("indexing")) {
 								path.setN(n);
@@ -105,6 +103,7 @@ public class PathParser {
 							subtype = "";
 							directory = "";
 							coding = "";
+							enclosed_text = "";
 						}
 						else if (last_keyword.equals("type")) {
 							type = enclosed_text; 
