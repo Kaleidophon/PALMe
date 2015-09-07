@@ -57,8 +57,16 @@ public class PathParser {
 					
 					if (current_keyword.contains("/")) {
 						if (openNodes.peekLast().equals(current_keyword.replace("/", ""))) {
-							openNodes.removeLast();
-							// Do other stuff
+							switch (openNodes.removeLast()) {
+								case ("path"):
+									break;
+								case ("type"):
+									break;
+								case ("subtype"):
+									break;
+								case ("directory"):
+									break;
+							}
 						}
 						else {
 							throw new XMLParseException("Tags are not properly nested.");
