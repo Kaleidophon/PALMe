@@ -1,10 +1,13 @@
 package inout.paths;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 import java.io.IOException;
 import java.util.regex.*;
 
@@ -17,10 +20,14 @@ public class PathParser {
 	private String PATHFILE_INPATH;
 	private IO reader;
 	private List<Path> paths;
-	private String[] keywords = {"path", "type", "subtype", "directory"};
+	private Set<String> demanding_keywords = new HashSet<>(Arrays.asList(new String[]{"type", "subtype", "directory"}));
+	private Set<String> non_demanding_keywords = new HashSet<>(Arrays.asList(new String[]{"path"}));
+	private Set<String> keywords;
 	
 	public PathParser(String PATHFILE_INPATH) {
 		this.PATHFILE_INPATH = PATHFILE_INPATH;
+		this.keywords = new HashSet<>(this.demanding_keywords);
+		this.keywords.addAll(this.non_demanding_keywords);
 		this.reader = new IO(PATHFILE_INPATH, "out");
 		try {
 			this.paths = this.parsePaths();
@@ -39,7 +46,7 @@ public class PathParser {
 		try {
 			// Preparations
 			LinkedList<String> openNodes = new LinkedList<>();
-			LinkedList<String> openTags = new LinkedList<>();
+			
 			// Possible Variables
 			Path path;
 			String type = "";
@@ -47,6 +54,7 @@ public class PathParser {
 			String directory = "";
 			String coding = "";
 			int n = 0;
+			String enclosed_text = "";
 			
 			do {
 				String line = this.reader.next();
@@ -58,70 +66,79 @@ public class PathParser {
 				if (this.countOccurrences(line, "<") != this.countOccurrences(line, ">")) {
 					throw new XMLParseException("Incomplete tags in document.");
 				}
-				for (String match : this.findMatches(line, "<.*?>")) {
-					String current_keyword = this.getKeyword(match);
-					String current_tag = match;
-					// Filter invalid keywords
-					if (!(this.contains(this.keywords, current_keyword) || this.contains(this.keywords, current_keyword.replace("/", "")))) {
+				List<String> tags = this.findMatches(line, "<.*?>");
+				for (String current_tag : tags) {
+					String current_keyword = this.getKeyword(current_tag);
+					
+					if (!(this.keywords.contains(current_keyword) || this.keywords.contains(current_keyword.replace("/", "")))) {
 						throw new XMLParseException("Invalid keyword: " + current_keyword);
 					}
 					
-					// For closing tags
-					if (current_keyword.contains("/")) {
-						String last_keyword = openNodes.removeLast();
-						if (last_keyword.equals(current_keyword.replace("/", ""))) {
-							String last_tag = openTags.removeLast();
-							String enclosed_text = "";
-							// If there is information to be extracted
-							if (line.indexOf(last_tag) != -1 && line.replaceAll("<.*?>", "").length() != 0) {
-								enclosed_text = line.substring(line.indexOf(last_tag) + last_tag.length(), line.indexOf(current_tag));
-							}
-							// Process information
-							switch (last_keyword) {
-								case ("path"):
-									path = new Path(type, subtype, directory, coding);
-									if (subtype.equals("indexing")) {
-										path.setN(n);
-										n = 0;
-									}
-									paths.add(path);
-									// Reset variables
-									path = null;
-									type = "";
-									subtype = "";
-									directory = "";
-									coding = "";
-									break;
-								case ("type"):
-									type = enclosed_text; 
-									break;
-								case ("subtype"):
-									if (this.hasAttributes(last_tag)) {
-										Map<String, String> attributes = this.extractAttributes(last_tag);
-										if (attributes.containsKey("n")) {
-											n = Integer.parseInt(attributes.get("n"));
-										}
-										if (attributes.containsKey("coding")) {
-											coding = attributes.get("coding");
-										}
-									}
-									subtype = enclosed_text;
-									break;
-								case ("directory"):
-									directory = enclosed_text;
-									break;
-							}
+					if (this.contains(current_tag, "/")) {
+						// Closing tag
+						if (this.demanding_keywords.contains(current_keyword.replace("/", ""))) {
+							// Extract text
+							enclosed_text = line.substring(0, line.indexOf(current_tag));
+							System.out.println(enclosed_text);
 						}
-						else {
+						
+						// Preparing wrapping up
+						String last_tag = openNodes.removeLast();
+						String last_keyword = this.getKeyword(last_tag);
+						
+						if (!(last_keyword.equals(current_keyword.replace("/", "")))) {
 							throw new XMLParseException("Tags are not properly nested.");
+						}
+						
+						if (last_keyword.equals("path")) {
+							String res = "Type: " + type + " | Subtype: " + subtype + " | Directory: " + directory + " | Coding: " + coding;
+							System.out.println(res);
+							path = new Path(type, subtype, directory, coding);
+							if (subtype.equals("indexing")) {
+								path.setN(n);
+								n = 0;
+							}
+							paths.add(path);
+							// Reset variables
+							path = null;
+							type = "";
+							subtype = "";
+							directory = "";
+							coding = "";
+						}
+						else if (last_keyword.equals("type")) {
+							type = enclosed_text; 
+							enclosed_text = "";
+						}
+						else if (last_keyword.equals("subtype")) {
+							// Dealing with attributes
+							if (this.hasAttributes(last_tag)) {
+								Map<String, String> attributes = this.extractAttributes(last_tag);
+								if (attributes.containsKey("n")) {
+									n = Integer.parseInt(attributes.get("n"));
+								}
+								if (attributes.containsKey("coding")) {
+									coding = attributes.get("coding");
+								}
+							}
+							subtype = enclosed_text;
+							enclosed_text = "";
+						}
+						else if (last_keyword.equals("directory")) {
+							directory = enclosed_text;
+							enclosed_text = "";
 						}
 					}
 					else {
-						// Add new open node
-						openNodes.add(current_keyword);
-						openTags.add(current_tag);
+						// Opening tag
+						openNodes.add(current_tag);
 					}
+					// Reduce line
+					line = line.replaceFirst(current_tag, "");
 				}
+				if (line.trim().length() > 0) {
+					enclosed_text = line.trim();
+				}	
 			} while(this.reader.hasNext());
 		}
 		catch (IOException ioe) {
@@ -133,8 +150,16 @@ public class PathParser {
 		return paths;
 	}
 	
-	public void setKeywords(String[] keywords) {
+	public void setKeywords(Set<String> keywords) {
 		this.keywords = keywords;
+	}
+	
+	public void setDemandingKeywords(Set<String> keywords) {
+		this.demanding_keywords = keywords;
+	}
+	
+	public void setNonDemandingKeywords(Set<String> keywords) {
+		this.non_demanding_keywords = keywords;
 	}
 	
 	private int countOccurrences(String s, String target) {
