@@ -9,7 +9,6 @@ public class IO {
 	final String MODE;
 	BufferedReader reader;
 	BufferedWriter writer;
-	boolean hasNext;
 	String next_line;
 	String current_line;
 	
@@ -20,7 +19,6 @@ public class IO {
 		try {
 			if(mode == "out") {
 				this.reader = new BufferedReader(new FileReader(FILE_PATH));
-				this.hasNext = true;
 				this.current_line = reader.readLine();
 				this.next_line = reader.readLine();
 			}
@@ -44,24 +42,12 @@ public class IO {
 		if(MODE != "out") {
 			throw new IOModeException();
 		}
-		String tmp = current_line;
-		current_line = next_line;
-		this.readNextLine();
+		String tmp = this.current_line;
+		this.current_line = this.next_line;
+		this.next_line = this.reader.readLine();
 		return tmp.trim();
 	}
-	
-	private void readNextLine() {
-		try {
-			this.next_line = this.reader.readLine();
-			if (this.next_line == null) {
-				this.hasNext = false;
-			}
-		}
-		catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
-	}
-	
+
 	public void finish() {
 		try {
 			if(MODE == "into") {
@@ -77,7 +63,8 @@ public class IO {
 	}
 	
 	public boolean hasNext() {
-		return this.hasNext;
+		boolean res = (this.current_line == null) ? false : true;
+		return res;
 	}
 
 }

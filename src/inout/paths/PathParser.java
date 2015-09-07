@@ -38,11 +38,20 @@ public class PathParser {
 		try {
 			// Preparations
 			LinkedList<String> openNodes = new LinkedList<>();
-			String line = this.reader.next();
-			while(this.reader.hasNext()) {
-				System.out.println(line);
+			LinkedList<String> openTags = new LinkedList<>();
+			// Possible Variables
+			Path path;
+			String type = "";
+			String subtype = "";
+			String directory = "";
+			String coding;
+			int n;
+			
+			do {
+				String line = this.reader.next();
+				System.out.println("Line: " + line);
+				// Ignore header
 				if (line.startsWith("<?xml version=")) {
-					line = this.reader.next();
 					continue;
 				}
 				// Actual Parsing
@@ -51,36 +60,60 @@ public class PathParser {
 				}
 				for (String match : this.findMatches(line, "<.*?>")) {
 					String current_keyword = this.getKeyword(match);
+					String current_tag = match;
+					// Filter invalid keywords
 					if (!(this.contains(this.keywords, current_keyword) || this.contains(this.keywords, current_keyword.replace("/", "")))) {
 						throw new XMLParseException("Invalid keyword: " + current_keyword);
 					}
 					
+					// For closing tags
 					if (current_keyword.contains("/")) {
-						if (openNodes.peekLast().equals(current_keyword.replace("/", ""))) {
-							switch (openNodes.removeLast()) {
+						String last_keyword = openNodes.removeLast();
+						if (last_keyword.equals(current_keyword.replace("/", ""))) {
+							String last_tag = openTags.removeLast();
+							String enclosed_text = "";
+							if (line.indexOf(last_tag) != -1) {
+								enclosed_text = line.substring(line.indexOf(last_tag) + last_tag.length(), line.indexOf(current_tag));
+							}
+							System.out.println("Text: " + enclosed_text);
+							System.out.println(last_keyword);
+							switch (last_keyword) {
 								case ("path"):
+									path = new Path(type, subtype, directory);
+									System.out.println("New Path: " + path.toString());
+									paths.add(path);
+									// Reset variables
+									path = null;
+									type = "";
+									subtype = "";
+									directory = "";
 									break;
 								case ("type"):
+									type = enclosed_text; 
 									break;
 								case ("subtype"):
+									subtype = enclosed_text;
 									break;
 								case ("directory"):
+									directory = enclosed_text;
 									break;
 							}
+							System.out.println("(Debug) Type: " + type + " | Subtype: " + subtype + " | Directory: " + directory);
 						}
 						else {
 							throw new XMLParseException("Tags are not properly nested.");
 						}
 					}
 					else {
+						// Add new open node
 						openNodes.add(current_keyword);
+						openTags.add(current_tag);
 					}
 					this.pAL(openNodes);
+					this.pAL(openTags);
+					System.out.println("");
 				}
-				
-				// Preparation for next iteration
-				line = this.reader.next();
-			}
+			} while(this.reader.hasNext());
 		}
 		catch (IOException ioe) {
 			ioe.printStackTrace();
@@ -159,6 +192,10 @@ public class PathParser {
 			}
 		}
 		return false;
+	}
+	
+	private boolean hasAttribute(String tag) {
+		return this.contains(tag, "=");
 	}
 	
 	

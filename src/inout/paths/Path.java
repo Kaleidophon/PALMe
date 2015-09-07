@@ -110,4 +110,9 @@ public class Path {
 	public void checkConsistency() {
 		// TO DO
 	}
+
+	@Override
+	public String toString() {
+		return "Type: " + this.getType() + " | Subtype: " + this.getSubtype() + " | Directory: " + this.getDirectory();
+	}
 }
