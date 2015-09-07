@@ -38,11 +38,11 @@ public class PathParser {
 		try {
 			// Preparations
 			LinkedList<String> openNodes = new LinkedList<>();
-			String line = this.reader.next().trim();
-			while(line != null) {
+			String line = this.reader.next();
+			while(this.reader.hasNext()) {
 				System.out.println(line);
 				if (line.startsWith("<?xml version=")) {
-					line = this.reader.next().trim();
+					line = this.reader.next();
 					continue;
 				}
 				// Actual Parsing
@@ -71,7 +71,7 @@ public class PathParser {
 				}
 				
 				// Preparation for next iteration
-				line = this.reader.next().trim();
+				line = this.reader.next();
 			}
 		}
 		catch (IOException ioe) {
