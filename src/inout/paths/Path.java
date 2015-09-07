@@ -70,7 +70,7 @@ public class Path {
 		this.extension = ext;
 	}
 	
-	public String getCoding() throws UnsetPathAttributeException {
+	public String getCoding() {
 		if (this.coding == null) {
 			throw new UnsetPathAttributeException();
 		}
@@ -84,7 +84,7 @@ public class Path {
 		this.coding = coding;
 	}
 	
-	public int getN() throws UnsetPathAttributeException {
+	public int getN() {
 		if (this.n == 0) {
 			throw new UnsetPathAttributeException();
 		}
@@ -113,6 +113,13 @@ public class Path {
 
 	@Override
 	public String toString() {
-		return "Type: " + this.getType() + " | Subtype: " + this.getSubtype() + " | Directory: " + this.getDirectory();
+		String res = "Type: " + this.getType() + " | Subtype: " + this.getSubtype() + " | Directory: " + this.getDirectory();
+		try {
+			res = (this.getSubtype().equals("indexing")) ? res += " | Coding: " + this.getCoding() + " | n: " + this.getN() : res;
+		}
+		catch (UnsetPathAttributeException uae) {
+			uae.printStackTrace();
+		}
+		return res;
 	}
 }

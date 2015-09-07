@@ -1,8 +1,10 @@
 package inout.paths;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
+import java.util.Map;
 import java.io.IOException;
 import java.util.regex.*;
 
@@ -22,6 +24,7 @@ public class PathParser {
 		this.reader = new IO(PATHFILE_INPATH, "out");
 		try {
 			this.paths = this.parsePaths();
+			this.pAL(paths);
 		}
 		catch (XMLParseException xpe) {
 			xpe.printStackTrace();
@@ -44,12 +47,11 @@ public class PathParser {
 			String type = "";
 			String subtype = "";
 			String directory = "";
-			String coding;
-			int n;
+			String coding = "";
+			int n = 0;
 			
 			do {
 				String line = this.reader.next();
-				System.out.println("Line: " + line);
 				// Ignore header
 				if (line.startsWith("<?xml version=")) {
 					continue;
@@ -72,15 +74,20 @@ public class PathParser {
 						if (last_keyword.equals(current_keyword.replace("/", ""))) {
 							String last_tag = openTags.removeLast();
 							String enclosed_text = "";
-							if (line.indexOf(last_tag) != -1) {
+							// If there is information to be extracted
+							if (line.indexOf(last_tag) != -1 && line.replaceAll("<.*?>", "").length() != 0) {
 								enclosed_text = line.substring(line.indexOf(last_tag) + last_tag.length(), line.indexOf(current_tag));
 							}
-							System.out.println("Text: " + enclosed_text);
-							System.out.println(last_keyword);
+							// Process information
 							switch (last_keyword) {
 								case ("path"):
 									path = new Path(type, subtype, directory);
-									System.out.println("New Path: " + path.toString());
+									if (subtype.equals("indexing")) {
+										path.setN(n);
+										path.setCoding(coding);
+										coding = "";
+										n = 0;
+									}
 									paths.add(path);
 									// Reset variables
 									path = null;
@@ -92,13 +99,17 @@ public class PathParser {
 									type = enclosed_text; 
 									break;
 								case ("subtype"):
+									if (this.hasAttributes(last_tag)) {
+										Map<String, String> attributes = this.extractAttributes(last_tag);
+										n = Integer.parseInt(attributes.get("n"));
+										coding = attributes.get("coding");
+									}
 									subtype = enclosed_text;
 									break;
 								case ("directory"):
 									directory = enclosed_text;
 									break;
 							}
-							System.out.println("(Debug) Type: " + type + " | Subtype: " + subtype + " | Directory: " + directory);
 						}
 						else {
 							throw new XMLParseException("Tags are not properly nested.");
@@ -109,9 +120,6 @@ public class PathParser {
 						openNodes.add(current_keyword);
 						openTags.add(current_tag);
 					}
-					this.pAL(openNodes);
-					this.pAL(openTags);
-					System.out.println("");
 				}
 			} while(this.reader.hasNext());
 		}
@@ -194,8 +202,23 @@ public class PathParser {
 		return false;
 	}
 	
-	private boolean hasAttribute(String tag) {
+	private boolean hasAttributes(String tag) {
 		return this.contains(tag, "=");
+	}
+	
+	private Map<String, String> extractAttributes(String tag) {
+		tag = tag.replace("<", "").replace(">", "").replace("\"", "");
+		Map<String, String> attributes = new HashMap<>();
+		String[] parts = tag.split(" ");
+		for (String part : parts) {
+			if (this.contains(part, "=")) {
+				attributes.put(part.split("=")[0], part.split("=")[1]);
+			}
+		}
+		if (attributes.keySet().size() == 0) {
+			return null;
+		}
+		return attributes;
 	}
 	
 	
