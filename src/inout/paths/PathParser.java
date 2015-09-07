@@ -15,7 +15,7 @@ public class PathParser {
 	private String PATHFILE_INPATH;
 	private IO reader;
 	private List<Path> paths;
-	private String[] keywords = {"path", "type", "subtype"};
+	private String[] keywords = {"path", "type", "subtype", "directory"};
 	
 	public PathParser(String PATHFILE_INPATH) {
 		this.PATHFILE_INPATH = PATHFILE_INPATH;
@@ -37,7 +37,7 @@ public class PathParser {
 		List<Path> paths = new ArrayList<>();
 		try {
 			// Preparations
-			List<String> openNodes = new LinkedList<>();
+			LinkedList<String> openNodes = new LinkedList<>();
 			String line = this.reader.next().trim();
 			while(line != null) {
 				System.out.println(line);
@@ -49,7 +49,26 @@ public class PathParser {
 				if (this.countOccurrences(line, "<") != this.countOccurrences(line, ">")) {
 					throw new XMLParseException("Incomplete tags in document.");
 				}
-				System.out.println("" + this.countOccurrencesOfPattern(line, "<.*?>"));
+				for (String match : this.findMatches(line, "<.*?>")) {
+					String current_keyword = this.getKeyword(match);
+					if (!(this.contains(this.keywords, current_keyword) || this.contains(this.keywords, current_keyword.replace("/", "")))) {
+						throw new XMLParseException("Invalid keyword: " + current_keyword);
+					}
+					
+					if (current_keyword.contains("/")) {
+						if (openNodes.peekLast().equals(current_keyword.replace("/", ""))) {
+							openNodes.removeLast();
+							// Do other stuff
+						}
+						else {
+							throw new XMLParseException("Tags are not properly nested.");
+						}
+					}
+					else {
+						openNodes.add(current_keyword);
+					}
+					this.pAL(openNodes);
+				}
 				
 				// Preparation for next iteration
 				line = this.reader.next().trim();
@@ -81,4 +100,58 @@ public class PathParser {
 		}
 		return count;
 	}
+	
+	private List<String> findMatches(String s, String pattern) {
+		List<String> matches = new ArrayList<>();
+		Pattern r = Pattern.compile(pattern);
+		Matcher m = r.matcher(s);
+		while (m.find()) {
+			matches.add(m.group());
+		}
+		return matches;	
+	}
+	
+	private <T> void pAL(List<T> al) {
+		if (al.size() == 0) {
+			System.out.println("{}");
+			return;
+		}
+		String out = "{" + al.get(0);
+		for (int i = 1; i < al.size(); i++) {
+			out += ", " + al.get(i);
+		}
+		out += "}";
+		System.out.println(out);
+	}
+	
+	private String getKeyword(String tag) {
+		String keyword;
+		if (tag.indexOf(" ") == -1) {
+			keyword = tag.substring(tag.indexOf("<") + 1, tag.indexOf(">"));
+		}
+		else {
+			keyword = tag.substring(tag.indexOf("<") + 1, tag.indexOf(" "));
+		}
+		return keyword;
+	}
+	
+	private <T> boolean contains(T[] array, T target) {
+		for (T element : array) {
+			if (element == target || element.equals(target)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean contains(String s, String target) {
+		for (int i = 0; i < s.length() - target.length() + 1; i++) {
+			if (s.substring(i, i + target.length()).equals(target)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
 }
