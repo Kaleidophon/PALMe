@@ -24,7 +24,6 @@ public class PathParser {
 		this.reader = new IO(PATHFILE_INPATH, "out");
 		try {
 			this.paths = this.parsePaths();
-			this.pAL(paths);
 		}
 		catch (XMLParseException xpe) {
 			xpe.printStackTrace();
@@ -32,8 +31,7 @@ public class PathParser {
 	}
 	
 	public List<Path> getPaths() {
-		List<Path> paths = new ArrayList<>();
-		return paths;
+		return this.paths;
 	}
 	
 	private List<Path> parsePaths() throws XMLParseException {
@@ -81,11 +79,9 @@ public class PathParser {
 							// Process information
 							switch (last_keyword) {
 								case ("path"):
-									path = new Path(type, subtype, directory);
+									path = new Path(type, subtype, directory, coding);
 									if (subtype.equals("indexing")) {
 										path.setN(n);
-										path.setCoding(coding);
-										coding = "";
 										n = 0;
 									}
 									paths.add(path);
@@ -94,6 +90,7 @@ public class PathParser {
 									type = "";
 									subtype = "";
 									directory = "";
+									coding = "";
 									break;
 								case ("type"):
 									type = enclosed_text; 
@@ -101,8 +98,12 @@ public class PathParser {
 								case ("subtype"):
 									if (this.hasAttributes(last_tag)) {
 										Map<String, String> attributes = this.extractAttributes(last_tag);
-										n = Integer.parseInt(attributes.get("n"));
-										coding = attributes.get("coding");
+										if (attributes.containsKey("n")) {
+											n = Integer.parseInt(attributes.get("n"));
+										}
+										if (attributes.containsKey("coding")) {
+											coding = attributes.get("coding");
+										}
 									}
 									subtype = enclosed_text;
 									break;
@@ -214,9 +215,6 @@ public class PathParser {
 			if (this.contains(part, "=")) {
 				attributes.put(part.split("=")[0], part.split("=")[1]);
 			}
-		}
-		if (attributes.keySet().size() == 0) {
-			return null;
 		}
 		return attributes;
 	}

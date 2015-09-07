@@ -7,19 +7,21 @@ import custom_exceptions.UnsetPathAttributeException;
 
 public class Path {
 	
-	String type;
-	String subtype;
-	String directory;
-	String extension;
-	String coding;
-	int n;
+	private String type;
+	private String subtype;
+	private String directory;
+	private String extension;
+	private String coding;
+	private int n;
 	
 	private enum Codings { DEFAULT, BINARY, HEXADECIMAL }
 	
-	public Path(String type, String subtype, String directory) {
+	public Path(String type, String subtype, String directory, String coding) {
 		this.type = type;
 		this.subtype = subtype;
 		this.directory = directory;
+		this.coding = coding;
+		this.extension = directory.substring(directory.lastIndexOf("."));
 	}
 	
 	public Path() {}
@@ -108,14 +110,23 @@ public class Path {
 	}
 	
 	public void checkConsistency() {
-		// TO DO
+		if (this.type.equals("lexicon")) {
+			if (!(this.n == 0)) {
+				throw new IllegalArgumentException("Lexicon doesn't have n attribute");
+			}
+		}
+		else if (this.type.equals("indexing")) {
+			if (this.n == 0) {
+				throw new IllegalArgumentException("Indexing needs an n attribute");
+			}
+		}
 	}
 
 	@Override
 	public String toString() {
-		String res = "Type: " + this.getType() + " | Subtype: " + this.getSubtype() + " | Directory: " + this.getDirectory();
+		String res = "Type: " + this.getType() + " | Subtype: " + this.getSubtype() + " | Directory: " + this.getDirectory() + " | Coding: " + this.getCoding();
 		try {
-			res = (this.getSubtype().equals("indexing")) ? res += " | Coding: " + this.getCoding() + " | n: " + this.getN() : res;
+			res = (this.getSubtype().equals("indexing")) ? res += " | n: " + this.getN() : res;
 		}
 		catch (UnsetPathAttributeException uae) {
 			uae.printStackTrace();
