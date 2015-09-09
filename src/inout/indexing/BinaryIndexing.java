@@ -19,14 +19,14 @@ import custom_exceptions.IncompleteLexiconException;
 
 public class BinaryIndexing extends Indexing {
 	
-	String prefix = "bin_";
+	private final String prefix = "bin_";
 	
-	public BinaryIndexing(Map<String, Integer> data, String IN_PATH) {
-		super(data, IN_PATH);
+	public BinaryIndexing(Map<String, Integer> data, String FREQS_IN_PATH, String LEX_IN_PATH) {
+		super(data, FREQS_IN_PATH, LEX_IN_PATH);
 	}
 	
-	public BinaryIndexing(String IN_PATH, boolean zipped) {
-		super(IN_PATH, zipped);
+	public BinaryIndexing(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
+		super(FREQS_IN_PATH, LEX_IN_PATH, zipped);
 	}
 	
 	public BinaryIndexing() {}

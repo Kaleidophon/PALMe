@@ -12,12 +12,6 @@ public class PathHandler {
 	
 	private List<Path> paths;
 	
-	private List<Set<String>> allowed_arguments;
-	private Set<String> format = new HashSet(Arrays.asList(new String[]{"raw", "zipped"}));
-	private Set<String> coding = new HashSet(Arrays.asList(new String[]{"default", "binary", "hexadecimal"}));
-	private Set<String> type = new HashSet(Arrays.asList(new String[]{"lexicon", "frequency", "probability"}));
-	private Set<String> subtype = new HashSet(Arrays.asList(new String[]{"reversed", "indexing"}));
-	
 	public PathHandler(String PATHFILE_INPATH) {
 		PathParser pp = new PathParser(PATHFILE_INPATH);
 		this.paths = pp.getPaths();
@@ -48,7 +42,10 @@ public class PathHandler {
 	public List<Path> getPathsWithSubtype(String subtype) {
 		List<Path> results = new ArrayList<>();
 		for (Path p : this.paths) {
-			if (p.getSubtype().equals(subtype)) {
+			if (p.getSubtype() == null) {
+				continue;
+			}
+			else if (p.getSubtype().equals(subtype)) {
 				results.add(p);
 			}
 		}
@@ -68,7 +65,10 @@ public class PathHandler {
 	public List<Path> getPathsWithCoding(String coding) {
 		List<Path> results = new ArrayList<>();
 		for (Path p : this.paths) {
-			if (p.getCoding().equals(coding)) {
+			if (p.getCoding() == null) {
+				continue;
+			}
+			else if (p.getCoding().equals(coding)) {
 				results.add(p);
 			}
 		}
@@ -88,13 +88,11 @@ public class PathHandler {
 	public List<Path> getPathsWithN(int n) {
 		List<Path> results = new ArrayList<>();
 		for (Path p : this.paths) {
-			try { 
-				if (p.getN() == n) {
-					results.add(p);
-				}
-			}
-			catch (UnsetPathAttributeException upae) {
+			if (p.getN() == 0) {
 				continue;
+			}
+			else if (p.getN() == n) {
+				results.add(p);
 			}
 		}
 		return results;
@@ -119,25 +117,33 @@ public class PathHandler {
 	public List<Path> getPathsWithAttributes(String specification) {
 		List<List<Path>> pathlists = new ArrayList<List<Path>>();
 		String[] parts = specification.split(" ");
-		if (!(parts.length == 4 || parts.length == 5)) {
+		if (!(parts.length == 2 || parts.length == 5)) {
 			throw new IllegalArgumentException("No valid specification: " + specification);
 		}
 		// Verification of parts arguments
-		this.allowed_arguments = new ArrayList<>();
-		this.allowed_arguments.add(this.format);
-		this.allowed_arguments.add(this.coding);
-		this.allowed_arguments.add(this.type);
-		this.allowed_arguments.add(this.subtype);
-		for (int i = 0; i < parts.length; i++) {
-			if (i < 4) {
-				if (!this.allowed_arguments.get(i).contains(parts[i])) {
-					throw new IllegalArgumentException("Illegal argument: " + parts[i]);
-				}
+		if (parts.length == 2) {
+			if (!(parts[0].equals("raw") || parts[0].equals("zipped"))) {
+				throw new IllegalArgumentException("Lexicons must be either raw or zipped");
 			}
-			else {
-				if (Integer.parseInt(parts[i]) <= 0) {
-					throw new IllegalArgumentException("Illegal argument: " + parts[i]);
-				}
+			else if (!parts[1].equals("lexicon")) {
+				throw new IllegalArgumentException("Two word specifications must be for lexicons");
+			}
+		}
+		else if (parts.length == 5) {
+			if (!(parts[0].equals("raw") || parts[0].equals("zipped"))) {
+				throw new IllegalArgumentException("Indexings must be either raw or zipped");
+			}
+			else if (!(parts[1].equals("default") || parts[1].equals("binary") || parts[1].equals("hexdecimal"))) {
+				throw new IllegalArgumentException("Specification contains invalid coding: " + parts[1]);
+			}
+			else if (!(parts[2].equals("frequency") || parts[2].equals("probability"))) {
+				throw new IllegalArgumentException("Type must be either frequency or probability, " + parts[2] + " found instead");
+			}
+			else if (!parts[3].equals("indexing")) {
+				throw new IllegalArgumentException("Five word specifications must be for indexings");
+			}
+			else if (Integer.parseInt(parts[4]) < 1) {
+				throw new IllegalArgumentException("n must be greater / equal to 1");
 			}
 		}
 		
@@ -151,11 +157,14 @@ public class PathHandler {
 				pathlists.add(this.getPathsWithCoding("BINARY")); break;
 			case ("hexadecimal"):
 				pathlists.add(this.getPathsWithCoding("HEXADECIMAL")); break;
+			case ("lexicon"):
+				pathlists.add(this.getPathsWithType("lexicon")); break;
+		}
+		if (parts.length == 2) {
+			return this.intersection(pathlists);
 		}
 		// Type: Lexicon, Frequency or Probability?
 		switch (parts[2]) {
-			case ("lexicon"):
-				pathlists.add(this.getPathsWithType("lexicon")); break;
 			case ("frequency"):
 				pathlists.add(this.getPathsWithType("frequency")); break;
 			case ("probability"):
@@ -169,11 +178,5 @@ public class PathHandler {
 		}
 
 		return this.intersection(pathlists);
-	}
-	
-	
-	
-	
-	
-	
+	}	
 }

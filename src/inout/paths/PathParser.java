@@ -91,7 +91,7 @@ public class PathParser {
 						}
 						
 						if (last_keyword.equals("path")) {
-							path = new Path(type, subtype, directory, coding);
+							path = (subtype.equals("")) ? new Path(type, directory) : new Path(type, subtype, directory, coding);
 							if (subtype.equals("indexing")) {
 								path.setN(n);
 								n = 0;

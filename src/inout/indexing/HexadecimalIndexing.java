@@ -19,14 +19,14 @@ import custom_exceptions.IncompleteLexiconException;
 
 public class HexadecimalIndexing extends Indexing {
 
-	String prefix = "hex_";
+	private final String prefix = "hex_";
 	
-	public HexadecimalIndexing(Map<String, Integer> data, String IN_PATH) {
-		super(data, IN_PATH);
+	public HexadecimalIndexing(Map<String, Integer> data, String FREQS_IN_PATH, String LEX_IN_PATH) {
+		super(data, FREQS_IN_PATH, LEX_IN_PATH);
 	}
 	
-	public HexadecimalIndexing(String IN_PATH, boolean zipped) {
-		super(IN_PATH, zipped);
+	public HexadecimalIndexing(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
+		super(FREQS_IN_PATH, LEX_IN_PATH, zipped);
 	}
 	
 	public HexadecimalIndexing() {}

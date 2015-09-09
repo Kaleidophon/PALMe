@@ -163,10 +163,10 @@ public class WordCount {
 	    job.setJarByClass(WordCount.class);
 	    TokenizerMapper.setN(Integer.parseInt(otherArgs[otherArgs.length-3])); // Set ngram length
 	    job.setMapperClass(TokenizerMapper.class);
-	    if (otherArgs[otherArgs.length-2] == "yes") {
+	    if (otherArgs[otherArgs.length-2].equals("yes")) {
 	    	job.setCombinerClass(IntSumReducer.class);
 	    }
-	    if (otherArgs[otherArgs.length-1] == "yes") {
+	    if (otherArgs[otherArgs.length-1].equals("yes")) {
 	    	job.setPartitionerClass(CustomPartitioner.class);
 	    	CustomPartitioner.setNumberOfReducers(NUMBER_OF_REDUCERS);
 	    }

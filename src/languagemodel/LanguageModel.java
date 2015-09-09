@@ -35,6 +35,7 @@ public class LanguageModel {
 	
 	public List<Indexing> collectIndexings(int mode, Indexing indexing) {
 		List<Indexing> indexings = new ArrayList<>();
+		String LEXICON_PATH = this.ph.getPathsWithAttributes((mode == 0) ? "raw" : "zipped" + " lexicon").get(0).getDirectory();
 		
 		for(int i = 1; i <= this.n; i++) {
 			switch (mode) {
@@ -42,30 +43,30 @@ public class LanguageModel {
 					// Unzipped
 					if (indexing instanceof BinaryIndexing) {
 						String INDEXING_PATH = this.ph.getPathsWithAttributes("raw binary frequency indexing " + i).get(0).getDirectory();
-						indexing = new BinaryIndexing(INDEXING_PATH, false);
+						indexing = new BinaryIndexing(INDEXING_PATH, LEXICON_PATH, false);
 					}
 					else if (indexing instanceof HexadecimalIndexing) {
 						String INDEXING_PATH = this.ph.getPathsWithAttributes("raw hexadecimal frequency indexing " + i).get(0).getDirectory();
-						indexing = new HexadecimalIndexing(INDEXING_PATH, false);
+						indexing = new HexadecimalIndexing(INDEXING_PATH, LEXICON_PATH, false);
 					}
 					else if (indexing instanceof Indexing) {
 						String INDEXING_PATH = this.ph.getPathsWithAttributes("raw default frequency indexing " + i).get(0).getDirectory();
-						indexing = new Indexing(INDEXING_PATH, false);
+						indexing = new Indexing(INDEXING_PATH, LEXICON_PATH, false);
 					}
 					break;
 				case (1):
 					// Zipped
 					if (indexing instanceof BinaryIndexing) {
 						String INDEXING_PATH = this.ph.getPathsWithAttributes("zipped binary frequency indexing " + i).get(0).getDirectory();
-						indexing = new BinaryIndexing(INDEXING_PATH, true);
+						indexing = new BinaryIndexing(INDEXING_PATH, LEXICON_PATH, true);
 					}
 					else if (indexing instanceof HexadecimalIndexing) {
 						String INDEXING_PATH = this.ph.getPathsWithAttributes("zipped hexadecimal frequency indexing " + i).get(0).getDirectory();
-						indexing = new HexadecimalIndexing(INDEXING_PATH, true);
+						indexing = new HexadecimalIndexing(INDEXING_PATH, LEXICON_PATH, true);
 					}
 					else if (indexing instanceof Indexing) {
 						String INDEXING_PATH = this.ph.getPathsWithAttributes("zipped default frequency indexing " + i).get(0).getDirectory();
-						indexing = new Indexing(INDEXING_PATH, true);
+						indexing = new Indexing(INDEXING_PATH, LEXICON_PATH, true);
 					}
 					break;
 			}
