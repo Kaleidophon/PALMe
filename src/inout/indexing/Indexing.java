@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.lang.StringBuilder;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -29,13 +30,13 @@ import custom_exceptions.IncompleteLexiconException;
 public class Indexing <V extends Number> implements Serializable {
 	
 	Map<Integer[], V> indices;
-	Map<Integer, String> lexicon;
-	Map<String, Integer> reversed_lexicon;
+	Lexicon lexicon;
 	
 	BufferedReader reader;
 	BufferedWriter writer;
 	
-	String IN_PATH;
+	String FREQS_IN_PATH;
+	String LEX_IN_PATH;
 	String mode;
 	String prefix = "";
 	
@@ -44,10 +45,11 @@ public class Indexing <V extends Number> implements Serializable {
 	
 	// ------------------------------------------------- Constructor -------------------------------------------------
 	
-	public Indexing(Map<String, V> data, String IN_PATH) {
+	public Indexing(Map<String, V> data, String FREQS_IN_PATH, String LEX_IN_PATH) {
 		try {
 			create_lexicons = true;
-			this.IN_PATH = IN_PATH;
+			this.FREQS_IN_PATH = FREQS_IN_PATH;
+			this.LEX_IN_PATH = LEX_IN_PATH;
 			this.setMode();
 			this.createIndices(data, this.getMode());
 		}
@@ -70,22 +72,17 @@ public class Indexing <V extends Number> implements Serializable {
 	
 	public void createIndices(Map<String, V> data, String mode) throws IncompleteLexiconException {
 		Map<Integer[], V> indices = new HashMap<>();
-		Map<Integer, String> lexicon = new HashMap<>();
-		Map<String, Integer> reversed_lexicon = new HashMap<>();
+		Lexicon lexicon = new Lexicon();
 		data = sortByValues(data);
-		
-		String lexicon_path = this.IN_PATH + "lexicons/";
 		
 		// Determine whether there is a pre-existing lexicon AND reversed lexicon of same format
 		try {
-			lexicon = this.readLexicon(lexicon_path, true, mode);
-			reversed_lexicon = this.readReversedLexicon(lexicon_path, true, mode);
+			lexicon = this.readLexicon(this.LEX_IN_PATH, true, mode);
 			this.create_lexicons = false;
 		}
 		catch (FileNotFoundException fnfe) {
 			try {
-				lexicon = this.readLexicon(lexicon_path, false, mode);
-				reversed_lexicon = this.readReversedLexicon(lexicon_path, false, mode);
+				lexicon = this.readLexicon(this.LEX_IN_PATH, false, mode);
 				this.create_lexicons = false;
 			}
 			catch (FileNotFoundException fnfe2) {}
@@ -103,17 +100,16 @@ public class Indexing <V extends Number> implements Serializable {
 				String[] key_parts = key.split(" ");
 				int ti_index = 0;
 				for (String token : key_parts) {
-					if(!(reversed_lexicon.keySet().contains(token)) && create_lexicons) {
+					if(!(lexicon.containsValue(token)) && create_lexicons) {
 						lexicon.put(index, token);
-						reversed_lexicon.put(token, index);
 						token_indices[ti_index] = index;
 						index++;
 					}
-					else if (!(reversed_lexicon.keySet().contains(token) && create_lexicons)) {
+					else if (!(lexicon.containsValue(token) && create_lexicons)) {
 						throw new IncompleteLexiconException();
 					}
 					else {
-						token_indices[ti_index] = reversed_lexicon.get(token);
+						token_indices[ti_index] = lexicon.getKey(token);
 					}
 					ti_index++;
 				}
@@ -128,7 +124,6 @@ public class Indexing <V extends Number> implements Serializable {
 		}
 		this.indices = indices;
 		this.lexicon = lexicon;
-		this.reversed_lexicon = reversed_lexicon;
 	}
 	
 	public void dump(String OUTFILE_PATH, boolean zipped) {
@@ -136,7 +131,6 @@ public class Indexing <V extends Number> implements Serializable {
 		this.writeIndices(this.getIndices(), OUTFILE_PATH + "/" + this.n + "/" + prefix + "indices" + ext, zipped, this.getMode());
 		if (this.createLexicons()) {
 			this.writeLexicon(this.getLexicon(), OUTFILE_PATH + "lexicons/" + prefix + "lexicon" + ext, zipped, this.getMode());
-			this.writeReversedLexicon(this.getReversedLexicon(), OUTFILE_PATH + "lexicons/" + prefix + "lexicon_reversed" + ext, zipped, this.getMode());
 		}
 	}
 	
@@ -144,8 +138,7 @@ public class Indexing <V extends Number> implements Serializable {
 		String ext = (zipped) ? ".gz" : ".txt";
 		try {
 			this.indices = this.readIndices(IN_PATH + prefix + "indices" + ext, zipped, this.getMode());
-			this.lexicon = this.readLexicon(IN_PATH + "lexicons/" + prefix + "lexicon" + ext, zipped, this.getMode());
-			this.reversed_lexicon = this.readReversedLexicon(IN_PATH + "lexicons/" + prefix + "lexicon_reversed" + ext, zipped, this.getMode());
+			this.lexicon = this.readLexicon(IN_PATH + "lexicons/" + prefix + "lexicon" + ext, zipped, this.getMode());;
 		}
 		catch(FileNotFoundException fnfe) {
 			fnfe.printStackTrace();
@@ -163,7 +156,7 @@ public class Indexing <V extends Number> implements Serializable {
 			throw new IllegalArgumentException("The Lexicon is empty.");
 		}
 		for (int key : keys) {
-			String value = this.lexicon.get(key);
+			String value = this.lexicon.getValue(key);
 			if (key < 0) {
 				throw new IllegalArgumentException("Invalid Key: " + key);
 			}
@@ -242,8 +235,8 @@ public class Indexing <V extends Number> implements Serializable {
 		return indices;
 	}
 	
-	protected Map<Integer, String> readLexicon(String INFILE_PATH, boolean zipped, String mode) throws FileNotFoundException {
-		Map<Integer, String> lexicon = new HashMap<>();
+	protected Lexicon readLexicon(String INFILE_PATH, boolean zipped, String mode) throws FileNotFoundException {
+		List<String> lexicon_entries = new ArrayList<>();
 		try {
 			BufferedReader reader;
 			if (zipped) {
@@ -256,60 +249,14 @@ public class Indexing <V extends Number> implements Serializable {
 			try {
 				String current_line = reader.readLine().trim();
 				while (current_line != "") {
-					String[] line_parts = current_line.trim().split("\t");
-					switch (mode) {
-						case ("binary"):
-							lexicon.put(Integer.parseInt(line_parts[0], 2), line_parts[1]);
-							break;
-						case ("hexadecimal"):
-							lexicon.put(Integer.parseInt(line_parts[0], 16), line_parts[1]);
-							break;
-						default:
-							lexicon.put(Integer.parseInt(line_parts[0]), line_parts[1]);
-							break;
-					}
+					lexicon_entries.add(current_line);
 					current_line = reader.readLine();
 				}
 			}
 			catch (NullPointerException npe) {}
 		}
 		catch (IOException ioe) {}
-		return lexicon;
-	}
-	
-	protected Map<String, Integer> readReversedLexicon(String INFILE_PATH, boolean zipped, String mode) throws FileNotFoundException {
-		Map<String, Integer> reversed_lexicon = new HashMap<>();
-		try {
-			BufferedReader reader;
-			if (zipped) {
-				GZIPInputStream gis = new GZIPInputStream(new FileInputStream(INFILE_PATH));
-				reader = new BufferedReader(new InputStreamReader(gis));
-			}
-			else {
-				reader = new BufferedReader(new FileReader(INFILE_PATH));
-			}
-			try {
-				String current_line = reader.readLine().trim();
-				while (current_line != "") {
-					String[] line_parts = current_line.trim().split("\t");
-					switch (mode) {
-					case ("binary"):
-						reversed_lexicon.put(line_parts[0], Integer.parseInt(line_parts[1], 2));
-						break;
-					case ("hexadecimal"):
-						reversed_lexicon.put(line_parts[0], Integer.parseInt(line_parts[1], 16));
-						break;
-					default:
-						reversed_lexicon.put(line_parts[0], Integer.parseInt(line_parts[1]));
-						break;
-				}
-					current_line = reader.readLine();
-				}
-			}
-			catch (NullPointerException npe) {}
-		}
-		catch (IOException ioe) {}
-		return reversed_lexicon;
+		return new Lexicon(lexicon_entries);
 	}
 	
 	protected <V> void writeIndices(Map<Integer[], V> data, String OUTFILE_PATH, boolean zipped, String mode) {
@@ -356,7 +303,7 @@ public class Indexing <V extends Number> implements Serializable {
 		catch (Exception e) { e.printStackTrace(); }
 	}
 	
-	protected void writeLexicon(Map<Integer, String> data, String OUTFILE_PATH, boolean zipped, String mode) {
+	protected void writeLexicon(Lexicon lexicon, String OUTFILE_PATH, boolean zipped, String mode) {
 		try {
 			BufferedWriter writer;
 			if (zipped) {
@@ -366,19 +313,8 @@ public class Indexing <V extends Number> implements Serializable {
 			else {
 				writer = new BufferedWriter(new FileWriter(OUTFILE_PATH));
 			}
-			for (Integer key : data.keySet()) {
-				String line = "";
-				switch(mode) {
-					case ("binary"):
-						line = Integer.toBinaryString(key) + "\t" + lexicon.get(key) + "\n";
-						break;
-					case ("hexadecimal"):
-						line = Integer.toHexString(key) + "\t" + lexicon.get(key) + "\n";
-						break;
-					default:
-						line = key + "\t" + data.get(key) + "\n";
-						break;
-				}
+			for (String entry : lexicon.getEntries()) {
+				String line = entry + "\n";
 				if (zipped) {
 					writer.append(line);
 				}
@@ -390,54 +326,15 @@ public class Indexing <V extends Number> implements Serializable {
 		}
 		catch (Exception e) { e.printStackTrace(); }
 	}
-	
-	protected void writeReversedLexicon(Map<String, Integer> data, String OUTFILE_PATH, boolean zipped, String mode) {
-		try {
-			BufferedWriter writer;
-			if (zipped) {
-				GZIPOutputStream gos = new GZIPOutputStream(new FileOutputStream(OUTFILE_PATH));
-				writer = new BufferedWriter(new OutputStreamWriter(gos, "UTF-8"));
-			}
-			else {
-				writer = new BufferedWriter(new FileWriter(OUTFILE_PATH));
-			}
-			for (String key : data.keySet()) {
-				String line = "";
-				switch(mode) {
-					case ("binary"):
-						line = key + "\t" + Integer.toBinaryString(data.get(key)) + "\n";
-						break;
-					case ("hexadecimal"):
-						line = key + "\t" + Integer.toHexString(data.get(key)) + "\n";
-						break;
-					default:
-						line = key + "\t" + data.get(key) + "\n";
-						break;
-				}
-				if (zipped) {
-					writer.append(line);
-				}
-				else {
-					writer.write(line);
-				}
-			}
-			writer.close();
-		}
-		catch (Exception e) { e.printStackTrace(); }
-	}
-	
+		
 	// ----------------------------------------------- Getter & Setter -----------------------------------------------
 	
 	public Map<Integer[], ? extends Number> getIndices() {
 		return this.indices;
 	}
 	
-	public Map<Integer, String> getLexicon() {
+	public Lexicon getLexicon() {
 		return this.lexicon;
-	}
-	
-	public Map<String, Integer> getReversedLexicon() {
-		return this.reversed_lexicon;
 	}
 	
 	public boolean createLexicons() {
