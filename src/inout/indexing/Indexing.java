@@ -29,19 +29,19 @@ import custom_exceptions.IncompleteLexiconException;
 
 public class Indexing <V extends Number> implements Serializable {
 	
-	Map<Integer[], V> indices;
-	Lexicon lexicon;
+	private Map<Integer[], V> indices;
+	private Lexicon lexicon;
 	
-	BufferedReader reader;
-	BufferedWriter writer;
+	private BufferedReader reader;
+	private BufferedWriter writer;
 	
-	String FREQS_IN_PATH;
-	String LEX_IN_PATH;
-	String mode;
-	String prefix = "";
+	private String FREQS_IN_PATH;
+	private String LEX_IN_PATH;
+	protected String mode;
+	private final String prefix = "";
 	
-	boolean create_lexicons;
-	int n;
+	private boolean create_lexicons;
+	private int n;
 	
 	// ------------------------------------------------- Constructor -------------------------------------------------
 	
@@ -58,9 +58,11 @@ public class Indexing <V extends Number> implements Serializable {
 		}
 	}
 	
-	public Indexing(String IN_PATH, boolean zipped) {
+	public Indexing(String LEX_IN_PATH, String FREQS_IN_PATH, boolean zipped) {
 		this.setMode();
-		this.load(IN_PATH, zipped);
+		this.load(LEX_IN_PATH, FREQS_IN_PATH, zipped);
+		this.LEX_IN_PATH = LEX_IN_PATH;
+		this.FREQS_IN_PATH = FREQS_IN_PATH;
 		// Take sample to determine n
 		Integer[] sample_key = this.getIndices().keySet().iterator().next();
 		this.n = sample_key.length;
@@ -134,11 +136,11 @@ public class Indexing <V extends Number> implements Serializable {
 		}
 	}
 	
-	public void load(String IN_PATH, boolean zipped) {
+	public void load(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
 		String ext = (zipped) ? ".gz" : ".txt";
 		try {
-			this.indices = this.readIndices(IN_PATH + prefix + "indices" + ext, zipped, this.getMode());
-			this.lexicon = this.readLexicon(IN_PATH + "lexicons/" + prefix + "lexicon" + ext, zipped, this.getMode());;
+			this.indices = this.readIndices(FREQS_IN_PATH + prefix + "indices" + ext, zipped, this.getMode());
+			this.lexicon = this.readLexicon(LEX_IN_PATH + "lexicons/" + prefix + "lexicon" + ext, zipped, this.getMode());;
 		}
 		catch(FileNotFoundException fnfe) {
 			fnfe.printStackTrace();
