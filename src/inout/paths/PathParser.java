@@ -31,8 +31,7 @@ public class PathParser {
 		this.reader = new IO(PATHFILE_INPATH, "out");
 		try {
 			this.paths = this.parsePaths();
-		}
-		catch (XMLParseException xpe) {
+		} catch (XMLParseException xpe) {
 			xpe.printStackTrace();
 		}
 	}
@@ -104,12 +103,10 @@ public class PathParser {
 							directory = "";
 							coding = "";
 							enclosed_text = "";
-						}
-						else if (last_keyword.equals("type")) {
+						} else if (last_keyword.equals("type")) {
 							type = enclosed_text; 
 							enclosed_text = "";
-						}
-						else if (last_keyword.equals("subtype")) {
+						} else if (last_keyword.equals("subtype")) {
 							// Dealing with attributes
 							if (this.hasAttributes(last_tag)) {
 								Map<String, String> attributes = this.extractAttributes(last_tag);
@@ -122,13 +119,11 @@ public class PathParser {
 							}
 							subtype = enclosed_text;
 							enclosed_text = "";
-						}
-						else if (last_keyword.equals("directory")) {
+						} else if (last_keyword.equals("directory")) {
 							directory = enclosed_text;
 							enclosed_text = "";
 						}
-					}
-					else {
+					} else {
 						// Opening tag
 						openNodes.add(current_tag);
 					}
@@ -139,11 +134,9 @@ public class PathParser {
 					enclosed_text = line.trim();
 				}	
 			} while(this.reader.hasNext());
-		}
-		catch (IOException ioe) {
+		} catch (IOException ioe) {
 			ioe.printStackTrace();
-		}
-		catch (IOModeException iome) {
+		} catch (IOModeException iome) {
 			iome.printStackTrace();
 		}
 		return paths;
@@ -202,8 +195,7 @@ public class PathParser {
 		String keyword;
 		if (tag.indexOf(" ") == -1) {
 			keyword = tag.substring(tag.indexOf("<") + 1, tag.indexOf(">"));
-		}
-		else {
+		} else {
 			keyword = tag.substring(tag.indexOf("<") + 1, tag.indexOf(" "));
 		}
 		return keyword;

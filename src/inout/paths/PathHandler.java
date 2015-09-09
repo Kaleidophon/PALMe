@@ -19,8 +19,7 @@ public class PathHandler {
 			for (Path p : this.paths) {
 				p.checkConsistency();
 			}
-		}
-		catch (IllegalArgumentException iae) {
+		} catch (IllegalArgumentException iae) {
 			iae.printStackTrace();
 		}
 	}
@@ -44,8 +43,7 @@ public class PathHandler {
 		for (Path p : this.paths) {
 			if (p.getSubtype() == null) {
 				continue;
-			}
-			else if (p.getSubtype().equals(subtype)) {
+			} else if (p.getSubtype().equals(subtype)) {
 				results.add(p);
 			}
 		}
@@ -67,8 +65,7 @@ public class PathHandler {
 		for (Path p : this.paths) {
 			if (p.getCoding() == null) {
 				continue;
-			}
-			else if (p.getCoding().equals(coding)) {
+			} else if (p.getCoding().equals(coding)) {
 				results.add(p);
 			}
 		}
@@ -90,8 +87,7 @@ public class PathHandler {
 		for (Path p : this.paths) {
 			if (p.getN() == 0) {
 				continue;
-			}
-			else if (p.getN() == n) {
+			} else if (p.getN() == n) {
 				results.add(p);
 			}
 		}
@@ -124,25 +120,19 @@ public class PathHandler {
 		if (parts.length == 2) {
 			if (!(parts[0].equals("raw") || parts[0].equals("zipped"))) {
 				throw new IllegalArgumentException("Lexicons must be either raw or zipped");
-			}
-			else if (!parts[1].equals("lexicon")) {
+			} else if (!parts[1].equals("lexicon")) {
 				throw new IllegalArgumentException("Two word specifications must be for lexicons");
 			}
-		}
-		else if (parts.length == 5) {
+		} else if (parts.length == 5) {
 			if (!(parts[0].equals("raw") || parts[0].equals("zipped"))) {
 				throw new IllegalArgumentException("Indexings must be either raw or zipped");
-			}
-			else if (!(parts[1].equals("default") || parts[1].equals("binary") || parts[1].equals("hexdecimal"))) {
+			} else if (!(parts[1].equals("default") || parts[1].equals("binary") || parts[1].equals("hexdecimal"))) {
 				throw new IllegalArgumentException("Specification contains invalid coding: " + parts[1]);
-			}
-			else if (!(parts[2].equals("frequency") || parts[2].equals("probability"))) {
+			} else if (!(parts[2].equals("frequency") || parts[2].equals("probability"))) {
 				throw new IllegalArgumentException("Type must be either frequency or probability, " + parts[2] + " found instead");
-			}
-			else if (!parts[3].equals("indexing")) {
+			} else if (!parts[3].equals("indexing")) {
 				throw new IllegalArgumentException("Five word specifications must be for indexings");
-			}
-			else if (Integer.parseInt(parts[4]) < 1) {
+			} else if (Integer.parseInt(parts[4]) < 1) {
 				throw new IllegalArgumentException("n must be greater / equal to 1");
 			}
 		}

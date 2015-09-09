@@ -5,12 +5,12 @@ import custom_exceptions.IOModeException;
 
 public class IO {
 	
-	final String FILE_PATH;
-	final String MODE;
-	BufferedReader reader;
-	BufferedWriter writer;
-	String next_line;
-	String current_line;
+	private final String FILE_PATH;
+	private final String MODE;
+	private BufferedReader reader;
+	private BufferedWriter writer;
+	private String next_line;
+	private String current_line;
 	
 	public IO(String file_path, String mode) {
 		FILE_PATH = file_path;
@@ -21,12 +21,10 @@ public class IO {
 				this.reader = new BufferedReader(new FileReader(FILE_PATH));
 				this.current_line = reader.readLine();
 				this.next_line = reader.readLine();
-			}
-			else if(mode == "into") {
+			} else if(mode == "into") {
 				this.writer = new BufferedWriter(new FileWriter(FILE_PATH));
 			}
-		}
-		catch(IOException ioe) {
+		} catch(IOException ioe) {
 			ioe.printStackTrace();
 		}
 	}
@@ -52,12 +50,10 @@ public class IO {
 		try {
 			if(MODE == "into") {
 				this.writer.close();
-			}
-			else if(MODE == "out") {
+			} else if(MODE == "out") {
 				this.reader.close();
 			}
-		}
-		catch(IOException ioe) {
+		} catch(IOException ioe) {
 			ioe.printStackTrace();
 		}
 	}

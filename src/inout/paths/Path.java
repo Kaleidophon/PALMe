@@ -51,11 +51,9 @@ public class Path {
 	public void setSubtype(String subtype) {
 		if (!(subtype.equals("raw") || subtype.equals("indexing"))) {
 			throw new IllegalArgumentException("Invalid subtype");
-		}
-		else if (this.getType().equals("lexicon")) {
+		} else if (this.getType().equals("lexicon")) {
 			throw new IllegalArgumentException("Lexicon doesn't have a subtype");
-		}
-		else if ((this.getType().equals("frequency") || this.getType().equals("probability")) && !subtype.equals("indexing")) {
+		} else if ((this.getType().equals("frequency") || this.getType().equals("probability")) && !subtype.equals("indexing")) {
 			throw new IllegalArgumentException("Frequency and Probability must have subtype indexing");
 		}
 		this.subtype = subtype;
@@ -126,20 +124,16 @@ public class Path {
 		if (this.type.equals("lexicon")) {
 			if (this.n != 0) {
 				throw new IllegalArgumentException("Lexicon doesn't have n attribute");
-			}
-			else if (this.coding != null) {
+			} else if (this.coding != null) {
 				throw new IllegalArgumentException("Lexicon doesn't have a coding");
-			}
-			else if (this.subtype != null) {
+			} else if (this.subtype != null) {
 				throw new IllegalArgumentException("Lexicon doesn't have a subtype");
 			}
-		}
-		else if (this.type.equals("indexing")) {
+		} else if (this.type.equals("indexing")) {
 			if (this.n == 0) {
 				throw new IllegalArgumentException("Indexing needs an n attribute");
 			}
-		}
-		else if (this.type.equals("probability")) {
+		} else if (this.type.equals("probability")) {
 			if (this.n == 0) {
 				throw new IllegalArgumentException("Probability needs an n attribute");
 			}

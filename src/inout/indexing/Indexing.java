@@ -52,8 +52,7 @@ public class Indexing <V extends Number> implements Serializable {
 			this.LEX_IN_PATH = LEX_IN_PATH;
 			this.setMode();
 			this.createIndices(data, this.getMode());
-		}
-		catch (IncompleteLexiconException ile) {
+		} catch (IncompleteLexiconException ile) {
 			ile.printStackTrace();
 		}
 	}
@@ -81,13 +80,11 @@ public class Indexing <V extends Number> implements Serializable {
 		try {
 			lexicon = this.readLexicon(this.LEX_IN_PATH, true, mode);
 			this.create_lexicons = false;
-		}
-		catch (FileNotFoundException fnfe) {
+		} catch (FileNotFoundException fnfe) {
 			try {
 				lexicon = this.readLexicon(this.LEX_IN_PATH, false, mode);
 				this.create_lexicons = false;
-			}
-			catch (FileNotFoundException fnfe2) {}
+			} catch (FileNotFoundException fnfe2) {}
 		}
 				
 		// Take sample to determine n
@@ -106,18 +103,15 @@ public class Indexing <V extends Number> implements Serializable {
 						lexicon.put(index, token);
 						token_indices[ti_index] = index;
 						index++;
-					}
-					else if (!(lexicon.containsValue(token) && create_lexicons)) {
+					} else if (!(lexicon.containsValue(token) && create_lexicons)) {
 						throw new IncompleteLexiconException();
-					}
-					else {
+					} else {
 						token_indices[ti_index] = lexicon.getKey(token);
 					}
 					ti_index++;
 				}
 				indices.put(token_indices, data.get(key + " "));
-			}
-			else {
+			} else {
 				token_indices[0] = index;
 				indices.put(token_indices, data.get(key));
 				lexicon.put(index, key);
@@ -141,8 +135,7 @@ public class Indexing <V extends Number> implements Serializable {
 		try {
 			this.indices = this.readIndices(FREQS_IN_PATH + prefix + "indices" + ext, zipped, this.getMode());
 			this.lexicon = this.readLexicon(LEX_IN_PATH + "lexicons/" + prefix + "lexicon" + ext, zipped, this.getMode());;
-		}
-		catch(FileNotFoundException fnfe) {
+		} catch(FileNotFoundException fnfe) {
 			fnfe.printStackTrace();
 		}
 	}
@@ -161,8 +154,7 @@ public class Indexing <V extends Number> implements Serializable {
 			String value = this.lexicon.getValue(key);
 			if (key < 0) {
 				throw new IllegalArgumentException("Invalid Key: " + key);
-			}
-			else if (!(value.length() > 0) || value == null) {
+			} else if (!(value.length() > 0) || value == null) {
 				throw new IllegalArgumentException("Invalid Value: " + value);
 			}
 		}
@@ -195,8 +187,7 @@ public class Indexing <V extends Number> implements Serializable {
 			if (zipped) {
 				GZIPInputStream gis = new GZIPInputStream(new FileInputStream(INFILE_PATH));
 				reader = new BufferedReader(new InputStreamReader(gis));
-			}
-			else {
+			} else {
 				reader = new BufferedReader(new FileReader(INFILE_PATH));
 			}
 			try {
@@ -210,14 +201,12 @@ public class Indexing <V extends Number> implements Serializable {
 							key_indices[i] = Integer.parseInt(string_key_indices[i], 2);
 						}
 						indices.put(key_indices, this.intCast(Integer.parseInt(line_parts[1], 2)));
-					}
-					else if (mode == "hexadecimal") {
+					} else if (mode == "hexadecimal") {
 						for (int i = 0; i < string_key_indices.length; i++) {
 							key_indices[i] = Integer.parseInt(string_key_indices[i], 16);
 						}
 						indices.put(key_indices, this.intCast(Integer.parseInt(line_parts[1], 16)));
-					}
-					else if (mode == "default") {
+					} else if (mode == "default") {
 						for (int i = 0; i < string_key_indices.length; i++) {
 							key_indices[i] = Integer.parseInt(string_key_indices[i]);
 						}
@@ -230,10 +219,8 @@ public class Indexing <V extends Number> implements Serializable {
 					}
 					current_line = reader.readLine().trim();
 				}
-			}
-			catch (NullPointerException npe) { }
-		}
-		catch (IOException ioe) { ioe.printStackTrace(); }
+			} catch (NullPointerException npe) { }
+		} catch (IOException ioe) { ioe.printStackTrace(); }
 		return indices;
 	}
 	
@@ -244,8 +231,7 @@ public class Indexing <V extends Number> implements Serializable {
 			if (zipped) {
 				GZIPInputStream gis = new GZIPInputStream(new FileInputStream(INFILE_PATH));
 				reader = new BufferedReader(new InputStreamReader(gis));
-			}
-			else {
+			} else {
 				reader = new BufferedReader(new FileReader(INFILE_PATH));
 			}
 			try {
@@ -254,10 +240,8 @@ public class Indexing <V extends Number> implements Serializable {
 					lexicon_entries.add(current_line);
 					current_line = reader.readLine();
 				}
-			}
-			catch (NullPointerException npe) {}
-		}
-		catch (IOException ioe) {}
+			} catch (NullPointerException npe) {}
+		} catch (IOException ioe) {}
 		return new Lexicon(lexicon_entries);
 	}
 	
@@ -267,8 +251,7 @@ public class Indexing <V extends Number> implements Serializable {
 			if (zipped) {
 				GZIPOutputStream gos = new GZIPOutputStream(new FileOutputStream(OUTFILE_PATH));
 				writer = new BufferedWriter(new OutputStreamWriter(gos, "UTF-8"));
-			}
-			else {
+			} else {
 				writer = new BufferedWriter(new FileWriter(OUTFILE_PATH));
 			}
 			for (Integer[] key : data.keySet()) {
@@ -295,14 +278,12 @@ public class Indexing <V extends Number> implements Serializable {
 				}
 				if (zipped) {
 					writer.append(this.njoin(" ", new_key) + "\t" + data.get(key) + "\n");
-				}
-				else {
+				} else {
 					writer.write(this.njoin(" ", new_key) + "\t" + data.get(key) + "\n");
 				}
 			}
 			writer.close();
-		}
-		catch (Exception e) { e.printStackTrace(); }
+		} catch (Exception e) { e.printStackTrace(); }
 	}
 	
 	protected void writeLexicon(Lexicon lexicon, String OUTFILE_PATH, boolean zipped, String mode) {
@@ -311,22 +292,19 @@ public class Indexing <V extends Number> implements Serializable {
 			if (zipped) {
 				GZIPOutputStream gos = new GZIPOutputStream(new FileOutputStream(OUTFILE_PATH));
 				writer = new BufferedWriter(new OutputStreamWriter(gos, "UTF-8"));
-			}
-			else {
+			} else {
 				writer = new BufferedWriter(new FileWriter(OUTFILE_PATH));
 			}
 			for (String entry : lexicon.getEntries()) {
 				String line = entry + "\n";
 				if (zipped) {
 					writer.append(line);
-				}
-				else {
+				} else {
 					writer.write(line);
 				}
 			}
 			writer.close();
-		}
-		catch (Exception e) { e.printStackTrace(); }
+		} catch (Exception e) { e.printStackTrace(); }
 	}
 		
 	// ----------------------------------------------- Getter & Setter -----------------------------------------------

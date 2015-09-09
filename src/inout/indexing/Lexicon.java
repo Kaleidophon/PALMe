@@ -57,8 +57,7 @@ public class Lexicon {
 	public void put(int key, String value) {
 		if (key > this.getLexiconSize()) {
 			throw new IllegalArgumentException("This lexicon key cannot be set: " + key);
-		}
-		else {
+		} else {
 			this.entries.add(value);
 		}
 	}

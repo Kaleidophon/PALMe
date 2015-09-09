@@ -10,8 +10,8 @@ import java.io.*;
 public class DataLoader {
 	
 	private String INFILE_PATH;
-	BufferedReader reader;
-	BufferedWriter writer;
+	private BufferedReader reader;
+	private BufferedWriter writer;
 
 	public DataLoader(String file_path) {
 		this.INFILE_PATH = file_path;
@@ -23,7 +23,7 @@ public class DataLoader {
 		Map<String, Integer> freqs = new HashMap<>();
 		
 		try {
-			reader = new BufferedReader(new FileReader(this.INFILE_PATH));
+			reader = new BufferedReader(new FileReader(this.getInPath()));
 			String current_line = reader.readLine().trim();
 			try {
 				while (current_line != "") {
@@ -31,10 +31,10 @@ public class DataLoader {
 					freqs.put(line_parts[0], Integer.parseInt(line_parts[1]));
 					current_line = reader.readLine();
 				}
-			} 
-			catch (NullPointerException e) {}
-		}
-		catch (IOException e) { e.printStackTrace(); }	
+			}  catch (NullPointerException e) {}
+		} catch (IOException e) { 
+			e.printStackTrace(); 
+		}	
 		return freqs;
 	}
 	
@@ -42,11 +42,9 @@ public class DataLoader {
 		String filename = "";
 		if (indexing instanceof BinaryIndexing) {
 			filename = "bin_index.ser";
-		}
-		else if (indexing instanceof HexadecimalIndexing) {
+		} else if (indexing instanceof HexadecimalIndexing) {
 			filename = "hex_index.ser";
-		}
-		else if (indexing instanceof Indexing) {
+		} else if (indexing instanceof Indexing) {
 			filename = "index.ser";
 		}
 		OUT_PATH += filename;
@@ -60,8 +58,9 @@ public class DataLoader {
 			oos.writeObject(indexing);
 			oos.close();
 			fos.close();
+		} catch (Exception e) {
+			e.printStackTrace(); 
 		}
-		catch (Exception e) { e.printStackTrace(); }
 	}
 	
 	public Indexing loadIndexing(String IN_PATH, boolean validateState) {
@@ -75,9 +74,14 @@ public class DataLoader {
 			if (validateState) {
 				indexing.validateState();
 			}
+		} catch(Exception e) {
+			e.printStackTrace(); 
 		}
-		catch(Exception e) {e.printStackTrace(); }
 		return indexing;
+	}
+	
+	public String getInPath() {
+		return this.INFILE_PATH;
 	}
 	
 }

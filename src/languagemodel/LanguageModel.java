@@ -44,12 +44,10 @@ public class LanguageModel {
 					if (indexing instanceof BinaryIndexing) {
 						String INDEXING_PATH = this.ph.getPathsWithAttributes("raw binary frequency indexing " + i).get(0).getDirectory();
 						indexing = new BinaryIndexing(INDEXING_PATH, LEXICON_PATH, false);
-					}
-					else if (indexing instanceof HexadecimalIndexing) {
+					} else if (indexing instanceof HexadecimalIndexing) {
 						String INDEXING_PATH = this.ph.getPathsWithAttributes("raw hexadecimal frequency indexing " + i).get(0).getDirectory();
 						indexing = new HexadecimalIndexing(INDEXING_PATH, LEXICON_PATH, false);
-					}
-					else if (indexing instanceof Indexing) {
+					} else if (indexing instanceof Indexing) {
 						String INDEXING_PATH = this.ph.getPathsWithAttributes("raw default frequency indexing " + i).get(0).getDirectory();
 						indexing = new Indexing(INDEXING_PATH, LEXICON_PATH, false);
 					}
@@ -59,12 +57,10 @@ public class LanguageModel {
 					if (indexing instanceof BinaryIndexing) {
 						String INDEXING_PATH = this.ph.getPathsWithAttributes("zipped binary frequency indexing " + i).get(0).getDirectory();
 						indexing = new BinaryIndexing(INDEXING_PATH, LEXICON_PATH, true);
-					}
-					else if (indexing instanceof HexadecimalIndexing) {
+					} else if (indexing instanceof HexadecimalIndexing) {
 						String INDEXING_PATH = this.ph.getPathsWithAttributes("zipped hexadecimal frequency indexing " + i).get(0).getDirectory();
 						indexing = new HexadecimalIndexing(INDEXING_PATH, LEXICON_PATH, true);
-					}
-					else if (indexing instanceof Indexing) {
+					} else if (indexing instanceof Indexing) {
 						String INDEXING_PATH = this.ph.getPathsWithAttributes("zipped default frequency indexing " + i).get(0).getDirectory();
 						indexing = new Indexing(INDEXING_PATH, LEXICON_PATH, true);
 					}

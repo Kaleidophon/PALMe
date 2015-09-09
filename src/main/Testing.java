@@ -32,11 +32,9 @@ public class Testing {
 		for (Indexing indexing : indexings) {
 			if (indexing instanceof BinaryIndexing) {
 				indexing = new BinaryIndexing(freqs, "./rsc/indices/");
-			}
-			else if (indexing instanceof HexadecimalIndexing) {
+			} else if (indexing instanceof HexadecimalIndexing) {
 				indexing = new HexadecimalIndexing(freqs, "./rsc/indices/");
-			}
-			else if (indexing instanceof Indexing) {
+			} else if (indexing instanceof Indexing) {
 				indexing = new Indexing<Integer>(freqs, "./rsc/indices/");
 			}
 			indexing.dump("./rsc/indices/", false);
