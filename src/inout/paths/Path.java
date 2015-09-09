@@ -17,10 +17,14 @@ public class Path {
 	private enum Codings { DEFAULT, BINARY, HEXADECIMAL }
 	
 	public Path(String type, String subtype, String directory, String coding) {
-		this.type = type;
+		this(type, directory);
 		this.subtype = subtype;
-		this.directory = directory;
 		this.coding = coding;
+	}
+	
+	public Path(String type, String directory) {
+		this.type = type;
+		this.directory = directory;
 		this.extension = directory.substring(directory.lastIndexOf("."));
 	}
 	
@@ -38,15 +42,18 @@ public class Path {
 	}
 	
 	public String getSubtype() {
+		if (this.subtype == null) {
+			throw new UnsetPathAttributeException();
+		}
 		return this.subtype;
 	}
 	
 	public void setSubtype(String subtype) {
-		if (!(subtype.equals("raw") || subtype.equals("reversed") || subtype.equals("indexing"))) {
+		if (!(subtype.equals("raw") || subtype.equals("indexing"))) {
 			throw new IllegalArgumentException("Invalid subtype");
 		}
-		else if (this.getType() == "lexicon" && !(subtype.equals("raw") || subtype.equals("reversed"))) {
-			throw new IllegalArgumentException("Invalid subtype for lexicon: " + subtype);
+		else if (this.getType().equals("lexicon")) {
+			throw new IllegalArgumentException("Lexicon doesn't have a subtype");
 		}
 		else if ((this.getType().equals("frequency") || this.getType().equals("probability")) && !subtype.equals("indexing")) {
 			throw new IllegalArgumentException("Frequency and Probability must have subtype indexing");
@@ -117,8 +124,14 @@ public class Path {
 	
 	public void checkConsistency() {
 		if (this.type.equals("lexicon")) {
-			if (!(this.n == 0)) {
+			if (this.n != 0) {
 				throw new IllegalArgumentException("Lexicon doesn't have n attribute");
+			}
+			else if (this.coding != null) {
+				throw new IllegalArgumentException("Lexicon doesn't have a coding");
+			}
+			else if (this.subtype != null) {
+				throw new IllegalArgumentException("Lexicon doesn't have a subtype");
 			}
 		}
 		else if (this.type.equals("indexing")) {
@@ -135,13 +148,10 @@ public class Path {
 
 	@Override
 	public String toString() {
-		String res = "Type: " + this.getType() + " | Subtype: " + this.getSubtype() + " | Directory: " + this.getDirectory() + " | Coding: " + this.getCoding();
-		try {
-			res = (this.getSubtype().equals("indexing")) ? res += " | n: " + this.getN() : res;
-		}
-		catch (UnsetPathAttributeException uae) {
-			uae.printStackTrace();
-		}
+		String res = "Type: " + this.getType();
+		res += (this.getSubtype().equals("indexing") ? " | Subtype: indexing" : "");
+		res += " | Directory: " + this.getDirectory();
+		res += (this.getSubtype().equals("indexing")) ? " | Coding: " + this.getCoding() + " | n: " + this.getN() : "";
 		return res;
 	}
 }
