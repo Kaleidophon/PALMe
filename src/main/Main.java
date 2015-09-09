@@ -14,7 +14,7 @@ public class Main {
 		
 		PathHandler ph = new PathHandler("./rsc/paths.xml");
 		System.out.println(ph.getPaths());
-		System.out.println(ph.getPathsWithExtension(".gz"));
+		System.out.println(ph.getPathsWithAttributes("raw binary lexicon indexing 3"));
 		//LanguageModel lm = new LanguageModel(2, "./rsc/", new MaximumFrequencyEstimation(), new DataLoader(), new HexadecimalIndexing(), 1);
 		
 	}

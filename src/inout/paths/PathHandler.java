@@ -1,5 +1,6 @@
 package inout.paths;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
@@ -10,6 +11,12 @@ import custom_exceptions.UnsetPathAttributeException;
 public class PathHandler {
 	
 	private List<Path> paths;
+	
+	private List<Set<String>> allowed_arguments;
+	private Set<String> format = new HashSet(Arrays.asList(new String[]{"raw", "zipped"}));
+	private Set<String> coding = new HashSet(Arrays.asList(new String[]{"default", "binary", "hexadecimal"}));
+	private Set<String> type = new HashSet(Arrays.asList(new String[]{"lexicon", "frequency", "probability"}));
+	private Set<String> subtype = new HashSet(Arrays.asList(new String[]{"reversed", "indexing"}));
 	
 	public PathHandler(String PATHFILE_INPATH) {
 		PathParser pp = new PathParser(PATHFILE_INPATH);
@@ -94,10 +101,10 @@ public class PathHandler {
 	}
 	
 	public List<Path> intersection(List<List<Path>> pathlists) {
-		Set<Path> intersection = new HashSet<>();
+		Set<Path> intersection = new HashSet<>(pathlists.get(0));
 
-		for (List<Path> pathlist : pathlists) {
-			this.getIntersection(intersection, new HashSet<Path>(pathlist));
+		for (int i = 1; i < pathlists.size(); i++) {
+			intersection =  this.getIntersection(intersection, new HashSet<Path>(pathlists.get(i)));
 		}
 		return new ArrayList<Path>(intersection);
 	}
@@ -109,13 +116,30 @@ public class PathHandler {
 	    return cloneSet;
 	}
 	
-	public List<List<Path>> getPathsWithAttributes(String specification) {
-		List<List<Path>> pathlists = new ArrayList<>();
+	public List<Path> getPathsWithAttributes(String specification) {
+		List<List<Path>> pathlists = new ArrayList<List<Path>>();
 		String[] parts = specification.split(" ");
-		if (parts.length != 4 || parts.length != 5) {
+		if (!(parts.length == 4 || parts.length == 5)) {
 			throw new IllegalArgumentException("No valid specification: " + specification);
 		}
-		// TO DO: Verification of parts arguments
+		// Verification of parts arguments
+		this.allowed_arguments = new ArrayList<>();
+		this.allowed_arguments.add(this.format);
+		this.allowed_arguments.add(this.coding);
+		this.allowed_arguments.add(this.type);
+		this.allowed_arguments.add(this.subtype);
+		for (int i = 0; i < parts.length; i++) {
+			if (i < 4) {
+				if (!this.allowed_arguments.get(i).contains(parts[i])) {
+					throw new IllegalArgumentException("Illegal argument: " + parts[i]);
+				}
+			}
+			else {
+				if (Integer.parseInt(parts[i]) <= 0) {
+					throw new IllegalArgumentException("Illegal argument: " + parts[i]);
+				}
+			}
+		}
 		
 		// Zipped or raw?
 		pathlists.add(this.getPathsWithExtension((parts[0].equals("raw")) ? ".txt" : ".gz"));
@@ -129,9 +153,22 @@ public class PathHandler {
 				pathlists.add(this.getPathsWithCoding("HEXADECIMAL")); break;
 		}
 		// Type: Lexicon, Frequency or Probability?
-		
-		
-		return pathlists;
+		switch (parts[2]) {
+			case ("lexicon"):
+				pathlists.add(this.getPathsWithType("lexicon")); break;
+			case ("frequency"):
+				pathlists.add(this.getPathsWithType("frequency")); break;
+			case ("probability"):
+				pathlists.add(this.getPathsWithType("probability")); break;
+		}
+		// Subtype: Reversed or indexing?
+		pathlists.add(this.getPathsWithSubtype(parts[3]));
+		// Optional for indexings: n = ?
+		if (parts.length == 5) {
+			pathlists.add(this.getPathsWithN(Integer.parseInt(parts[4])));
+		}
+
+		return this.intersection(pathlists);
 	}
 	
 	
