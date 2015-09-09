@@ -31,7 +31,7 @@ public class Path {
 	}
 	
 	public void setType(String type) {
-		if (!(type == "lexicon" || type == "frequency" || type == "probability")) {
+		if (!(type.equals("lexicon") || type.equals("frequency") || type.equals("probability"))) {
 			throw new IllegalArgumentException("Invalid type");
 		}
 		this.type = type;
@@ -42,8 +42,14 @@ public class Path {
 	}
 	
 	public void setSubtype(String subtype) {
-		if (!(subtype == "raw" || subtype == "reversed" || subtype == "indexing")) {
+		if (!(subtype.equals("raw") || subtype.equals("reversed") || subtype.equals("indexing"))) {
 			throw new IllegalArgumentException("Invalid subtype");
+		}
+		else if (this.getType() == "lexicon" && !(subtype.equals("raw") || subtype.equals("reversed"))) {
+			throw new IllegalArgumentException("Invalid subtype for lexicon: " + subtype);
+		}
+		else if ((this.getType().equals("frequency") || this.getType().equals("probability")) && !subtype.equals("indexing")) {
+			throw new IllegalArgumentException("Frequency and Probability must have subtype indexing");
 		}
 		this.subtype = subtype;
 	}
@@ -66,7 +72,7 @@ public class Path {
 	}
 	
 	public void setExtension(String ext) {
-		if (!(ext == ".txt" || ext == ".ser" || ext == ".gz")) {
+		if (!(ext.equals(".txt") || ext.equals(".ser") || ext.equals(".gz"))) {
 			throw new IllegalArgumentException("Invalid file extension");
 		}
 		this.extension = ext;
@@ -118,6 +124,11 @@ public class Path {
 		else if (this.type.equals("indexing")) {
 			if (this.n == 0) {
 				throw new IllegalArgumentException("Indexing needs an n attribute");
+			}
+		}
+		else if (this.type.equals("probability")) {
+			if (this.n == 0) {
+				throw new IllegalArgumentException("Probability needs an n attribute");
 			}
 		}
 	}

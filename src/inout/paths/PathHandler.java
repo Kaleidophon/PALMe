@@ -1,7 +1,10 @@
 package inout.paths;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
+
 import custom_exceptions.UnsetPathAttributeException;
 
 public class PathHandler {
@@ -88,6 +91,47 @@ public class PathHandler {
 			}
 		}
 		return results;
+	}
+	
+	public List<Path> intersection(List<List<Path>> pathlists) {
+		Set<Path> intersection = new HashSet<>();
+
+		for (List<Path> pathlist : pathlists) {
+			this.getIntersection(intersection, new HashSet<Path>(pathlist));
+		}
+		return new ArrayList<Path>(intersection);
+	}
+	
+	public Set<Path> getIntersection(Set<Path> set1, Set<Path> set2) {
+	    boolean set1IsLarger = set1.size() > set2.size();
+	    Set<Path> cloneSet = new HashSet<Path>(set1IsLarger ? set2 : set1);
+	    cloneSet.retainAll(set1IsLarger ? set1 : set2);
+	    return cloneSet;
+	}
+	
+	public List<List<Path>> getPathsWithAttributes(String specification) {
+		List<List<Path>> pathlists = new ArrayList<>();
+		String[] parts = specification.split(" ");
+		if (parts.length != 4 || parts.length != 5) {
+			throw new IllegalArgumentException("No valid specification: " + specification);
+		}
+		// TO DO: Verification of parts arguments
+		
+		// Zipped or raw?
+		pathlists.add(this.getPathsWithExtension((parts[0].equals("raw")) ? ".txt" : ".gz"));
+		// Coding: None, binary or hexadecimal?
+		switch (parts[1]) {
+			case ("default"):
+				pathlists.add(this.getPathsWithCoding("DEFAULT")); break;
+			case ("binary"):
+				pathlists.add(this.getPathsWithCoding("BINARY")); break;
+			case ("hexadecimal"):
+				pathlists.add(this.getPathsWithCoding("HEXADECIMAL")); break;
+		}
+		// Type: Lexicon, Frequency or Probability?
+		
+		
+		return pathlists;
 	}
 	
 	
