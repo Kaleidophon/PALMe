@@ -78,14 +78,17 @@ public class Indexing <V extends Number> implements Serializable {
 		
 		// Determine whether there is a pre-existing lexicon AND reversed lexicon of same format
 		try {
-			lexicon = this.readLexicon(this.LEX_IN_PATH, true, mode);
+			lexicon = this.readLexicon(this.LEX_IN_PATH, true);
 			this.create_lexicons = false;
-		} catch (FileNotFoundException fnfe) {
+			System.out.println("Gezipptes Lexikon gefunden.");
+		} catch (IOException |  NullPointerException fnfe) {
 			try {
-				lexicon = this.readLexicon(this.LEX_IN_PATH, false, mode);
+				lexicon = this.readLexicon(this.LEX_IN_PATH, false);
 				this.create_lexicons = false;
-			} catch (FileNotFoundException fnfe2) {}
+				System.out.println("Ungezipptes Lexikon gefunden.");
+			} catch (IOException | NullPointerException fnfe2) {}
 		}
+		System.out.println("" + lexicon.getLexiconSize());
 				
 		// Take sample to determine n
 		String sample_key = data.keySet().iterator().next();
@@ -118,24 +121,27 @@ public class Indexing <V extends Number> implements Serializable {
 				index++;
 			}
 		}
+		if (this.create_lexicons) {
+			this.writeLexicon(lexicon, this.LEX_IN_PATH + "lexicon.txt", false);
+			this.writeLexicon(lexicon, this.LEX_IN_PATH + "lexicon.gz", true);
+		}
 		this.indices = indices;
 		this.lexicon = lexicon;
 	}
 	
 	public void dump(String OUTFILE_PATH, boolean zipped) {
 		String ext = (zipped) ? ".gz" : ".txt";
-		this.writeIndices(this.getIndices(), OUTFILE_PATH + "/" + this.n + "/" + prefix + "indices" + ext, zipped, this.getMode());
+		this.writeIndices(this.getIndices(), OUTFILE_PATH + "/" + this.n + "/" + this.getPrefix() + "indices" + ext, zipped, this.getMode());
 		if (this.createLexicons()) {
-			this.writeLexicon(this.getLexicon(), OUTFILE_PATH + "lexicons/" + prefix + "lexicon" + ext, zipped, this.getMode());
 		}
 	}
 	
 	public void load(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
 		String ext = (zipped) ? ".gz" : ".txt";
 		try {
-			this.indices = this.readIndices(FREQS_IN_PATH + prefix + "indices" + ext, zipped, this.getMode());
-			this.lexicon = this.readLexicon(LEX_IN_PATH + "lexicons/" + prefix + "lexicon" + ext, zipped, this.getMode());;
-		} catch(FileNotFoundException fnfe) {
+			this.indices = this.readIndices(FREQS_IN_PATH + this.getPrefix() + "indices" + ext, zipped, this.getMode());
+			this.lexicon = this.readLexicon(LEX_IN_PATH + "lexicons/" + "lexicon" + ext, zipped);
+		} catch(IOException fnfe) {
 			fnfe.printStackTrace();
 		}
 	}
@@ -192,7 +198,7 @@ public class Indexing <V extends Number> implements Serializable {
 			}
 			try {
 				String current_line = reader.readLine().trim();
-				while (current_line != "") {
+				while (current_line != null) {
 					String[] line_parts = current_line.split("\t");
 					String[] string_key_indices = line_parts[0].split(" ");
 					Integer[] key_indices = new Integer[string_key_indices.length];
@@ -224,25 +230,21 @@ public class Indexing <V extends Number> implements Serializable {
 		return indices;
 	}
 	
-	protected Lexicon readLexicon(String INFILE_PATH, boolean zipped, String mode) throws FileNotFoundException {
-		List<String> lexicon_entries = new ArrayList<>();
-		try {
-			BufferedReader reader;
-			if (zipped) {
-				GZIPInputStream gis = new GZIPInputStream(new FileInputStream(INFILE_PATH));
-				reader = new BufferedReader(new InputStreamReader(gis));
-			} else {
-				reader = new BufferedReader(new FileReader(INFILE_PATH));
-			}
-			try {
-				String current_line = reader.readLine().trim();
-				while (current_line != "") {
-					lexicon_entries.add(current_line);
-					current_line = reader.readLine();
-				}
-			} catch (NullPointerException npe) {}
-		} catch (IOException ioe) {}
-		return new Lexicon(lexicon_entries);
+	protected Lexicon readLexicon(String INFILE_PATH, boolean zipped) throws IOException {
+		Lexicon lexicon = new Lexicon();
+		BufferedReader reader;
+		if (zipped) {
+			GZIPInputStream gis = new GZIPInputStream(new FileInputStream(INFILE_PATH));
+			reader = new BufferedReader(new InputStreamReader(gis));
+		} else {
+			reader = new BufferedReader(new FileReader(INFILE_PATH));
+		}
+		String current_line = reader.readLine().trim();
+		while (current_line != null) {
+			lexicon.addEntry(current_line);
+			current_line = reader.readLine();
+		}
+		return lexicon;
 	}
 	
 	protected <V> void writeIndices(Map<Integer[], V> data, String OUTFILE_PATH, boolean zipped, String mode) {
@@ -286,7 +288,7 @@ public class Indexing <V extends Number> implements Serializable {
 		} catch (Exception e) { e.printStackTrace(); }
 	}
 	
-	protected void writeLexicon(Lexicon lexicon, String OUTFILE_PATH, boolean zipped, String mode) {
+	protected void writeLexicon(Lexicon lexicon, String OUTFILE_PATH, boolean zipped) {
 		try {
 			BufferedWriter writer;
 			if (zipped) {
@@ -331,6 +333,10 @@ public class Indexing <V extends Number> implements Serializable {
 	
 	private void setMode() {
 		this.mode = "default";
+	}
+	
+	public String getPrefix() {
+		return this.prefix;
 	}
 	
 	// ------------------------------------------------ Other methods- -----------------------------------------------

@@ -13,10 +13,16 @@ public class Lexicon {
 		this.entries = entries;
 	}
 	
-	public Lexicon() {}
+	public Lexicon() {
+		this.entries = new ArrayList<>(100000);
+	}
 	
 	public List<String> getEntries() {
 		return this.entries;
+	}
+	
+	public void addEntry(String entry) {
+		this.entries.add(entry);
 	}
 	
 	public String getValue(int key) {

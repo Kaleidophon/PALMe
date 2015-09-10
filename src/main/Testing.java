@@ -31,19 +31,19 @@ public class Testing {
 		
 		for (Indexing indexing : indexings) {
 			if (indexing instanceof BinaryIndexing) {
-				indexing = new BinaryIndexing(freqs, "./rsc/indices/");
+				indexing = new BinaryIndexing(freqs, "./rsc/indices/", "./rsc/indices/lexicons/lexicon.gz");
 			} else if (indexing instanceof HexadecimalIndexing) {
-				indexing = new HexadecimalIndexing(freqs, "./rsc/indices/");
+				indexing = new HexadecimalIndexing(freqs, "./rsc/indices/", "./rsc/indices/lexicons/lexicon.gz");
 			} else if (indexing instanceof Indexing) {
-				indexing = new Indexing<Integer>(freqs, "./rsc/indices/");
+				indexing = new Indexing<Integer>(freqs, "./rsc/indices/", "./rsc/indices/lexicons/lexicon.gz");
 			}
 			indexing.dump("./rsc/indices/", false);
 			indexing.dump("./rsc/indices/", true);
-			dl.dumpIndexing(indexing, "./rsc/indices/" + n + "/", true);
+			//dl.dumpIndexing(indexing, "./rsc/indices/" + n + "/", true);
 		}
 	}
 	
-	private static void timeIndexing(int mode, String IN_PATH, boolean para, int iterations) {
+	private static void timeIndexing(int mode, String IN_PATH, String LEX_PATH, boolean para, int iterations) {
 		System.out.println("Path: " + IN_PATH + " | Mode: " + mode);
 		DataLoader dl = new DataLoader();
 		long[] durations = new long[iterations];
@@ -74,22 +74,22 @@ public class Testing {
 			long startTime = System.nanoTime();
 			switch (mode) {
 				case (0):
-					Indexing<Integer> indexing1 = new Indexing<>(IN_PATH, para);
+					Indexing<Integer> indexing1 = new Indexing<>(LEX_PATH, IN_PATH, para);
 					break;
 				case (2):
-					Indexing indexing2 = new BinaryIndexing(IN_PATH, para);
+					Indexing indexing2 = new BinaryIndexing(LEX_PATH, IN_PATH, para);
 					break;
 				case (3):
-					Indexing indexing3 = new HexadecimalIndexing(IN_PATH, para);
+					Indexing indexing3 = new HexadecimalIndexing(LEX_PATH, IN_PATH, para);
 					break;
 				case (4):
-					Indexing<Integer> indexing4 = dl.loadIndexing(IN_PATH + "index.ser", para);
+					//Indexing<Integer> indexing4 = dl.loadIndexing(IN_PATH + "index.ser", para);
 					break;
 				case (5):
-					Indexing indexing5 = dl.loadIndexing(IN_PATH + "bin_index.ser", para);
+					//Indexing indexing5 = dl.loadIndexing(IN_PATH + "bin_index.ser", para);
 					break;
 				case (6):
-					Indexing indexing6 = dl.loadIndexing(IN_PATH + "hex_index.ser", para);
+					//Indexing indexing6 = dl.loadIndexing(IN_PATH + "hex_index.ser", para);
 					break;
 			}
 			long endTime = System.nanoTime();
