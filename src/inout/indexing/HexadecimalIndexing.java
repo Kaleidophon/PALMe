@@ -18,20 +18,24 @@ import java.util.zip.GZIPOutputStream;
 import custom_exceptions.IncompleteLexiconException;
 
 public class HexadecimalIndexing extends Indexing {
-
-	private final String prefix = "hex_";
 	
 	public HexadecimalIndexing(Map<String, Integer> data, String FREQS_IN_PATH, String LEX_IN_PATH) {
 		super(data, FREQS_IN_PATH, LEX_IN_PATH);
+		this.setPrefix();
 	}
 	
 	public HexadecimalIndexing(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
 		super(FREQS_IN_PATH, LEX_IN_PATH, zipped);
+		this.setPrefix();
 	}
 	
 	public HexadecimalIndexing() {}
 	
 	private void setMode() {
 		this.mode = "hexadecimal";
+	}
+	
+	private void setPrefix() {
+		this.prefix = "hex_";
 	}
 }

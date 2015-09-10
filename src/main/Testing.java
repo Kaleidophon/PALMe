@@ -13,7 +13,7 @@ import java.util.Map;
 public class Testing {
 
 	public static void main(String[] args) {
-		createTestData(1);
+		createTestData(2);
 		/*int n = 5;
 		for (int c = 0; c <= 5; c++) {
 			timeIndexing(c, "./rsc/indices/" + n + "/", false, 10);
@@ -32,11 +32,15 @@ public class Testing {
 		for (Indexing indexing : indexings) {
 			if (indexing instanceof BinaryIndexing) {
 				indexing = new BinaryIndexing(freqs, "./rsc/indices/", "./rsc/indices/lexicons/lexicon.gz");
+				System.out.println(indexing.getClass().getName());
 			} else if (indexing instanceof HexadecimalIndexing) {
 				indexing = new HexadecimalIndexing(freqs, "./rsc/indices/", "./rsc/indices/lexicons/lexicon.gz");
+				System.out.println(indexing.getClass().getName());
 			} else if (indexing instanceof Indexing) {
 				indexing = new Indexing<Integer>(freqs, "./rsc/indices/", "./rsc/indices/lexicons/lexicon.gz");
+				System.out.println(indexing.getClass().getName());
 			}
+			System.out.println(indexing.prefix);
 			indexing.dump("./rsc/indices/", false);
 			indexing.dump("./rsc/indices/", true);
 			//dl.dumpIndexing(indexing, "./rsc/indices/" + n + "/", true);

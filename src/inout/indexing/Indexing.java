@@ -38,7 +38,7 @@ public class Indexing <V extends Number> implements Serializable {
 	private String FREQS_IN_PATH;
 	private String LEX_IN_PATH;
 	protected String mode;
-	private final String prefix = "";
+	public String prefix;
 	
 	private boolean create_lexicons;
 	private int n;
@@ -46,11 +46,12 @@ public class Indexing <V extends Number> implements Serializable {
 	// ------------------------------------------------- Constructor -------------------------------------------------
 	
 	public Indexing(Map<String, V> data, String FREQS_IN_PATH, String LEX_IN_PATH) {
+		create_lexicons = true;
+		this.FREQS_IN_PATH = FREQS_IN_PATH;
+		this.LEX_IN_PATH = LEX_IN_PATH;
+		this.setMode();
+		this.setPrefix();
 		try {
-			create_lexicons = true;
-			this.FREQS_IN_PATH = FREQS_IN_PATH;
-			this.LEX_IN_PATH = LEX_IN_PATH;
-			this.setMode();
 			this.createIndices(data, this.getMode());
 		} catch (IncompleteLexiconException ile) {
 			ile.printStackTrace();
@@ -59,6 +60,7 @@ public class Indexing <V extends Number> implements Serializable {
 	
 	public Indexing(String LEX_IN_PATH, String FREQS_IN_PATH, boolean zipped) {
 		this.setMode();
+		this.setPrefix();
 		this.load(LEX_IN_PATH, FREQS_IN_PATH, zipped);
 		this.LEX_IN_PATH = LEX_IN_PATH;
 		this.FREQS_IN_PATH = FREQS_IN_PATH;
@@ -107,7 +109,7 @@ public class Indexing <V extends Number> implements Serializable {
 						token_indices[ti_index] = index;
 						index++;
 					} else if (!(lexicon.containsValue(token) && create_lexicons)) {
-						throw new IncompleteLexiconException();
+						throw new IncompleteLexiconException("Lexicon doesn't contain key: " + token);
 					} else {
 						token_indices[ti_index] = lexicon.getKey(token);
 					}
@@ -131,6 +133,7 @@ public class Indexing <V extends Number> implements Serializable {
 	
 	public void dump(String OUTFILE_PATH, boolean zipped) {
 		String ext = (zipped) ? ".gz" : ".txt";
+		System.out.println(OUTFILE_PATH + this.n + "/" + this.getPrefix() + "indices" + ext);
 		this.writeIndices(this.getIndices(), OUTFILE_PATH + "/" + this.n + "/" + this.getPrefix() + "indices" + ext, zipped, this.getMode());
 		if (this.createLexicons()) {
 		}
@@ -337,6 +340,10 @@ public class Indexing <V extends Number> implements Serializable {
 	
 	public String getPrefix() {
 		return this.prefix;
+	}
+	
+	private void setPrefix() {
+		this.prefix = "";
 	}
 	
 	// ------------------------------------------------ Other methods- -----------------------------------------------
