@@ -1,6 +1,6 @@
-package custom_exceptions;
+package inout.indexing;
 
-public class IncompleteLexiconException extends Exception {
+public class IncompleteLexiconException extends RuntimeException {
 
 	public IncompleteLexiconException(String message) {
 		super(message);

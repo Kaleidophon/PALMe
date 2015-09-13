@@ -15,8 +15,6 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import custom_exceptions.IncompleteLexiconException;
-
 public class HexadecimalIndexing extends Indexing {
 	
 	public HexadecimalIndexing(Map<String, Integer> data, String FREQS_IN_PATH, String LEX_IN_PATH) {

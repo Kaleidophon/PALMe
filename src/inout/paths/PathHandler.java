@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 
-import custom_exceptions.UnsetPathAttributeException;
-
 public class PathHandler {
 	
 	private List<Path> paths;

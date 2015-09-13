@@ -23,6 +23,7 @@ public class Testing {
 	
 	private static void createTestData(int n) {
 		List<Indexing> indexings = new ArrayList<>();
+		System.out.println("Reading frequencies...");
 		DataLoader dl = new DataLoader("./rsc/freqs/" + n + "/res.txt");
 		Map<String, Integer> freqs = dl.readFrequencies();
 		indexings.add(new Indexing<Integer>());
@@ -31,18 +32,23 @@ public class Testing {
 		
 		for (Indexing indexing : indexings) {
 			if (indexing instanceof BinaryIndexing) {
+				System.out.println("Create new "  + indexing.getClass().getName() + " for n = " + n);
 				indexing = new BinaryIndexing(freqs, "./rsc/indices/", "./rsc/indices/lexicons/lexicon.gz");
 				System.out.println(indexing.getClass().getName());
 			} else if (indexing instanceof HexadecimalIndexing) {
+				System.out.println("Create new "  + indexing.getClass().getName() + " for n = " + n);
 				indexing = new HexadecimalIndexing(freqs, "./rsc/indices/", "./rsc/indices/lexicons/lexicon.gz");
 				System.out.println(indexing.getClass().getName());
 			} else if (indexing instanceof Indexing) {
+				System.out.println("Create new "  + indexing.getClass().getName() + " for n = " + n);
 				indexing = new Indexing<Integer>(freqs, "./rsc/indices/", "./rsc/indices/lexicons/lexicon.gz");
 				System.out.println(indexing.getClass().getName());
 			}
-			System.out.println(indexing.prefix);
+			System.out.println("Dumping...");
 			indexing.dump("./rsc/indices/", false);
 			indexing.dump("./rsc/indices/", true);
+			indexing = null;
+			break;
 			//dl.dumpIndexing(indexing, "./rsc/indices/" + n + "/", true);
 		}
 	}

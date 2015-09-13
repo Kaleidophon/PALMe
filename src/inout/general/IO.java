@@ -1,7 +1,6 @@
 package inout.general;
 
 import java.io.*;
-import custom_exceptions.IOModeException;
 
 public class IO {
 	

@@ -11,9 +11,8 @@ import java.util.Set;
 import java.io.IOException;
 import java.util.regex.*;
 
-import custom_exceptions.IOModeException;
-import custom_exceptions.XMLParseException;
 import inout.general.IO;
+import inout.general.IOModeException;
 
 public class PathParser {
 	

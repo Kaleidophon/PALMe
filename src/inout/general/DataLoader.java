@@ -10,8 +10,8 @@ import java.io.*;
 public class DataLoader {
 	
 	private String INFILE_PATH;
-	private BufferedReader reader;
-	private BufferedWriter writer;
+	private IO reader;
+	private IO writer;
 
 	public DataLoader(String file_path) {
 		this.INFILE_PATH = file_path;
@@ -23,18 +23,17 @@ public class DataLoader {
 		Map<String, Integer> freqs = new HashMap<>();
 		
 		try {
-			reader = new BufferedReader(new FileReader(this.getInPath()));
-			String current_line = reader.readLine().trim();
-			try {
-				while (current_line != "") {
-					String[] line_parts = current_line.trim().split("\t");
-					freqs.put(line_parts[0], Integer.parseInt(line_parts[1]));
-					current_line = reader.readLine();
-				}
-			}  catch (NullPointerException e) {}
-		} catch (IOException e) { 
-			e.printStackTrace(); 
-		}	
+		this.reader = new IO(this.getInPath(), "out");
+		String current_line = this.reader.next();
+			do {
+				String[] line_parts = current_line.trim().split("\t");
+				freqs.put(current_line.replace(line_parts[line_parts.length-1], "").replace("\n", "").replace("\t", ""),
+						Integer.parseInt(line_parts[line_parts.length-1]));
+				current_line = this.reader.next();
+			} while (this.reader.hasNext());
+		}  catch (NullPointerException | IOModeException | IOException e) {
+			e.printStackTrace();
+		}
 		return freqs;
 	}
 	

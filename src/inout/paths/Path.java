@@ -3,8 +3,6 @@ package inout.paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import custom_exceptions.UnsetPathAttributeException;
-
 public class Path {
 	
 	private String type;
