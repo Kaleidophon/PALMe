@@ -20,11 +20,13 @@ public class HexadecimalIndexing extends Indexing {
 	public HexadecimalIndexing(Map<String, Integer> data, String FREQS_IN_PATH, String LEX_IN_PATH) {
 		super(data, FREQS_IN_PATH, LEX_IN_PATH);
 		this.setPrefix();
+		this.setMode();
 	}
 	
 	public HexadecimalIndexing(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
 		super(FREQS_IN_PATH, LEX_IN_PATH, zipped);
 		this.setPrefix();
+		this.setMode();
 	}
 	
 	public HexadecimalIndexing() {

@@ -41,7 +41,7 @@ public class Indexing <V extends Number> implements Serializable {
 	private String FREQS_IN_PATH;
 	private String LEX_IN_PATH;
 	protected String mode;
-	public String prefix;
+	protected String prefix;
 	
 	private boolean create_lexicons;
 	private int n;
@@ -120,13 +120,8 @@ public class Indexing <V extends Number> implements Serializable {
 		Iterator<Entry<String, V>> iter = data.entrySet().iterator();
 		while (iter.hasNext()) {
 			String key = iter.next().getKey().trim();
-			if (c % 25000 == 0) {
+			if (c % 250000 == 0) {
 				System.out.println((c + 1) * 1.0 / total * 100.0 + " % complete.");
-				//System.out.println("Entry nr.: " + c);
-				//System.out.println(key);
-				//if (key.equals(". </s>")) {
-					//debug = true;
-				//}
 			}
 			if (key.equals("")) {
 				continue;
@@ -134,9 +129,6 @@ public class Indexing <V extends Number> implements Serializable {
 			Integer[] token_indices = new Integer[this.n];
 			if (this.n > 1) {
 				String[] key_parts = key.split(" ");
-				if (key_parts.length == 1) {
-					this.pA(key_parts);
-				}
 				int ti_index = 0;
 				for (int i = 0; i < key_parts.length; i++) {
 					String token = key_parts[i];
@@ -158,17 +150,21 @@ public class Indexing <V extends Number> implements Serializable {
 				}
 				indices.put(token_indices, data.get(key));
 			} else {
-				token_indices[0] = index;
+				if (this.create_lexicons) {
+					token_indices[0] = index;
+					lexicon.put(index, key);
+					index++;
+				} else {
+					token_indices[0] = lexicon.getKey(key);
+				}
 				indices.put(token_indices, data.get(key));
-				lexicon.put(index, key);
-				index++;
 			}
 			c++;
 		}
 		if (this.create_lexicons) {
 			String NEW_LEX_PATH = this.LEX_IN_PATH.substring(0, this.LEX_IN_PATH.lastIndexOf("/") + 1);
-			this.writeLexicon(lexicon, this.LEX_IN_PATH + "lexicon.txt", false);
-			this.writeLexicon(lexicon, this.LEX_IN_PATH + "lexicon.gz", true);
+			this.writeLexicon(lexicon, NEW_LEX_PATH + "lexicon.txt", false);
+			this.writeLexicon(lexicon, NEW_LEX_PATH + "lexicon.gz", true);
 		}
 		this.indices = indices;
 		this.lexicon = lexicon;
@@ -301,7 +297,6 @@ public class Indexing <V extends Number> implements Serializable {
 			}
 			for (Map.Entry<Integer[], V> entry : data.entrySet()) {
 				Integer[] key = entry.getKey();
-				//this.pA(key);
 				String[] new_key = new String[key.length];
 				switch (mode) {
 					case ("binary"):
@@ -318,10 +313,11 @@ public class Indexing <V extends Number> implements Serializable {
 						}
 						new_key = hexadecimal_key;
 						break;
-					default:
+					case ("default"):
 						for (int i = 0; i < key.length; i++) {
 							new_key[i] = "" + key[i];
 						}
+						break;
 				}
 				String line = this.njoin(" ", new_key) + "\t" + data.get(key) + "\n";
 				if (zipped) {

@@ -20,11 +20,13 @@ public class BinaryIndexing extends Indexing {
 	public BinaryIndexing(Map<String, Integer> data, String FREQS_IN_PATH, String LEX_IN_PATH) {
 		super(data, FREQS_IN_PATH, LEX_IN_PATH);
 		this.setPrefix();
+		this.setMode();
 	}
 	
 	public BinaryIndexing(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
 		super(FREQS_IN_PATH, LEX_IN_PATH, zipped);
 		this.setPrefix();
+		this.setMode();
 	}
 	
 	public BinaryIndexing() {
