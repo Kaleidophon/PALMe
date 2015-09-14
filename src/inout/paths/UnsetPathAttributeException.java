@@ -1,6 +1,6 @@
-package custom_exceptions;
+package inout.paths;
 
-public class UnsetPathAttributeException extends Exception {
+public class UnsetPathAttributeException extends RuntimeException {
 
 	public UnsetPathAttributeException(String message) {
 		super(message);

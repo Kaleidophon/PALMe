@@ -101,8 +101,7 @@ public class WordCount {
 			// If yet to encounter a high maximum, a special partition doesn't make much sense
 			if (max < 100) {
 				res =  word_occurrences % NUMBER_OF_REDUCERS;
-			}
-			else {
+			} else {
 				for (int i = 0; i < boundaries.length; i++) {
 					if (word_occurrences >= boundaries[i]) {
 						res = i;
@@ -163,10 +162,11 @@ public class WordCount {
 	    job.setJarByClass(WordCount.class);
 	    TokenizerMapper.setN(Integer.parseInt(otherArgs[otherArgs.length-3])); // Set ngram length
 	    job.setMapperClass(TokenizerMapper.class);
-	    if (otherArgs[otherArgs.length-2] == "yes") {
+	    if (otherArgs[otherArgs.length-2].equals("yes")) {
 	    	job.setCombinerClass(IntSumReducer.class);
 	    }
-	    if (otherArgs[otherArgs.length-1] == "yes") {
+	    
+	    if (otherArgs[otherArgs.length-1].equals("yes")) {
 	    	job.setPartitionerClass(CustomPartitioner.class);
 	    	CustomPartitioner.setNumberOfReducers(NUMBER_OF_REDUCERS);
 	    }

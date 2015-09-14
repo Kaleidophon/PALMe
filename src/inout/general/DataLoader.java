@@ -10,8 +10,8 @@ import java.io.*;
 public class DataLoader {
 	
 	private String INFILE_PATH;
-	BufferedReader reader;
-	BufferedWriter writer;
+	private IO reader;
+	private IO writer;
 
 	public DataLoader(String file_path) {
 		this.INFILE_PATH = file_path;
@@ -23,18 +23,18 @@ public class DataLoader {
 		Map<String, Integer> freqs = new HashMap<>();
 		
 		try {
-			reader = new BufferedReader(new FileReader(this.INFILE_PATH));
-			String current_line = reader.readLine().trim();
-			try {
-				while (current_line != "") {
-					String[] line_parts = current_line.trim().split("\t");
-					freqs.put(line_parts[0], Integer.parseInt(line_parts[1]));
-					current_line = reader.readLine();
-				}
-			} 
-			catch (NullPointerException e) {}
+			this.reader = new IO(this.getInPath(), "out");
+			String current_line = this.reader.next();
+			do {
+				String[] line_parts = current_line.trim().split("\t");
+				String key = current_line.substring(0, current_line.indexOf("\t") + 1).trim();
+				int value = Integer.parseInt(line_parts[line_parts.length-1]);
+				freqs.put(key, value);
+				current_line = this.reader.next();
+			} while (this.reader.hasNext());
+		}  catch (NullPointerException | IOModeException | IOException e) {
+			e.printStackTrace();
 		}
-		catch (IOException e) { e.printStackTrace(); }	
 		return freqs;
 	}
 	
@@ -42,11 +42,9 @@ public class DataLoader {
 		String filename = "";
 		if (indexing instanceof BinaryIndexing) {
 			filename = "bin_index.ser";
-		}
-		else if (indexing instanceof HexadecimalIndexing) {
+		} else if (indexing instanceof HexadecimalIndexing) {
 			filename = "hex_index.ser";
-		}
-		else if (indexing instanceof Indexing) {
+		} else if (indexing instanceof Indexing) {
 			filename = "index.ser";
 		}
 		OUT_PATH += filename;
@@ -60,8 +58,9 @@ public class DataLoader {
 			oos.writeObject(indexing);
 			oos.close();
 			fos.close();
+		} catch (Exception e) {
+			e.printStackTrace(); 
 		}
-		catch (Exception e) { e.printStackTrace(); }
 	}
 	
 	public Indexing loadIndexing(String IN_PATH, boolean validateState) {
@@ -75,9 +74,23 @@ public class DataLoader {
 			if (validateState) {
 				indexing.validateState();
 			}
+		} catch(Exception e) {
+			e.printStackTrace(); 
 		}
-		catch(Exception e) {e.printStackTrace(); }
 		return indexing;
+	}
+	
+	public String getInPath() {
+		return this.INFILE_PATH;
+	}
+	
+	private <T> void pA(T[] a) {
+		String out = "{" + a[0];
+		for (int i = 1; i < a.length; i++) {
+			out += ", " + a[i];
+		}
+		out += "}";
+		System.out.println(out);
 	}
 	
 }

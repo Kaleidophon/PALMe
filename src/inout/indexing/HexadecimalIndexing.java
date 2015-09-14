@@ -15,23 +15,29 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import custom_exceptions.IncompleteLexiconException;
-
 public class HexadecimalIndexing extends Indexing {
-
-	String prefix = "hex_";
 	
-	public HexadecimalIndexing(Map<String, Integer> data, String IN_PATH) {
-		super(data, IN_PATH);
+	public HexadecimalIndexing(Map<String, Integer> data, String FREQS_IN_PATH, String LEX_IN_PATH) {
+		super(data, FREQS_IN_PATH, LEX_IN_PATH);
+		this.setPrefix();
+		this.setMode();
 	}
 	
-	public HexadecimalIndexing(String IN_PATH, boolean zipped) {
-		super(IN_PATH, zipped);
+	public HexadecimalIndexing(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
+		super(FREQS_IN_PATH, LEX_IN_PATH, zipped);
+		this.setPrefix();
+		this.setMode();
 	}
 	
-	public HexadecimalIndexing() {}
+	public HexadecimalIndexing() {
+		super();
+	}
 	
 	private void setMode() {
 		this.mode = "hexadecimal";
+	}
+	
+	private void setPrefix() {
+		this.prefix = "hex_";
 	}
 }

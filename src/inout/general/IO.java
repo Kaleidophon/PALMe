@@ -1,14 +1,15 @@
 package inout.general;
 
 import java.io.*;
-import custom_exceptions.IOModeException;
 
 public class IO {
 	
-	final String FILE_PATH;
-	final String MODE;
-	BufferedReader reader;
-	BufferedWriter writer;
+	private final String FILE_PATH;
+	private final String MODE;
+	private BufferedReader reader;
+	private BufferedWriter writer;
+	private String next_line;
+	private String current_line;
 	
 	public IO(String file_path, String mode) {
 		FILE_PATH = file_path;
@@ -17,12 +18,12 @@ public class IO {
 		try {
 			if(mode == "out") {
 				this.reader = new BufferedReader(new FileReader(FILE_PATH));
-			}
-			else if(mode == "into") {
+				this.current_line = reader.readLine();
+				this.next_line = reader.readLine();
+			} else if(mode == "into") {
 				this.writer = new BufferedWriter(new FileWriter(FILE_PATH));
 			}
-		}
-		catch(IOException ioe) {
+		} catch(IOException ioe) {
 			ioe.printStackTrace();
 		}
 	}
@@ -38,22 +39,27 @@ public class IO {
 		if(MODE != "out") {
 			throw new IOModeException();
 		}
-		String line = this.reader.readLine();
-		return line;
+		String tmp = this.current_line;
+		this.current_line = this.next_line;
+		this.next_line = this.reader.readLine();
+		return tmp.trim();
 	}
-	
+
 	public void finish() {
 		try {
 			if(MODE == "into") {
 				this.writer.close();
-			}
-			else if(MODE == "out") {
+			} else if(MODE == "out") {
 				this.reader.close();
 			}
-		}
-		catch(IOException ioe) {
+		} catch(IOException ioe) {
 			ioe.printStackTrace();
 		}
+	}
+	
+	public boolean hasNext() {
+		boolean res = (this.current_line == null) ? false : true;
+		return res;
 	}
 
 }
