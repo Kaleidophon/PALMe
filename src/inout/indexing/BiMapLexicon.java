@@ -12,6 +12,10 @@ import com.google.common.collect.HashBiMap;
 public class BiMapLexicon implements Lexicon, Iterable {
 	
 	private BiMap<Integer, String> entries;
+	
+	public BiMapLexicon() {
+		this.entries = HashBiMap.create();
+	}
 
 	public BiMapLexicon(String[] entries) {
 		this.entries = HashBiMap.create();
@@ -69,6 +73,10 @@ public class BiMapLexicon implements Lexicon, Iterable {
 	
 	public Set<Integer> keySet() {
 		return this.entries.keySet();
+	}
+	
+	public void put(int key, String value) {
+		this.entries.put(key, value);
 	}
 	
 	public Set<String> valueSet() {
