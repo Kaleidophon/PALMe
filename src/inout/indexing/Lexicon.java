@@ -3,7 +3,7 @@ package inout.indexing;
 import java.util.List;
 import java.util.Set;
 
-public interface Lexicon <T> {
+public interface Lexicon <T> extends Iterable {
 	
 	public T getEntries();
 	public String getValue(int key);

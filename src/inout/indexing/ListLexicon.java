@@ -3,10 +3,11 @@ package inout.indexing;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public class ListLexicon implements Lexicon {
+public class ListLexicon implements Lexicon, Iterable {
 	
 	private List<String> entries;
 	
@@ -71,5 +72,9 @@ public class ListLexicon implements Lexicon {
 		} else {
 			this.entries.add(value);
 		}
+	}
+	
+	public Iterator<String> iterator() {
+		return this.entries.iterator();
 	}
 }

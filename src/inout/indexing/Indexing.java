@@ -32,7 +32,7 @@ import inout.indexing.ListLexicon;
 public class Indexing <V extends Number> implements Serializable {
 	
 	private Map<Integer[], V> indices;
-	private Lexicon lexicon;
+	private ArrayLexicon lexicon;
 	
 	private BufferedReader reader;
 	private BufferedWriter writer;
@@ -88,17 +88,17 @@ public class Indexing <V extends Number> implements Serializable {
 	
 	public void createIndices(Map<String, V> data, String mode) throws IncompleteLexiconException {
 		Map<Integer[], V> indices = new HashMap<>();
-		ListLexicon lexicon = new ListLexicon();
-		ArrayLexicon lexicon_ = null;
+		ListLexicon listlex = new ListLexicon();
+		ArrayLexicon arraylex = null;
 		data = sortByValues(data);
 		
 		// Determine whether there is a pre-existing lexicon AND reversed lexicon of same format
 		try {
-			lexicon_ = new ArrayLexicon(this.readLexicon(this.LEX_IN_PATH, true));
+			arraylex = this.readLexicon(this.LEX_IN_PATH, true);
 			this.create_lexicons = false;
 		} catch (IOException |  NullPointerException fnfe) {
 			try {
-				lexicon_ = new ArrayLexicon(this.readLexicon(this.LEX_IN_PATH, false));
+				arraylex = this.readLexicon(this.LEX_IN_PATH, false);
 				this.create_lexicons = false;
 			} catch (IOException | NullPointerException fnfe2) {}
 		}
@@ -117,7 +117,7 @@ public class Indexing <V extends Number> implements Serializable {
 		Iterator<Entry<String, V>> iter = data.entrySet().iterator();
 		while (iter.hasNext()) {
 			String key = iter.next().getKey().trim();
-			if (c % 25000 == 0) {
+			if (c % 1000 == 0) {
 				System.out.println((c + 1) * 1.0 / total * 100.0 + " % complete.");
 				//System.out.println("Entry nr.: " + c);
 				//System.out.println(key);
@@ -134,11 +134,11 @@ public class Indexing <V extends Number> implements Serializable {
 				int ti_index = 0;
 				for (int i = 0; i < key_parts.length; i++) {
 					String token = key_parts[i];
-					boolean lexiconContainsValue = lexicon.containsValue(token);
+					boolean lexiconContainsValue = (arraylex == null) ? listlex.containsValue(token) : arraylex.containsValue(token);
 					if(!lexiconContainsValue) {
 						if (this.create_lexicons) {
 							// If you are currently creating lexicons and there is an unseen value, add it
-							lexicon.put(index, token);
+							listlex.put(index, token);
 							token_indices[ti_index] = index;
 							index++;
 						} else {
@@ -146,7 +146,7 @@ public class Indexing <V extends Number> implements Serializable {
 							throw new IncompleteLexiconException("Lexicon doesn't contain value: '" + token + "'");
 						}
 					} else {
-						token_indices[ti_index] = lexicon.getKey(token);
+						token_indices[ti_index] = (this.create_lexicons) ? listlex.getKey(token + " ") : arraylex.getKey(token + " ");
 					}
 					ti_index++;
 				}
@@ -154,18 +154,18 @@ public class Indexing <V extends Number> implements Serializable {
 			} else {
 				token_indices[0] = index;
 				indices.put(token_indices, data.get(key));
-				lexicon.put(index, key);
+				listlex.put(index, key);
 				index++;
 			}
 			c++;
 		}
 		if (this.create_lexicons) {
 			String NEW_LEX_PATH = this.LEX_IN_PATH.substring(0, this.LEX_IN_PATH.lastIndexOf("/") + 1);
-			this.writeLexicon(lexicon, this.LEX_IN_PATH + "lexicon.txt", false);
-			this.writeLexicon(lexicon, this.LEX_IN_PATH + "lexicon.gz", true);
+			this.writeLexicon(listlex, this.LEX_IN_PATH + "lexicon.txt", false);
+			this.writeLexicon(listlex, this.LEX_IN_PATH + "lexicon.gz", true);
 		}
 		this.indices = indices;
-		this.lexicon = lexicon;
+		this.lexicon = (this.create_lexicons) ? new ArrayLexicon(listlex) : arraylex;
 	}
 	
 	public void dump(String OUTFILE_PATH, boolean zipped) {
@@ -269,8 +269,8 @@ public class Indexing <V extends Number> implements Serializable {
 		return indices;
 	}
 	
-	protected ListLexicon readLexicon(String INFILE_PATH, boolean zipped) throws IOException {
-		ListLexicon lexicon = new ListLexicon();
+	protected ArrayLexicon readLexicon(String INFILE_PATH, boolean zipped) throws IOException {
+		List<String> lexicon_entries = new ArrayList<>();
 		BufferedReader reader;
 		if (zipped) {
 			GZIPInputStream gis = new GZIPInputStream(new FileInputStream(INFILE_PATH));
@@ -280,10 +280,10 @@ public class Indexing <V extends Number> implements Serializable {
 		}
 		String current_line = reader.readLine().trim();
 		while (current_line != null) {
-			lexicon.addEntry(current_line);
+			lexicon_entries.add(current_line);
 			current_line = reader.readLine();
 		}
-		return lexicon;
+		return new ArrayLexicon(lexicon_entries);
 	}
 	
 	protected <V> void writeIndices(Map<Integer[], V> data, String OUTFILE_PATH, boolean zipped, String mode) {
@@ -336,7 +336,8 @@ public class Indexing <V extends Number> implements Serializable {
 			} else {
 				writer = new BufferedWriter(new FileWriter(OUTFILE_PATH));
 			}
-			for (String entry : lexicon.getEntries()) {
+			for (int i = 0; i < lexicon.getLexiconSize(); i++) {
+				String entry = lexicon.getValue(i);
 				String line = entry.trim() + "\n";
 				if (zipped) {
 					writer.append(line);

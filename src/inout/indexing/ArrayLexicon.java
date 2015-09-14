@@ -3,10 +3,12 @@ package inout.indexing;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
-public class ArrayLexicon implements Lexicon {
+public class ArrayLexicon implements Lexicon, Iterable {
 	
 	private String[] entries;
 	
@@ -62,6 +64,35 @@ public class ArrayLexicon implements Lexicon {
 	
 	public Set<String> valueSet() {
 		return new HashSet<String>(Arrays.asList(this.entries));
+	}
+	
+	public Iterator<String> iterator() {
+		return new ArrayIterator(this.entries);
+	}
+	
+	public class ArrayIterator implements Iterator {
+		private Object array[];
+		private int pos = 0;
+	
+		public ArrayIterator(Object anArray[]) {
+			array = anArray;
+		}
+	
+		public boolean hasNext() {
+			return pos < array.length;
+		}
+	
+		public Object next() throws NoSuchElementException {
+			if (hasNext()) {
+				return array[pos++];
+		    } else {
+		    	throw new NoSuchElementException();
+		    }
+		}
+	
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 }
