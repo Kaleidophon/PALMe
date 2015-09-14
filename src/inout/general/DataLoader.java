@@ -23,12 +23,13 @@ public class DataLoader {
 		Map<String, Integer> freqs = new HashMap<>();
 		
 		try {
-		this.reader = new IO(this.getInPath(), "out");
-		String current_line = this.reader.next();
+			this.reader = new IO(this.getInPath(), "out");
+			String current_line = this.reader.next();
 			do {
 				String[] line_parts = current_line.trim().split("\t");
-				freqs.put(current_line.replace(line_parts[line_parts.length-1], "").replace("\n", "").replace("\t", ""),
-						Integer.parseInt(line_parts[line_parts.length-1]));
+				String key = current_line.substring(0, current_line.indexOf("\t") + 1).trim();
+				int value = Integer.parseInt(line_parts[line_parts.length-1]);
+				freqs.put(key, value);
 				current_line = this.reader.next();
 			} while (this.reader.hasNext());
 		}  catch (NullPointerException | IOModeException | IOException e) {
@@ -81,6 +82,15 @@ public class DataLoader {
 	
 	public String getInPath() {
 		return this.INFILE_PATH;
+	}
+	
+	private <T> void pA(T[] a) {
+		String out = "{" + a[0];
+		for (int i = 1; i < a.length; i++) {
+			out += ", " + a[i];
+		}
+		out += "}";
+		System.out.println(out);
 	}
 	
 }

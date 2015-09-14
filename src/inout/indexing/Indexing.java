@@ -28,11 +28,12 @@ import java.util.zip.GZIPOutputStream;
 
 import inout.indexing.ArrayLexicon;
 import inout.indexing.ListLexicon;
+import inout.indexing.BiMapLexicon;
 
 public class Indexing <V extends Number> implements Serializable {
 	
 	private Map<Integer[], V> indices;
-	private ArrayLexicon lexicon;
+	private Lexicon lexicon;
 	
 	private BufferedReader reader;
 	private BufferedWriter writer;
@@ -40,7 +41,7 @@ public class Indexing <V extends Number> implements Serializable {
 	private String FREQS_IN_PATH;
 	private String LEX_IN_PATH;
 	protected String mode;
-	public String prefix;
+	protected String prefix;
 	
 	private boolean create_lexicons;
 	private int n;
@@ -88,19 +89,21 @@ public class Indexing <V extends Number> implements Serializable {
 	
 	public void createIndices(Map<String, V> data, String mode) throws IncompleteLexiconException {
 		Map<Integer[], V> indices = new HashMap<>();
-		ListLexicon listlex = new ListLexicon();
-		ArrayLexicon arraylex = null;
+		BiMapLexicon lexicon = null;
 		data = sortByValues(data);
+		this.create_lexicons = true;
 		
 		// Determine whether there is a pre-existing lexicon AND reversed lexicon of same format
 		try {
-			arraylex = this.readLexicon(this.LEX_IN_PATH, true);
+			lexicon = new BiMapLexicon(this.readLexicon(this.LEX_IN_PATH, true));
 			this.create_lexicons = false;
 		} catch (IOException |  NullPointerException fnfe) {
 			try {
-				arraylex = this.readLexicon(this.LEX_IN_PATH, false);
+				lexicon = new BiMapLexicon(this.readLexicon(this.LEX_IN_PATH, false));
 				this.create_lexicons = false;
-			} catch (IOException | NullPointerException fnfe2) {}
+			} catch (IOException | NullPointerException fnfe2) {
+				lexicon = new BiMapLexicon();
+			}
 		}
 		
 		System.out.println(this.create_lexicons);
@@ -117,13 +120,8 @@ public class Indexing <V extends Number> implements Serializable {
 		Iterator<Entry<String, V>> iter = data.entrySet().iterator();
 		while (iter.hasNext()) {
 			String key = iter.next().getKey().trim();
-			if (c % 1000 == 0) {
+			if (c % 250000 == 0) {
 				System.out.println((c + 1) * 1.0 / total * 100.0 + " % complete.");
-				//System.out.println("Entry nr.: " + c);
-				//System.out.println(key);
-				//if (key.equals(". </s>")) {
-					//debug = true;
-				//}
 			}
 			if (key.equals("")) {
 				continue;
@@ -134,11 +132,11 @@ public class Indexing <V extends Number> implements Serializable {
 				int ti_index = 0;
 				for (int i = 0; i < key_parts.length; i++) {
 					String token = key_parts[i];
-					boolean lexiconContainsValue = (arraylex == null) ? listlex.containsValue(token) : arraylex.containsValue(token);
+					boolean lexiconContainsValue = lexicon.containsValue(token);
 					if(!lexiconContainsValue) {
 						if (this.create_lexicons) {
 							// If you are currently creating lexicons and there is an unseen value, add it
-							listlex.put(index, token);
+							lexicon.put(index, token);
 							token_indices[ti_index] = index;
 							index++;
 						} else {
@@ -146,40 +144,42 @@ public class Indexing <V extends Number> implements Serializable {
 							throw new IncompleteLexiconException("Lexicon doesn't contain value: '" + token + "'");
 						}
 					} else {
-						token_indices[ti_index] = (this.create_lexicons) ? listlex.getKey(token + " ") : arraylex.getKey(token + " ");
+						token_indices[ti_index] = lexicon.getKey(token);
 					}
 					ti_index++;
 				}
 				indices.put(token_indices, data.get(key));
 			} else {
-				token_indices[0] = index;
+				if (this.create_lexicons) {
+					token_indices[0] = index;
+					lexicon.put(index, key);
+					index++;
+				} else {
+					token_indices[0] = lexicon.getKey(key);
+				}
 				indices.put(token_indices, data.get(key));
-				listlex.put(index, key);
-				index++;
 			}
 			c++;
 		}
 		if (this.create_lexicons) {
 			String NEW_LEX_PATH = this.LEX_IN_PATH.substring(0, this.LEX_IN_PATH.lastIndexOf("/") + 1);
-			this.writeLexicon(listlex, this.LEX_IN_PATH + "lexicon.txt", false);
-			this.writeLexicon(listlex, this.LEX_IN_PATH + "lexicon.gz", true);
+			this.writeLexicon(lexicon, NEW_LEX_PATH + "lexicon.txt", false);
+			this.writeLexicon(lexicon, NEW_LEX_PATH + "lexicon.gz", true);
 		}
 		this.indices = indices;
-		this.lexicon = (this.create_lexicons) ? new ArrayLexicon(listlex) : arraylex;
+		this.lexicon = lexicon;
 	}
 	
 	public void dump(String OUTFILE_PATH, boolean zipped) {
 		String ext = (zipped) ? ".gz" : ".txt";
-		this.writeIndices(this.getIndices(), OUTFILE_PATH + "/" + this.n + "/" + this.getPrefix() + "indices" + ext, zipped, this.getMode());
-		if (this.createLexicons()) {
-		}
+		this.writeIndices(this.indices, OUTFILE_PATH + "/" + this.n + "/" + this.getPrefix() + "indices" + ext, zipped, this.getMode());
 	}
 	
 	public void load(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
 		String ext = (zipped) ? ".gz" : ".txt";
 		try {
 			this.indices = this.readIndices(FREQS_IN_PATH + this.getPrefix() + "indices" + ext, zipped, this.getMode());
-			this.lexicon = this.readLexicon(LEX_IN_PATH + "lexicons/" + "lexicon" + ext, zipped);
+			this.lexicon = new BiMapLexicon(this.readLexicon(LEX_IN_PATH + "lexicons/" + "lexicon" + ext, zipped));
 		} catch(IOException fnfe) {
 			fnfe.printStackTrace();
 		}
@@ -269,7 +269,7 @@ public class Indexing <V extends Number> implements Serializable {
 		return indices;
 	}
 	
-	protected ArrayLexicon readLexicon(String INFILE_PATH, boolean zipped) throws IOException {
+	protected List<String> readLexicon(String INFILE_PATH, boolean zipped) throws IOException {
 		List<String> lexicon_entries = new ArrayList<>();
 		BufferedReader reader;
 		if (zipped) {
@@ -283,7 +283,7 @@ public class Indexing <V extends Number> implements Serializable {
 			lexicon_entries.add(current_line);
 			current_line = reader.readLine();
 		}
-		return new ArrayLexicon(lexicon_entries);
+		return lexicon_entries;
 	}
 	
 	protected <V> void writeIndices(Map<Integer[], V> data, String OUTFILE_PATH, boolean zipped, String mode) {
@@ -295,7 +295,8 @@ public class Indexing <V extends Number> implements Serializable {
 			} else {
 				writer = new BufferedWriter(new FileWriter(OUTFILE_PATH));
 			}
-			for (Integer[] key : data.keySet()) {
+			for (Map.Entry<Integer[], V> entry : data.entrySet()) {
+				Integer[] key = entry.getKey();
 				String[] new_key = new String[key.length];
 				switch (mode) {
 					case ("binary"):
@@ -312,15 +313,17 @@ public class Indexing <V extends Number> implements Serializable {
 						}
 						new_key = hexadecimal_key;
 						break;
-					default:
+					case ("default"):
 						for (int i = 0; i < key.length; i++) {
 							new_key[i] = "" + key[i];
 						}
+						break;
 				}
+				String line = this.njoin(" ", new_key) + "\t" + data.get(key) + "\n";
 				if (zipped) {
-					writer.append(this.njoin(" ", new_key) + "\t" + data.get(key) + "\n");
+					writer.append(line);
 				} else {
-					writer.write(this.njoin(" ", new_key) + "\t" + data.get(key) + "\n");
+					writer.write(line);
 				}
 			}
 			writer.close();
