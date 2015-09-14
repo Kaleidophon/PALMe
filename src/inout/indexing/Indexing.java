@@ -91,6 +91,7 @@ public class Indexing <V extends Number> implements Serializable {
 		Map<Integer[], V> indices = new HashMap<>();
 		BiMapLexicon lexicon = null;
 		data = sortByValues(data);
+		this.create_lexicons = true;
 		
 		// Determine whether there is a pre-existing lexicon AND reversed lexicon of same format
 		try {
@@ -100,7 +101,9 @@ public class Indexing <V extends Number> implements Serializable {
 			try {
 				lexicon = new BiMapLexicon(this.readLexicon(this.LEX_IN_PATH, false));
 				this.create_lexicons = false;
-			} catch (IOException | NullPointerException fnfe2) {}
+			} catch (IOException | NullPointerException fnfe2) {
+				lexicon = new BiMapLexicon();
+			}
 		}
 		
 		System.out.println(this.create_lexicons);
@@ -131,6 +134,9 @@ public class Indexing <V extends Number> implements Serializable {
 			Integer[] token_indices = new Integer[this.n];
 			if (this.n > 1) {
 				String[] key_parts = key.split(" ");
+				if (key_parts.length == 1) {
+					this.pA(key_parts);
+				}
 				int ti_index = 0;
 				for (int i = 0; i < key_parts.length; i++) {
 					String token = key_parts[i];
@@ -170,9 +176,7 @@ public class Indexing <V extends Number> implements Serializable {
 	
 	public void dump(String OUTFILE_PATH, boolean zipped) {
 		String ext = (zipped) ? ".gz" : ".txt";
-		this.writeIndices(this.getIndices(), OUTFILE_PATH + "/" + this.n + "/" + this.getPrefix() + "indices" + ext, zipped, this.getMode());
-		if (this.createLexicons()) {
-		}
+		this.writeIndices(this.indices, OUTFILE_PATH + "/" + this.n + "/" + this.getPrefix() + "indices" + ext, zipped, this.getMode());
 	}
 	
 	public void load(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
@@ -295,7 +299,9 @@ public class Indexing <V extends Number> implements Serializable {
 			} else {
 				writer = new BufferedWriter(new FileWriter(OUTFILE_PATH));
 			}
-			for (Integer[] key : data.keySet()) {
+			for (Map.Entry<Integer[], V> entry : data.entrySet()) {
+				Integer[] key = entry.getKey();
+				//this.pA(key);
 				String[] new_key = new String[key.length];
 				switch (mode) {
 					case ("binary"):
@@ -317,10 +323,11 @@ public class Indexing <V extends Number> implements Serializable {
 							new_key[i] = "" + key[i];
 						}
 				}
+				String line = this.njoin(" ", new_key) + "\t" + data.get(key) + "\n";
 				if (zipped) {
-					writer.append(this.njoin(" ", new_key) + "\t" + data.get(key) + "\n");
+					writer.append(line);
 				} else {
-					writer.write(this.njoin(" ", new_key) + "\t" + data.get(key) + "\n");
+					writer.write(line);
 				}
 			}
 			writer.close();

@@ -27,7 +27,9 @@ public class HexadecimalIndexing extends Indexing {
 		this.setPrefix();
 	}
 	
-	public HexadecimalIndexing() {}
+	public HexadecimalIndexing() {
+		super();
+	}
 	
 	private void setMode() {
 		this.mode = "hexadecimal";

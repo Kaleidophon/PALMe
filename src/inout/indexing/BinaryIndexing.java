@@ -27,7 +27,9 @@ public class BinaryIndexing extends Indexing {
 		this.setPrefix();
 	}
 	
-	public BinaryIndexing() {}
+	public BinaryIndexing() {
+		super();
+	}
 	
 	private void setMode() {
 		this.mode = "binary";

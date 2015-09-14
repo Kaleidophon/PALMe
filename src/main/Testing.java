@@ -48,7 +48,6 @@ public class Testing {
 			indexing.dump("./rsc/indices/", false);
 			indexing.dump("./rsc/indices/", true);
 			indexing = null;
-			break;
 			//dl.dumpIndexing(indexing, "./rsc/indices/" + n + "/", true);
 		}
 	}
