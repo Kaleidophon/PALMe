@@ -141,9 +141,13 @@ public class Path {
 	@Override
 	public String toString() {
 		String res = "Type: " + this.getType();
-		res += (this.getSubtype().equals("indexing") ? " | Subtype: indexing" : "");
+		if (!this.getType().equals("lexicon")) {
+			res += " | Subtype: indexing";
+		}
 		res += " | Directory: " + this.getDirectory();
-		res += (this.getSubtype().equals("indexing")) ? " | Coding: " + this.getCoding() + " | n: " + this.getN() : "";
+		if (!this.getType().equals("lexicon")) {
+			res +=" | Coding: " + this.getCoding() + " | n: " + this.getN();
+		}
 		return res;
 	}
 }

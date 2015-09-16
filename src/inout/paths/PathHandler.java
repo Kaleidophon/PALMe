@@ -39,10 +39,13 @@ public class PathHandler {
 	public List<Path> getPathsWithSubtype(String subtype) {
 		List<Path> results = new ArrayList<>();
 		for (Path p : this.paths) {
-			if (p.getSubtype() == null) {
+			try {
+				if (p.getSubtype().equals(subtype)) {
+					results.add(p);
+				}
+			}
+			catch (UnsetPathAttributeException upae) {
 				continue;
-			} else if (p.getSubtype().equals(subtype)) {
-				results.add(p);
 			}
 		}
 		return results;
@@ -61,10 +64,13 @@ public class PathHandler {
 	public List<Path> getPathsWithCoding(String coding) {
 		List<Path> results = new ArrayList<>();
 		for (Path p : this.paths) {
-			if (p.getCoding() == null) {
+			try {
+				if (p.getCoding().equals(coding)) {
+					results.add(p);
+				}
+			}
+			catch (UnsetPathAttributeException upae) {
 				continue;
-			} else if (p.getCoding().equals(coding)) {
-				results.add(p);
 			}
 		}
 		return results;
@@ -83,10 +89,13 @@ public class PathHandler {
 	public List<Path> getPathsWithN(int n) {
 		List<Path> results = new ArrayList<>();
 		for (Path p : this.paths) {
-			if (p.getN() == 0) {
+			try {
+				if (p.getN() == n) {
+					results.add(p);
+				}
+			}
+			catch (UnsetPathAttributeException upae) {
 				continue;
-			} else if (p.getN() == n) {
-				results.add(p);
 			}
 		}
 		return results;
@@ -124,7 +133,7 @@ public class PathHandler {
 		} else if (parts.length == 5) {
 			if (!(parts[0].equals("raw") || parts[0].equals("zipped"))) {
 				throw new IllegalArgumentException("Indexings must be either raw or zipped");
-			} else if (!(parts[1].equals("default") || parts[1].equals("binary") || parts[1].equals("hexdecimal"))) {
+			} else if (!(parts[1].equals("default") || parts[1].equals("binary") || parts[1].equals("hexadecimal"))) {
 				throw new IllegalArgumentException("Specification contains invalid coding: " + parts[1]);
 			} else if (!(parts[2].equals("frequency") || parts[2].equals("probability"))) {
 				throw new IllegalArgumentException("Type must be either frequency or probability, " + parts[2] + " found instead");

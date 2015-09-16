@@ -23,6 +23,12 @@ public class LanguageModel {
 	public LanguageModel(int n, String IN_PATH, Smoothing smoothing, DataLoader dl, Indexing indexing, int mode) {
 		this.n = n;
 		this.ph = new PathHandler(IN_PATH);
+		
+		List<Path> paths = this.ph.getPaths();
+		for (Path p : paths) {
+			System.out.println(p.toString());
+		}
+		
 		this.smoothing = smoothing;
 		this.dl = dl;
 		this.validateState = false;
