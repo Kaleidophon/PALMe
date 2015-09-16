@@ -9,19 +9,29 @@ import inout.indexing.Indexing;
 import inout.paths.Path;
 import inout.paths.PathHandler;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.lang.IllegalArgumentException;
 
 public class LanguageModel {
 	
 	private final int n;
+	private int mode;
 	private Smoothing smoothing;
-	private DataLoader dl;
 	private List<Indexing> indexings;
 	private boolean validateState;
 	private PathHandler ph;
+	private String IN_PATH;
 	
-	public LanguageModel(int n, String IN_PATH, Smoothing smoothing, DataLoader dl, Indexing indexing, int mode) {
+	public LanguageModel(int n, String IN_PATH, Smoothing smoothing, Indexing indexing, int mode) {
 		this.n = n;
+		this.IN_PATH = IN_PATH;
+		this.mode = mode;
+		this.checkIntegrity();
+		
+		
 		this.ph = new PathHandler(IN_PATH);
 		
 		List<Path> paths = this.ph.getPaths();
@@ -30,13 +40,12 @@ public class LanguageModel {
 		}
 		
 		this.smoothing = smoothing;
-		this.dl = dl;
 		this.validateState = false;
 		long startTime = System.nanoTime();
 		this.indexings = this.collectIndexings(mode, indexing);
 		long endTime = System.nanoTime();
 		long duration = (endTime - startTime);
-		System.out.println("Loading Language Model data took " + duration / 1000000000.0 + " seconds on average.");
+		System.out.println("Loading Language Model data took " + duration / 1000000000.0 + " in total.");
 	}
 	
 	public List<Indexing> collectIndexings(int mode, Indexing indexing) {
@@ -92,6 +101,34 @@ public class LanguageModel {
 	
 	public List<Indexing> getIndexings() {
 		return this.indexings;
+	}
+	
+	public Smoothing getSmoothing() {
+		return this.smoothing;
+	}
+	
+	public int getN() {
+		return this.n;
+	}
+
+	public int getMode() {
+		return this.mode;
+	}
+	
+	private void checkIntegrity() {
+		if (this.getN() < 1) {
+			throw new IllegalArgumentException("n must be greater/equals 1");
+		}
+		System.out.println("'" + this.IN_PATH + "'");
+		Pattern r = Pattern.compile("((\\.(\\.?))?/[a-z_\\-\\s0-9\\.]+)+/paths\\.xml");
+		Matcher m = r.matcher(this.IN_PATH);
+		m.matches();
+		if (m.group() == null) {
+			throw new IllegalArgumentException("Illegal path");
+		}
+		if (this.mode != 0 && this.mode != 1) {
+			throw new IllegalArgumentException("Illegal mode");
+		}
 	}
 	
 }

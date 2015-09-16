@@ -24,9 +24,10 @@ public class HexadecimalIndexing extends Indexing {
 	}
 	
 	public HexadecimalIndexing(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
-		super(FREQS_IN_PATH, LEX_IN_PATH, zipped);
+		super(FREQS_IN_PATH, LEX_IN_PATH);
 		this.setPrefix();
 		this.setMode();
+		this.load(FREQS_IN_PATH, LEX_IN_PATH, zipped);
 	}
 	
 	public HexadecimalIndexing() {

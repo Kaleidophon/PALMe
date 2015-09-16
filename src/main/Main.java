@@ -12,7 +12,7 @@ public class Main {
 	
 	public static void main(String[] args) {
 		
-		LanguageModel lm = new LanguageModel(2, "./rsc/paths.xml", new MaximumFrequencyEstimation(), new DataLoader(), new HexadecimalIndexing(), 1);
+		LanguageModel lm = new LanguageModel(5, "./rsc/paths.xml", new MaximumFrequencyEstimation(), new HexadecimalIndexing(), 1);
 		
 	}
 	

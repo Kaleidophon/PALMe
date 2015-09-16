@@ -24,13 +24,16 @@ public class BinaryIndexing extends Indexing {
 	}
 	
 	public BinaryIndexing(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
-		super(FREQS_IN_PATH, LEX_IN_PATH, zipped);
+		super(FREQS_IN_PATH, LEX_IN_PATH);
 		this.setPrefix();
 		this.setMode();
+		this.load(FREQS_IN_PATH, LEX_IN_PATH, zipped);
 	}
 	
 	public BinaryIndexing() {
 		super();
+		this.setPrefix();
+		this.setMode();
 	}
 	
 	private void setMode() {

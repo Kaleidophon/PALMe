@@ -61,15 +61,16 @@ public class Indexing <V extends Number> implements Serializable {
 		}
 	}
 	
-	public Indexing(String LEX_IN_PATH, String FREQS_IN_PATH, boolean zipped) {
-		this.setMode();
-		this.setPrefix();
-		this.load(LEX_IN_PATH, FREQS_IN_PATH, zipped);
+	public Indexing(String FREQS_IN_PATH, String LEX_IN_PATH) {
 		this.LEX_IN_PATH = LEX_IN_PATH;
 		this.FREQS_IN_PATH = FREQS_IN_PATH;
-		// Take sample to determine n
-		Integer[] sample_key = this.getIndices().keySet().iterator().next();
-		this.n = sample_key.length;
+	}
+	
+	public Indexing(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
+		this(FREQS_IN_PATH, LEX_IN_PATH);
+		this.setMode();
+		this.setPrefix();
+		this.load(FREQS_IN_PATH, LEX_IN_PATH, zipped);
 	}
 	
 	public Indexing() {
@@ -104,10 +105,7 @@ public class Indexing <V extends Number> implements Serializable {
 			} catch (IOException | NullPointerException fnfe2) {
 				lexicon = new BiMapLexicon();
 			}
-		}
-		
-		System.out.println(this.create_lexicons);
-				
+		}		
 		// Take sample to determine n
 		String sample_key = data.keySet().iterator().next();
 		this.n = sample_key.split(" ").length;
@@ -178,11 +176,14 @@ public class Indexing <V extends Number> implements Serializable {
 	public void load(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
 		String ext = (zipped) ? ".gz" : ".txt";
 		try {
-			this.indices = this.readIndices(FREQS_IN_PATH + this.getPrefix() + "indices" + ext, zipped, this.getMode());
-			this.lexicon = new BiMapLexicon(this.readLexicon(LEX_IN_PATH + "lexicons/" + "lexicon" + ext, zipped));
+			this.indices = this.readIndices(FREQS_IN_PATH, zipped, this.getMode());
+			this.lexicon = new BiMapLexicon(this.readLexicon(LEX_IN_PATH, zipped));
 		} catch(IOException fnfe) {
 			fnfe.printStackTrace();
 		}
+		// Take sample to determine n
+		Integer[] sample_key = this.getIndices().keySet().iterator().next();
+		this.n = sample_key.length;
 	}
 	
 	public void validateState() throws IllegalArgumentException {
@@ -241,17 +242,17 @@ public class Indexing <V extends Number> implements Serializable {
 					String[] line_parts = current_line.split("\t");
 					String[] string_key_indices = line_parts[0].split(" ");
 					Integer[] key_indices = new Integer[string_key_indices.length];
-					if (mode == "binary") {
+					if (mode.equals("binary")) {
 						for (int i = 0; i < string_key_indices.length; i++) {
 							key_indices[i] = Integer.parseInt(string_key_indices[i], 2);
 						}
 						indices.put(key_indices, this.intCast(Integer.parseInt(line_parts[1], 2)));
-					} else if (mode == "hexadecimal") {
+					} else if (mode.equals("hexadecimal")) {
 						for (int i = 0; i < string_key_indices.length; i++) {
 							key_indices[i] = Integer.parseInt(string_key_indices[i], 16);
 						}
 						indices.put(key_indices, this.intCast(Integer.parseInt(line_parts[1], 16)));
-					} else if (mode == "default") {
+					} else if (mode.equals("default")) {
 						for (int i = 0; i < string_key_indices.length; i++) {
 							key_indices[i] = Integer.parseInt(string_key_indices[i]);
 						}
