@@ -1,13 +1,16 @@
 package smoothing;
 
+import inout.indexing.Indexing;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class KneserNeySmoothing implements Smoothing {
 	
-	public Map<String, Double> calculateNgramProbabilities(List<Map<String, Integer>> nGramFrequencies) {
-		Map<String, Double> nGramProbabilities = new HashMap<>();
+	public List<Indexing> calculateNgramProbabilities(List<Indexing> nGramFrequencies) {
+		List<Indexing> nGramProbabilities = new ArrayList<>();
 		return nGramProbabilities;
 	}
 }

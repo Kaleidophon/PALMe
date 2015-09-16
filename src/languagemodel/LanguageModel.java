@@ -30,8 +30,6 @@ public class LanguageModel {
 		this.IN_PATH = IN_PATH;
 		this.mode = mode;
 		this.checkIntegrity();
-		
-		
 		this.ph = new PathHandler(IN_PATH);
 		
 		List<Path> paths = this.ph.getPaths();
@@ -84,6 +82,10 @@ public class LanguageModel {
 			indexings.add(indexing);
 		}
 		return indexings;
+	}
+	
+	public void calculate() {
+		this.smoothing.calculateNgramProbabilities(this.indexings);
 	}
 	
 	public void setValidateState(boolean validateState) {
