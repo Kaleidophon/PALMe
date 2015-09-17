@@ -32,7 +32,7 @@ import inout.indexing.BiMapLexicon;
 
 public class Indexing <V extends Number> implements Serializable {
 	
-	private Map<Integer[], V> indices;
+	private Map<List<Integer>, V> indices;
 	private Lexicon lexicon;
 	
 	private BufferedReader reader;
@@ -89,7 +89,7 @@ public class Indexing <V extends Number> implements Serializable {
 	// ------------------------------------------------- Main methods ------------------------------------------------
 	
 	public void createIndices(Map<String, V> data, String mode) throws IncompleteLexiconException {
-		Map<Integer[], V> indices = new HashMap<>();
+		Map<List<Integer>, V> indices = new HashMap<>();
 		BiMapLexicon lexicon = null;
 		data = sortByValues(data);
 		this.create_lexicons = true;
@@ -124,10 +124,9 @@ public class Indexing <V extends Number> implements Serializable {
 			if (key.equals("")) {
 				continue;
 			}
-			Integer[] token_indices = new Integer[this.n];
+			List<Integer> token_indices = new ArrayList<Integer>(this.n);
 			if (this.n > 1) {
 				String[] key_parts = key.split(" ");
-				int ti_index = 0;
 				for (int i = 0; i < key_parts.length; i++) {
 					String token = key_parts[i];
 					boolean lexiconContainsValue = lexicon.containsValue(token);
@@ -135,25 +134,24 @@ public class Indexing <V extends Number> implements Serializable {
 						if (this.create_lexicons) {
 							// If you are currently creating lexicons and there is an unseen value, add it
 							lexicon.put(index, token);
-							token_indices[ti_index] = index;
+							token_indices.add(index);
 							index++;
 						} else {
 							// If you are not creating a lexicon and there is an unseen value, the lexicon is incomplete
 							throw new IncompleteLexiconException("Lexicon doesn't contain value: '" + token + "'");
 						}
 					} else {
-						token_indices[ti_index] = lexicon.getKey(token);
+						token_indices.add(lexicon.getKey(token));
 					}
-					ti_index++;
 				}
 				indices.put(token_indices, data.get(key));
 			} else {
 				if (this.create_lexicons) {
-					token_indices[0] = index;
+					token_indices.add(index);
 					lexicon.put(index, key);
 					index++;
 				} else {
-					token_indices[0] = lexicon.getKey(key);
+					token_indices.add(lexicon.getKey(key));
 				}
 				indices.put(token_indices, data.get(key));
 			}
@@ -182,8 +180,8 @@ public class Indexing <V extends Number> implements Serializable {
 			fnfe.printStackTrace();
 		}
 		// Take sample to determine n
-		Integer[] sample_key = this.getIndices().keySet().iterator().next();
-		this.n = sample_key.length;
+		List<Integer> sample_key = this.getIndices().keySet().iterator().next();
+		this.n = sample_key.size();
 	}
 	
 	public void validateState() throws IllegalArgumentException {
@@ -207,11 +205,11 @@ public class Indexing <V extends Number> implements Serializable {
 	}
 	
 	private void validateIndices() {
-		Set<Integer[]> keys = this.indices.keySet();
+		Set<List<Integer>> keys = this.indices.keySet();
 		if (!(keys.size() > 0)) {
 			throw new IllegalArgumentException("The Lexicon is empty.");
 		}
-		for (Integer[] key : keys) {
+		for (List<Integer> key : keys) {
 			V value = this.indices.get(key);
 			for (int index : key) {
 				if (index < 0) {
@@ -226,8 +224,8 @@ public class Indexing <V extends Number> implements Serializable {
 	
 	// ----------------------------------------------- Reading & Writing ---------------------------------------------
 	
-	protected Map<Integer[], V> readIndices(String INFILE_PATH, boolean zipped, String mode) throws FileNotFoundException{
-		Map<Integer[], V> indices = new HashMap<>();
+	protected Map<List<Integer>, V> readIndices(String INFILE_PATH, boolean zipped, String mode) throws FileNotFoundException{
+		Map<List<Integer>, V> indices = new HashMap<>();
 		try {
 			BufferedReader reader;
 			if (zipped) {
@@ -241,32 +239,33 @@ public class Indexing <V extends Number> implements Serializable {
 				while (current_line != null) {
 					String[] line_parts = current_line.split("\t");
 					String[] string_key_indices = line_parts[0].split(" ");
-					Integer[] key_indices = new Integer[string_key_indices.length];
+					List<Integer> key_indices = new ArrayList<>();
 					if (mode.equals("binary")) {
 						for (int i = 0; i < string_key_indices.length; i++) {
-							key_indices[i] = Integer.parseInt(string_key_indices[i], 2);
+							key_indices.add(Integer.parseInt(string_key_indices[i], 2));
 						}
 						indices.put(key_indices, this.intCast(Integer.parseInt(line_parts[1], 2)));
 					} else if (mode.equals("hexadecimal")) {
 						for (int i = 0; i < string_key_indices.length; i++) {
-							key_indices[i] = Integer.parseInt(string_key_indices[i], 16);
+ 							key_indices.add(Integer.parseInt(string_key_indices[i], 16));
 						}
 						indices.put(key_indices, this.intCast(Integer.parseInt(line_parts[1], 16)));
 					} else if (mode.equals("default")) {
 						for (int i = 0; i < string_key_indices.length; i++) {
-							key_indices[i] = Integer.parseInt(string_key_indices[i]);
+							key_indices.add(Integer.parseInt(string_key_indices[i]));
 						}
 						try {
 							indices.put(key_indices, this.intCast(Integer.parseInt(line_parts[1])));
-						}
-						catch (NumberFormatException nfe) {
+						} catch (NumberFormatException nfe) {
 							indices.put(key_indices, this.doubleCast(Double.parseDouble(line_parts[1])));
 						}
 					}
 					current_line = reader.readLine().trim();
 				}
-			} catch (NullPointerException npe) { }
-		} catch (IOException ioe) { ioe.printStackTrace(); }
+			} catch (NullPointerException npe) {}
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
 		return indices;
 	}
 	
@@ -287,7 +286,7 @@ public class Indexing <V extends Number> implements Serializable {
 		return lexicon_entries;
 	}
 	
-	protected <V> void writeIndices(Map<Integer[], V> data, String OUTFILE_PATH, boolean zipped, String mode) {
+	protected <V> void writeIndices(Map<List<Integer>, V> data, String OUTFILE_PATH, boolean zipped, String mode) {
 		try {
 			BufferedWriter writer;
 			if (zipped) {
@@ -296,27 +295,27 @@ public class Indexing <V extends Number> implements Serializable {
 			} else {
 				writer = new BufferedWriter(new FileWriter(OUTFILE_PATH));
 			}
-			for (Map.Entry<Integer[], V> entry : data.entrySet()) {
-				Integer[] key = entry.getKey();
-				String[] new_key = new String[key.length];
+			for (Map.Entry<List<Integer>, V> entry : data.entrySet()) {
+				List<Integer> key = entry.getKey();
+				String[] new_key = new String[key.size()];
 				switch (mode) {
 					case ("binary"):
-						String[] binary_key = new String[key.length];
-						for (int i = 0; i < key.length; i++) {
-							binary_key[i] = Integer.toBinaryString(key[i]);
+						String[] binary_key = new String[key.size()];
+						for (int i = 0; i < key.size(); i++) {
+							binary_key[i] = Integer.toBinaryString(key.get(i));
 						}
 						new_key = binary_key;
 						break;
 					case ("hexadecimal"):
-						String[] hexadecimal_key = new String[key.length];
-						for (int i = 0; i < key.length; i++) {
-							hexadecimal_key[i] = Integer.toHexString(key[i]);
+						String[] hexadecimal_key = new String[key.size()];
+						for (int i = 0; i < key.size(); i++) {
+							hexadecimal_key[i] = Integer.toHexString(key.get(i));
 						}
 						new_key = hexadecimal_key;
 						break;
 					case ("default"):
-						for (int i = 0; i < key.length; i++) {
-							new_key[i] = "" + key[i];
+						for (int i = 0; i < key.size(); i++) {
+							new_key[i] = "" + key.get(i);
 						}
 						break;
 				}
@@ -355,7 +354,7 @@ public class Indexing <V extends Number> implements Serializable {
 		
 	// ----------------------------------------------- Getter & Setter -----------------------------------------------
 	
-	public Map<Integer[], ? extends Number> getIndices() {
+	public Map<List<Integer>, ? extends Number> getIndices() {
 		return this.indices;
 	}
 	
@@ -406,6 +405,15 @@ public class Indexing <V extends Number> implements Serializable {
 	    return sortedHashMap;
 	}
 	
+	protected <T> String njoin(String delimiter, List<T> a) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(a.get(0));
+		for (int i = 1; i < a.size(); i++) {
+			sb.append(delimiter + a.get(i));
+		}
+		return sb.toString();
+	}
+	
 	protected <T> String njoin(String delimiter, T[] a) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(a[0]);
@@ -423,12 +431,12 @@ public class Indexing <V extends Number> implements Serializable {
 		return (V) d;
 	}	
 	
-	private <T> void pA(T[] a) {
-		String out = "{" + a[0];
-		for (int i = 1; i < a.length; i++) {
-			out += ", " + a[i];
+	private <T> String pA(List<T> a) {
+		String out = "{" + a.get(0);
+		for (int i = 1; i < a.size(); i++) {
+			out += ", " + a.get(i);
 		}
 		out += "}";
-		System.out.println(out);
+		return out;
 	}
 }

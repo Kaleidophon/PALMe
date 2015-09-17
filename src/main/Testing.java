@@ -13,7 +13,7 @@ import java.util.Map;
 public class Testing {
 
 	public static void main(String[] args) {
-		createTestData(5);
+		createTestData(1);
 		/*int n = 5;
 		for (int c = 0; c <= 5; c++) {
 			timeIndexing(c, "./rsc/indices/" + n + "/", false, 10);
