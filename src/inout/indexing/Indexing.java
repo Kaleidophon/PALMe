@@ -11,14 +11,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
-import java.lang.StringBuilder;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -173,7 +168,6 @@ public class Indexing <V extends Number> implements Serializable {
 	}
 	
 	public void load(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
-		String ext = (zipped) ? ".gz" : ".txt";
 		try {
 			this.indices = this.readIndices(FREQS_IN_PATH, zipped, this.getMode());
 			this.lexicon = new BiMapLexicon(this.readLexicon(LEX_IN_PATH, zipped));
@@ -241,24 +235,24 @@ public class Indexing <V extends Number> implements Serializable {
 					String[] line_parts = current_line.split("\t");
 					String[] string_key_indices = line_parts[0].split(" ");
 					List<Integer> key_indices = new ArrayList<>();
-					if (mode.equals("binary")) {
-						for (int i = 0; i < string_key_indices.length; i++) {
-							key_indices.add(Integer.parseInt(string_key_indices[i], 2));
-						}
-						indices.put(key_indices, (V) Toolbox.intCast(Integer.parseInt(line_parts[1], 2)));
-					} else if (mode.equals("hexadecimal")) {
-						for (int i = 0; i < string_key_indices.length; i++) {
- 							key_indices.add(Integer.parseInt(string_key_indices[i], 16));
-						}
-						indices.put(key_indices, (V) Toolbox.intCast(Integer.parseInt(line_parts[1], 16)));
-					} else if (mode.equals("default")) {
-						for (int i = 0; i < string_key_indices.length; i++) {
-							key_indices.add(Integer.parseInt(string_key_indices[i]));
-						}
-						try {
-							indices.put(key_indices, (V) Toolbox.intCast(Integer.parseInt(line_parts[1])));
-						} catch (NumberFormatException nfe) {
-							indices.put(key_indices, (V) Toolbox.doubleCast(Double.parseDouble(line_parts[1])));
+					int base = 0;
+					switch (mode) {
+						case ("binary"): base = 2; break;
+						case ("hexadecimal"): base = 16; break;
+						case ("default"): base = 10; break;
+					}
+					for (int i = 0; i < string_key_indices.length; i++) {
+						key_indices.add(Integer.parseInt(string_key_indices[i], base));
+					}
+					try {
+						// Value is an integer
+						indices.put(key_indices, (V) Toolbox.intCast(Integer.parseInt(line_parts[1], base)));
+					} catch (NumberFormatException nfe) {
+						// Value is a double
+						switch (mode) {
+							case ("binary"): indices.put(key_indices, (V) Toolbox.stringToDouble(line_parts[1], 2)); break;
+							case ("hexadecimal"): indices.put(key_indices, (V) Toolbox.stringToDouble(line_parts[1], 16)); break;
+							case ("default"): indices.put(key_indices, (V) Toolbox.doubleCast(Double.parseDouble(line_parts[1]))); break;
 						}
 					}
 					current_line = reader.readLine().trim();
@@ -287,7 +281,7 @@ public class Indexing <V extends Number> implements Serializable {
 		return lexicon_entries;
 	}
 	
-	protected <V> void writeIndices(Map<List<Integer>, V> data, String OUTFILE_PATH, boolean zipped, String mode) {
+	protected void writeIndices(Map<List<Integer>, V> data, String OUTFILE_PATH, boolean zipped, String mode) {
 		try {
 			BufferedWriter writer;
 			if (zipped) {
@@ -299,28 +293,33 @@ public class Indexing <V extends Number> implements Serializable {
 			for (Map.Entry<List<Integer>, V> entry : data.entrySet()) {
 				List<Integer> key = entry.getKey();
 				String[] new_key = new String[key.size()];
+				for (int i = 0; i < key.size(); i++) {
+					switch (mode) {
+						case ("binary"): 
+							new_key[i] = Integer.toBinaryString(key.get(i)); 
+							break;
+						case ("hexadecimal"): 
+							new_key[i] = Integer.toHexString(key.get(i));
+							break;
+						case ("default"):
+							new_key[i] = "" + key.get(i);
+							break;
+					}
+				}
+				V value = data.get(key);
+				String new_value = "";
 				switch (mode) {
 					case ("binary"):
-						String[] binary_key = new String[key.size()];
-						for (int i = 0; i < key.size(); i++) {
-							binary_key[i] = Integer.toBinaryString(key.get(i));
-						}
-						new_key = binary_key;
+						new_value = (value instanceof Double) ? Toolbox.doubleToBinary((Double) value) : Integer.toBinaryString((Integer) value);
 						break;
 					case ("hexadecimal"):
-						String[] hexadecimal_key = new String[key.size()];
-						for (int i = 0; i < key.size(); i++) {
-							hexadecimal_key[i] = Integer.toHexString(key.get(i));
-						}
-						new_key = hexadecimal_key;
+						new_value = (value instanceof Double) ? Toolbox.doubleToHex((Double) value) : Integer.toHexString((Integer) value);
 						break;
 					case ("default"):
-						for (int i = 0; i < key.size(); i++) {
-							new_key[i] = "" + key.get(i);
-						}
+						new_value = "" + value;
 						break;
 				}
-				String line = Toolbox.njoin(" ", new_key) + "\t" + data.get(key) + "\n";
+				String line = Toolbox.njoin(" ", new_key) + "\t" + new_value + "\n";
 				if (zipped) {
 					writer.append(line);
 				} else {

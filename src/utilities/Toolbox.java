@@ -56,6 +56,21 @@ public class Toolbox {
 		return (V) d;
 	}	
 	
+	public static Double stringToDouble(String input, int base) {
+		if (base == 10) {
+			return Double.parseDouble(input);
+		}
+		return Double.longBitsToDouble(Long.parseLong(input, base));
+	}
+	
+	public static String doubleToHex(Double d) {
+		return Long.toHexString(Double.doubleToRawLongBits(d));
+	}
+	
+	public static String doubleToBinary(Double d) {
+		return Long.toBinaryString(Double.doubleToRawLongBits(d));
+	}
+	
 	public static <T> void printList(List<T> l) {
 		System.out.println(listToString(l));
 	}
