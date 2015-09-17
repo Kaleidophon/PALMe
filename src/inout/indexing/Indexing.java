@@ -29,6 +29,7 @@ import java.util.zip.GZIPOutputStream;
 import inout.indexing.ArrayLexicon;
 import inout.indexing.ListLexicon;
 import inout.indexing.BiMapLexicon;
+import utilities.Toolbox;
 
 public class Indexing <V extends Number> implements Serializable {
 	
@@ -91,7 +92,7 @@ public class Indexing <V extends Number> implements Serializable {
 	public void createIndices(Map<String, V> data, String mode) throws IncompleteLexiconException {
 		Map<List<Integer>, V> indices = new HashMap<>();
 		BiMapLexicon lexicon = null;
-		data = sortByValues(data);
+		data = Toolbox.sortByValues(data);
 		this.create_lexicons = true;
 		
 		// Determine whether there is a pre-existing lexicon AND reversed lexicon of same format
@@ -244,20 +245,20 @@ public class Indexing <V extends Number> implements Serializable {
 						for (int i = 0; i < string_key_indices.length; i++) {
 							key_indices.add(Integer.parseInt(string_key_indices[i], 2));
 						}
-						indices.put(key_indices, this.intCast(Integer.parseInt(line_parts[1], 2)));
+						indices.put(key_indices, (V) Toolbox.intCast(Integer.parseInt(line_parts[1], 2)));
 					} else if (mode.equals("hexadecimal")) {
 						for (int i = 0; i < string_key_indices.length; i++) {
  							key_indices.add(Integer.parseInt(string_key_indices[i], 16));
 						}
-						indices.put(key_indices, this.intCast(Integer.parseInt(line_parts[1], 16)));
+						indices.put(key_indices, (V) Toolbox.intCast(Integer.parseInt(line_parts[1], 16)));
 					} else if (mode.equals("default")) {
 						for (int i = 0; i < string_key_indices.length; i++) {
 							key_indices.add(Integer.parseInt(string_key_indices[i]));
 						}
 						try {
-							indices.put(key_indices, this.intCast(Integer.parseInt(line_parts[1])));
+							indices.put(key_indices, (V) Toolbox.intCast(Integer.parseInt(line_parts[1])));
 						} catch (NumberFormatException nfe) {
-							indices.put(key_indices, this.doubleCast(Double.parseDouble(line_parts[1])));
+							indices.put(key_indices, (V) Toolbox.doubleCast(Double.parseDouble(line_parts[1])));
 						}
 					}
 					current_line = reader.readLine().trim();
@@ -319,7 +320,7 @@ public class Indexing <V extends Number> implements Serializable {
 						}
 						break;
 				}
-				String line = this.njoin(" ", new_key) + "\t" + data.get(key) + "\n";
+				String line = Toolbox.njoin(" ", new_key) + "\t" + data.get(key) + "\n";
 				if (zipped) {
 					writer.append(line);
 				} else {
@@ -384,59 +385,5 @@ public class Indexing <V extends Number> implements Serializable {
 	
 	private void setPrefix() {
 		this.prefix = "";
-	}
-	
-	// ------------------------------------------------ Other methods- -----------------------------------------------
-	
-	protected static <K, V, E> HashMap<K, V> sortByValues(Map<K, V> map) { 
-		List<E> list = new LinkedList(map.entrySet());
-
-	    Collections.sort(list, new Comparator() {
-	    	public int compare(Object o1, Object o2) {
-	    		return ((Comparable) ((Map.Entry) (o2)).getValue()).compareTo(((Map.Entry) (o1)).getValue());
-	        }
-	    });
-
-	    HashMap sortedHashMap = new LinkedHashMap<>();
-	    for (Iterator it = list.iterator(); it.hasNext();) {
-	    	Map.Entry entry = (Map.Entry) it.next();
-	        sortedHashMap.put(entry.getKey(), entry.getValue());
-	    } 
-	    return sortedHashMap;
-	}
-	
-	protected <T> String njoin(String delimiter, List<T> a) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(a.get(0));
-		for (int i = 1; i < a.size(); i++) {
-			sb.append(delimiter + a.get(i));
-		}
-		return sb.toString();
-	}
-	
-	protected <T> String njoin(String delimiter, T[] a) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(a[0]);
-		for (int i = 1; i < a.length; i++) {
-			sb.append(delimiter + a[i]);
-		}
-		return sb.toString();
-	}
-	
-	private V intCast(Integer i) {
-		return (V) i;
-	}
-	
-	private V doubleCast(Double d)  {
-		return (V) d;
-	}	
-	
-	private <T> String pA(List<T> a) {
-		String out = "{" + a.get(0);
-		for (int i = 1; i < a.size(); i++) {
-			out += ", " + a.get(i);
-		}
-		out += "}";
-		return out;
 	}
 }

@@ -1,8 +1,6 @@
 package languagemodel;
 
 import smoothing.*;
-import inout.*;
-import inout.general.DataLoader;
 import inout.indexing.BinaryIndexing;
 import inout.indexing.HexadecimalIndexing;
 import inout.indexing.Indexing;
