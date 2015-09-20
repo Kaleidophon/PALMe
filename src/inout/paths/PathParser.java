@@ -51,6 +51,7 @@ public class PathParser {
 			String subtype = "";
 			String directory = "";
 			String coding = "";
+			String task = "";
 			int n = 0;
 			String enclosed_text = "";
 			
@@ -89,7 +90,7 @@ public class PathParser {
 						}
 						
 						if (last_keyword.equals("path")) {
-							path = (subtype.equals("")) ? new Path(type, directory) : new Path(type, subtype, directory, coding);
+							path = (subtype.equals("")) ? new Path(type, directory) : new Path(type, subtype, directory, coding, task);
 							if (subtype.equals("indexing")) {
 								path.setN(n);
 								n = 0;
@@ -101,6 +102,7 @@ public class PathParser {
 							subtype = "";
 							directory = "";
 							coding = "";
+							task = "";
 							enclosed_text = "";
 						} else if (last_keyword.equals("type")) {
 							type = enclosed_text; 
@@ -119,6 +121,12 @@ public class PathParser {
 							subtype = enclosed_text;
 							enclosed_text = "";
 						} else if (last_keyword.equals("directory")) {
+							if (this.hasAttributes(last_tag)) {
+								Map<String, String> attributes = this.extractAttributes(last_tag);
+								if (attributes.containsKey("task")) {
+									task = attributes.get("task");
+								}
+							}
 							directory = enclosed_text;
 							enclosed_text = "";
 						}

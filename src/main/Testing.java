@@ -13,7 +13,9 @@ import java.util.Map;
 public class Testing {
 
 	public static void main(String[] args) {
-		createTestData(2);
+		createTestData(3);
+		createTestData(4);
+		createTestData(5);
 		/*int n = 5;
 		for (int c = 0; c <= 5; c++) {
 			timeIndexing(c, "./rsc/indices/" + n + "/", false, 10);
@@ -27,8 +29,8 @@ public class Testing {
 		DataLoader dl = new DataLoader("./rsc/freqs/" + n + "/res.txt");
 		Map<String, Integer> freqs = dl.readFrequencies();
 		indexings.add(new Indexing<Integer>());
-		indexings.add(new BinaryIndexing());
-		indexings.add(new HexadecimalIndexing());
+		indexings.add(new BinaryIndexing<Integer>());
+		indexings.add(new HexadecimalIndexing<Integer>());
 		
 		for (Indexing indexing : indexings) {
 			if (indexing instanceof BinaryIndexing) {
