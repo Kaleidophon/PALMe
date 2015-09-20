@@ -11,13 +11,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-public class HexadecimalIndexing extends Indexing {
+public class HexadecimalIndexing <V extends Number> extends Indexing {
 	
-	public HexadecimalIndexing(Map<String, Integer> data, String FREQS_IN_PATH, String LEX_IN_PATH) {
+	public HexadecimalIndexing(Map<String, V> data, String FREQS_IN_PATH, String LEX_IN_PATH) {
 		super(data, FREQS_IN_PATH, LEX_IN_PATH);
 		this.setPrefix();
 		this.setMode();
@@ -28,6 +29,13 @@ public class HexadecimalIndexing extends Indexing {
 		this.setPrefix();
 		this.setMode();
 		this.load(FREQS_IN_PATH, LEX_IN_PATH, zipped);
+	}
+	
+	public HexadecimalIndexing(Map<List<Integer>, V> indexed_data, String FREQS_IN_PATH, boolean zipped) {
+		super(indexed_data, FREQS_IN_PATH);
+		this.setMode();
+		this.setPrefix();
+		this.dump(FREQS_IN_PATH, zipped);
 	}
 	
 	public HexadecimalIndexing() {

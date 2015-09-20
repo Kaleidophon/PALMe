@@ -101,6 +101,21 @@ public class PathHandler {
 		return results;
 	}
 	
+	public List<Path> getPathsWithTask(String task) {
+		List<Path> results = new ArrayList<>();
+		for (Path p : this.paths) {
+			try {
+				if (p.getTask().equals(task)) {
+					results.add(p);
+				}
+			}
+			catch (UnsetPathAttributeException upae) {
+				continue;
+			}
+		}
+		return results;
+	}
+	
 	public List<Path> intersection(List<List<Path>> pathlists) {
 		Set<Path> intersection = new HashSet<>(pathlists.get(0));
 
@@ -110,17 +125,25 @@ public class PathHandler {
 		return new ArrayList<Path>(intersection);
 	}
 	
-	public Set<Path> getIntersection(Set<Path> set1, Set<Path> set2) {
+	private Set<Path> getIntersection(Set<Path> set1, Set<Path> set2) {
 	    boolean set1IsLarger = set1.size() > set2.size();
 	    Set<Path> cloneSet = new HashSet<Path>(set1IsLarger ? set2 : set1);
 	    cloneSet.retainAll(set1IsLarger ? set1 : set2);
 	    return cloneSet;
 	}
 	
+	public Path getFirstPathWithAttributes(String specification) {
+		List<Path> paths = this.getPathsWithAttributes(specification);
+		if (paths.size() == 0) {
+			return null;
+		}
+		return this.getPathsWithAttributes(specification).get(0);
+	}
+	
 	public List<Path> getPathsWithAttributes(String specification) {
 		List<List<Path>> pathlists = new ArrayList<List<Path>>();
 		String[] parts = specification.split(" ");
-		if (!(parts.length == 2 || parts.length == 5)) {
+		if (!(parts.length == 2 || parts.length == 6)) {
 			throw new IllegalArgumentException("No valid specification: " + specification);
 		}
 		// Verification of parts arguments
@@ -130,7 +153,7 @@ public class PathHandler {
 			} else if (!parts[1].equals("lexicon")) {
 				throw new IllegalArgumentException("Two word specifications must be for lexicons");
 			}
-		} else if (parts.length == 5) {
+		} else if (parts.length == 6) {
 			if (!(parts[0].equals("raw") || parts[0].equals("zipped"))) {
 				throw new IllegalArgumentException("Indexings must be either raw or zipped");
 			} else if (!(parts[1].equals("default") || parts[1].equals("binary") || parts[1].equals("hexadecimal"))) {
@@ -138,15 +161,17 @@ public class PathHandler {
 			} else if (!(parts[2].equals("frequency") || parts[2].equals("probability"))) {
 				throw new IllegalArgumentException("Type must be either frequency or probability, " + parts[2] + " found instead");
 			} else if (!parts[3].equals("indexing")) {
-				throw new IllegalArgumentException("Five word specifications must be for indexings");
+				throw new IllegalArgumentException("Six word specifications must be for indexings");
 			} else if (Integer.parseInt(parts[4]) < 1) {
 				throw new IllegalArgumentException("n must be greater / equal to 1");
+			} else if (!parts[5].equals("read") && !parts[5].equals("write")) {
+				throw new IllegalArgumentException("Task type must be either read oder write.");
 			}
 		}
 		
 		// Zipped or raw?
 		pathlists.add(this.getPathsWithExtension((parts[0].equals("raw")) ? ".txt" : ".gz"));
-		// Coding: None, binary or hexadecimal?
+		// Lexicon or Coding: default, binary or hexadecimal?
 		switch (parts[1]) {
 			case ("default"):
 				pathlists.add(this.getPathsWithCoding("DEFAULT")); break;
@@ -160,20 +185,18 @@ public class PathHandler {
 		if (parts.length == 2) {
 			return this.intersection(pathlists);
 		}
-		// Type: Lexicon, Frequency or Probability?
+		// Subype: Lexicon, Frequency or Probability?
 		switch (parts[2]) {
 			case ("frequency"):
 				pathlists.add(this.getPathsWithType("frequency")); break;
 			case ("probability"):
 				pathlists.add(this.getPathsWithType("probability")); break;
 		}
-		// Subtype: Reversed or indexing?
-		pathlists.add(this.getPathsWithSubtype(parts[3]));
-		// Optional for indexings: n = ?
-		if (parts.length == 5) {
+		if (parts.length == 6) {
+			pathlists.add(this.getPathsWithSubtype(parts[3]));
 			pathlists.add(this.getPathsWithN(Integer.parseInt(parts[4])));
+			pathlists.add(this.getPathsWithTask(parts[5]));
 		}
-
 		return this.intersection(pathlists);
 	}	
 }

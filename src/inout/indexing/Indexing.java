@@ -57,8 +57,13 @@ public class Indexing <V extends Number> implements Serializable {
 		}
 	}
 	
-	public Indexing(String FREQS_IN_PATH, String LEX_IN_PATH) {
+	protected Indexing(String FREQS_IN_PATH, String LEX_IN_PATH) {
 		this.LEX_IN_PATH = LEX_IN_PATH;
+		this.FREQS_IN_PATH = FREQS_IN_PATH;
+	}
+	
+	protected Indexing(Map<List<Integer>, V> indexed_data, String FREQS_IN_PATH) {
+		this.indices = indexed_data;
 		this.FREQS_IN_PATH = FREQS_IN_PATH;
 	}
 	
@@ -67,6 +72,13 @@ public class Indexing <V extends Number> implements Serializable {
 		this.setMode();
 		this.setPrefix();
 		this.load(FREQS_IN_PATH, LEX_IN_PATH, zipped);
+	}
+	
+	public Indexing(Map<List<Integer>, V> indexed_data, String FREQS_IN_PATH, boolean zipped) {
+		this(indexed_data, FREQS_IN_PATH);
+		this.setMode();
+		this.setPrefix();
+		this.dump(this.FREQS_IN_PATH, zipped);
 	}
 	
 	public Indexing() {
@@ -164,7 +176,7 @@ public class Indexing <V extends Number> implements Serializable {
 	
 	public void dump(String OUTFILE_PATH, boolean zipped) {
 		String ext = (zipped) ? ".gz" : ".txt";
-		this.writeIndices(this.indices, OUTFILE_PATH + "/" + this.n + "/" + this.getPrefix() + "indices" + ext, zipped, this.getMode());
+		this.writeIndices(this.indices, OUTFILE_PATH, zipped, this.getMode());
 	}
 	
 	public void load(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {

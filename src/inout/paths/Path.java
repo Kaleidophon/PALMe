@@ -10,14 +10,16 @@ public class Path {
 	private String directory;
 	private String extension;
 	private String coding;
+	private String task;
 	private int n;
 	
 	private enum Codings { DEFAULT, BINARY, HEXADECIMAL }
 	
-	public Path(String type, String subtype, String directory, String coding) {
+	public Path(String type, String subtype, String directory, String coding, String task) {
 		this(type, directory);
 		this.subtype = subtype;
 		this.coding = coding;
+		this.task = task;
 	}
 	
 	public Path(String type, String directory) {
@@ -74,12 +76,17 @@ public class Path {
 		return this.extension;
 	}
 	
+	public boolean isZipped() {
+		return this.getExtension().equals(".gz");
+	}
+	
 	public void setExtension(String ext) {
 		if (!(ext.equals(".txt") || ext.equals(".ser") || ext.equals(".gz"))) {
 			throw new IllegalArgumentException("Invalid file extension");
 		}
 		this.extension = ext;
 	}
+	
 	
 	public String getCoding() {
 		if (this.coding == null) {
@@ -109,6 +116,17 @@ public class Path {
 		this.n = n;
 	}
 	
+	public String getTask() {
+		if (this.task == null) {
+			throw new UnsetPathAttributeException();
+		}
+		return this.task;
+	}
+	
+	public void setTask(String task) {
+		this.task = task;
+	}
+	
 	private boolean contains(String test) {
 	    for (Codings c : Codings.values()) {
 	        if (c.name().equals(test)) {
@@ -130,10 +148,14 @@ public class Path {
 		} else if (this.type.equals("indexing")) {
 			if (this.n == 0) {
 				throw new IllegalArgumentException("Indexing needs an n attribute");
+			} else if (!task.equals("read") && !task.equals("write")) {
+				throw new IllegalArgumentException("Illegal task type: " + this.getTask());
 			}
 		} else if (this.type.equals("probability")) {
 			if (this.n == 0) {
 				throw new IllegalArgumentException("Probability needs an n attribute");
+			} else if (!task.equals("read") && !task.equals("write")) {
+				throw new IllegalArgumentException("Illegal task type: " + this.getTask());
 			}
 		}
 	}
@@ -146,7 +168,7 @@ public class Path {
 		}
 		res += " | Directory: " + this.getDirectory();
 		if (!this.getType().equals("lexicon")) {
-			res +=" | Coding: " + this.getCoding() + " | n: " + this.getN();
+			res +=" | Coding: " + this.getCoding() + " | n: " + this.getN() + " | Task: " + this.getTask();
 		}
 		return res;
 	}

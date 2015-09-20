@@ -1,6 +1,7 @@
 package smoothing;
 
 import inout.indexing.Indexing;
+import inout.paths.PathHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,8 +10,7 @@ import java.util.Map;
 
 public class LinearInterpolation implements Smoothing {
 	
-	public List<Indexing> calculateNgramProbabilities(List<Indexing> nGramFrequencies) {
-		List<Indexing> nGramProbabilities = new ArrayList<>();
-		return nGramProbabilities;
+	public void calculateNgramProbabilities(int n, PathHandler ph) {
+		List<Indexing<Double>> nGramProbabilities = new ArrayList<>();
 	}
 }

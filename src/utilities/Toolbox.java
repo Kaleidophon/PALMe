@@ -97,7 +97,7 @@ public class Toolbox {
 		return out;
 	}
 	
-	public List<Integer> pop(List<Integer> l) {
+	public static List<Integer> pop(List<Integer> l) {
 		List<Integer> clone = new ArrayList<>(l);
 		clone.remove(clone.size()-1);
 		return new ArrayList<>(clone);
