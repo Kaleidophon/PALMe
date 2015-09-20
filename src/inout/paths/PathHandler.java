@@ -199,4 +199,10 @@ public class PathHandler {
 		}
 		return this.intersection(pathlists);
 	}	
+	
+	public void printPaths() {
+		for (Path p : this.getPaths()) {
+			System.out.println(p.toString());
+		}
+	}	
 }

@@ -15,7 +15,8 @@ public class Main {
 	
 	public static void main(String[] args) {
 
-		LanguageModel lm = new LanguageModel(5, "./rsc/paths.xml", new MaximumFrequencyEstimation());
-		lm.calculate();
+		LanguageModel lm = new LanguageModel(3, "./rsc/paths.xml");
+		lm.flipDebug();
+		lm.getSequenceProbability("Caro ist ganz nett .");
 	}
 }
