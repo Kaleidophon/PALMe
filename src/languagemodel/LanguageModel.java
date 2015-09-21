@@ -2,6 +2,7 @@ package languagemodel;
 
 import smoothing.*;
 import utilities.Toolbox;
+import inout.general.IO;
 import inout.indexing.BiMapLexicon;
 import inout.indexing.BinaryIndexing;
 import inout.indexing.HexadecimalIndexing;
@@ -28,6 +29,8 @@ public class LanguageModel {
 	private boolean debug;
 	private boolean normalization;
 	private String mode;
+	private List<Map<List<Integer>, Double>> n_probabilities;
+	private BiMapLexicon lex;
 	
 	public LanguageModel(int n, String IN_PATH, Smoothing smoothing, String mode, boolean normalization) {
 		// Constructor to calculate n-gram probabilities based on n-gram frequencies
@@ -54,6 +57,7 @@ public class LanguageModel {
 		this.checkIntegrity();
 		this.ph = new PathHandler(IN_PATH);
 		if (debug) this.ph.printPaths();
+		if (mode.equals("fast back-off")) { setup(); }
 	}
 	
 	public double getSequenceProbability(String seq) {
@@ -61,9 +65,11 @@ public class LanguageModel {
 		double probability = 1.0;
 		long startTime = System.nanoTime();
 		List<String> tokens = new ArrayList<>();
-		tokens.add("<s>");
 		tokens.addAll(Arrays.asList(seq.trim().split(" ")));
-		tokens.add("</s>");
+		if (!tokens.contains("<s>") && !tokens.contains("</s")) {
+			tokens.add(0, "<s>");
+			tokens.add("</s>");
+		}
 		// Convert to array
 		String[] tokens_ = new String[tokens.size()];
 		tokens_ = tokens.toArray(tokens_);
@@ -78,11 +84,31 @@ public class LanguageModel {
 				String[] slice = Arrays.copyOfRange(tokens_, i, i + this.getN());
 				List<Integer> ids = this.translateToInt(slice, (BiMapLexicon) prob_indexing.getLexicon());
 				double prob = (probs.get(ids) == null) ? 0 : probs.get(ids);
-				if (debug) Toolbox.printArray(slice); System.out.println("Slice prob is " + prob);
+				if (this.debug) Toolbox.printArray(slice); System.out.println("Slice prob is " + prob);
 				probability *= prob;
 			}
-			
-		} else if (mode.equals("back-off")) {
+		} else if (mode.equals("fast back-off")) {
+			for (int i = 0; i <= tokens_.length; i++) {
+				for (int j = i - this.getN(); j != i; j++) {
+					try {
+						String[] slice = Arrays.copyOfRange(tokens_, j, i);
+						if(this.debug) Toolbox.printArray(slice);
+						List<Integer> ids = this.translateToInt(slice, this.lex);
+						Double prob = this.n_probabilities.get(slice.length-1).get(ids);
+						if (prob != null) {
+							if (this.debug) System.out.println("It's a match!");
+							probability *= prob;
+							break;
+						} else if (slice.length == 1 && prob == null) {
+							probability = 0;
+							break;
+						}
+					} catch(IndexOutOfBoundsException ioobe) {
+						continue;
+					}
+				}
+			}
+		} else if (mode.equals("efficient back-off")) {
 			List<WordNGrams> words_ngrams = new ArrayList<>(tokens_.length);
 			
 			int highest_order = 0;
@@ -146,23 +172,35 @@ public class LanguageModel {
 		
 		long endTime = System.nanoTime();
 		long duration = (endTime - startTime);
+		if (this.getNormalization()) probability = Math.pow(probability, (1.0 / tokens.size()));
 		if (debug) {
 			System.out.println("Sequence probability for '" + seq + "' is " + probability + ".");
-			System.out.println("Calculating sequence probability with " + this.n + "-grams took " + 
+			System.out.println("Calculating sequence probability with " + this.getMode() + " Language model and " + this.n + "-grams took " + 
 								Math.round(duration / 10000000.0) / 100.0 + " s in total.");
 		}
-		System.out.println(probability);
-		probability = Math.pow(probability, (1.0 / tokens.size()));
-		System.out.println(probability);
 		return probability;
+	}
+	
+	public double evaluateLanguageModel(String INPATH) {
+		double perplexity = 0.0;
+		int count = 0;
+		IO reader = new IO(INPATH, "out");
+		do {
+			if (!this.debug && count % 995 == 0) System.out.println("Sentence nr. " + count);
+			String line = reader.next();
+			perplexity += this.getSequenceProbability(line);
+			count++;
+			
+		} while(reader.hasNext());
+		return perplexity / count;
 	}
 	
 	private Indexing<Double> getProbIndexing(int n) {
 		List<List<Path>> pathlists = new ArrayList<>();
-		pathlists.add(ph.getPathsWithN(n));
-		pathlists.add(ph.getPathsWithType("probability"));
-		pathlists.add(ph.getPathsWithTask("read"));
-		Path prob_indexing_path = ph.intersection(pathlists).get(0);
+		pathlists.add(this.ph.getPathsWithN(n));
+		pathlists.add(this.ph.getPathsWithType("probability"));
+		pathlists.add(this.ph.getPathsWithTask("read"));
+		Path prob_indexing_path = this.ph.intersection(pathlists).get(0);
 		Indexing<Double> prob_indexing = null;
 		
 		// Load lexicon
@@ -184,6 +222,15 @@ public class LanguageModel {
 				break;
 		}
 		return prob_indexing;
+	}
+	
+	private void setup() {
+		this.n_probabilities = new ArrayList<>();
+		this.lex = (BiMapLexicon) this.getProbIndexing(1).getLexicon();
+		
+		for (int i = 0; i < this.getN() - 1; i++) {
+			this.n_probabilities.add((Map<List<Integer>, Double>) this.getProbIndexing(i+1).getIndices());
+		}
 	}
 	
 	private void calculate() {
@@ -249,7 +296,7 @@ public class LanguageModel {
 		if (m.group() == null) {
 			throw new IllegalArgumentException("Illegal path");
 		}
-		if (!this.mode.equals("back-off") && !this.mode.equals("default")) {
+		if (!this.mode.equals("fast back-off") && !this.mode.equals("default") && !this.mode.equals("efficient back-off")) {
 			throw new IllegalArgumentException("Illegal mode");
 		}
 	}

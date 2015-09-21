@@ -1,22 +1,14 @@
 package main;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-import inout.general.DataLoader;
-import inout.indexing.HexadecimalIndexing;
-import inout.paths.PathParser;
-import inout.paths.PathHandler;
 import languagemodel.*;
-import smoothing.*;
 
 public class Main {
 	
 	public static void main(String[] args) {
 
-		LanguageModel lm = new LanguageModel(3, "./rsc/paths.xml", "back-off", false);
+		LanguageModel lm = new LanguageModel(5, "./rsc/paths.xml", "fast back-off", true);
 		//lm.flipDebug();
-		lm.getSequenceProbability("David schreibt keinen schönen Code .");
+		System.out.println(lm.evaluateLanguageModel("./rsc/corpora/dewiki_plain_1000k_test.txt"));
 	}
 }

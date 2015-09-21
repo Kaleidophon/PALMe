@@ -2,7 +2,7 @@ package inout.general;
 
 import java.io.*;
 
-public class IOModeException extends Exception{
+public class IOModeException extends RuntimeException {
 	
 	public IOModeException(String message) {
 		super(message);

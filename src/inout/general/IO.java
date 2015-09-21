@@ -28,20 +28,30 @@ public class IO {
 		}
 	}
 	
-	public void next(String line) throws IOModeException, IOException {
+	public void next(String line) {
 		if(MODE != "into") {
 			throw new IOModeException();
 		}
-		this.writer.write(line);
+		try {
+			this.writer.write(line);
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+			System.exit(0);
+		}
 	}
 	
-	public String next() throws IOModeException, IOException {
+	public String next() {
 		if(MODE != "out") {
 			throw new IOModeException();
 		}
 		String tmp = this.current_line;
 		this.current_line = this.next_line;
-		this.next_line = this.reader.readLine();
+		try {
+			this.next_line = this.reader.readLine();
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+			System.exit(0);
+		}
 		return tmp.trim();
 	}
 

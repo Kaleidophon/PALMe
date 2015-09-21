@@ -7,7 +7,6 @@ import inout.paths.Path;
 import inout.paths.PathHandler;
 import utilities.Toolbox;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;

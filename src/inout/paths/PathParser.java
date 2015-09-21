@@ -16,7 +16,6 @@ import inout.general.IOModeException;
 
 public class PathParser {
 	
-	private String PATHFILE_INPATH;
 	private IO reader;
 	private List<Path> paths;
 	private Set<String> demanding_keywords = new HashSet<>(Arrays.asList(new String[]{"type", "subtype", "directory"}));
@@ -24,7 +23,6 @@ public class PathParser {
 	private Set<String> keywords;
 	
 	public PathParser(String PATHFILE_INPATH) {
-		this.PATHFILE_INPATH = PATHFILE_INPATH;
 		this.keywords = new HashSet<>(this.demanding_keywords);
 		this.keywords.addAll(this.non_demanding_keywords);
 		this.reader = new IO(PATHFILE_INPATH, "out");
@@ -141,8 +139,6 @@ public class PathParser {
 					enclosed_text = line.trim();
 				}	
 			} while(this.reader.hasNext());
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
 		} catch (IOModeException iome) {
 			iome.printStackTrace();
 		}
@@ -165,16 +161,6 @@ public class PathParser {
 		return (s.length() - s.replace(target, "").length()) / target.length();
 	}
 	
-	private int countOccurrencesOfPattern(String s, String pattern) {
-		Pattern r = Pattern.compile(pattern);
-		Matcher m = r.matcher(s);
-		int count = 0;
-		while (m.find()) {
-			count++;
-		}
-		return count;
-	}
-	
 	private List<String> findMatches(String s, String pattern) {
 		List<String> matches = new ArrayList<>();
 		Pattern r = Pattern.compile(pattern);
@@ -185,19 +171,6 @@ public class PathParser {
 		return matches;	
 	}
 	
-	private <T> void pAL(List<T> al) {
-		if (al.size() == 0) {
-			System.out.println("{}");
-			return;
-		}
-		String out = "{" + al.get(0);
-		for (int i = 1; i < al.size(); i++) {
-			out += ", " + al.get(i);
-		}
-		out += "}";
-		System.out.println(out);
-	}
-	
 	private String getKeyword(String tag) {
 		String keyword;
 		if (tag.indexOf(" ") == -1) {
@@ -206,15 +179,6 @@ public class PathParser {
 			keyword = tag.substring(tag.indexOf("<") + 1, tag.indexOf(" "));
 		}
 		return keyword;
-	}
-	
-	private <T> boolean contains(T[] array, T target) {
-		for (T element : array) {
-			if (element == target || element.equals(target)) {
-				return true;
-			}
-		}
-		return false;
 	}
 	
 	private boolean contains(String s, String target) {
