@@ -66,6 +66,14 @@ public class Indexing <V extends Number> implements Serializable {
 		this.load(FREQS_IN_PATH, LEX_IN_PATH, zipped);
 	}
 	
+	/** Constructor to load an Indexing from already computed data in a parallelized manner */
+	public Indexing(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped, int threads) {
+		this(FREQS_IN_PATH, LEX_IN_PATH);
+		this.setMode();
+		this.setPrefix();
+		this.loadParallelized(FREQS_IN_PATH, LEX_IN_PATH, zipped, threads);
+	}
+	
 	/** Constructor to dump already indexed data */
 	public Indexing(Map<List<Integer>, V> indexed_data, String FREQS_IN_PATH, boolean zipped) {
 		this(indexed_data, FREQS_IN_PATH);
@@ -187,7 +195,7 @@ public class Indexing <V extends Number> implements Serializable {
 	
 	public void load(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
 		try {
-			this.indices = this.readIndicesParallelized(FREQS_IN_PATH, zipped, this.getMode(), 6);
+			this.indices = this.readIndices(FREQS_IN_PATH, zipped, this.getMode());
 			this.lexicon = new BiMapLexicon(this.readLexicon(LEX_IN_PATH, zipped));
 		} catch(IOException fnfe) {
 			fnfe.printStackTrace();
@@ -196,6 +204,19 @@ public class Indexing <V extends Number> implements Serializable {
 		List<Integer> sample_key = this.getIndices().keySet().iterator().next();
 		this.n = sample_key.size();
 	}
+	
+	public void loadParallelized(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped, int threads) {
+		try {
+			this.indices = this.readIndicesParallelized(FREQS_IN_PATH, zipped, this.getMode(), threads);
+			this.lexicon = new BiMapLexicon(this.readLexicon(LEX_IN_PATH, zipped));
+		} catch(IOException fnfe) {
+			fnfe.printStackTrace();
+		}
+		// Take sample to determine n
+		List<Integer> sample_key = this.getIndices().keySet().iterator().next();
+		this.n = sample_key.size();
+	}
+	
 	
 	public void validateState() throws IllegalArgumentException {
 		this.validateIndices();
@@ -299,16 +320,11 @@ public class Indexing <V extends Number> implements Serializable {
 				index_readers.add(new IndexReader<V>(reader, mode));
 			}
 			for (IndexReader<V> index_reader : index_readers) {
-				while (index_reader.isRunning()) {
-					System.out.println(index_reader.isRunning());
-				}
+				index_reader.join();
 				if (!index_reader.isRunning()) {
-					System.out.println("Index reader nr. " + index_reader.getID() + " finished the job.");
 					indices.putAll(index_reader.getIndices());
 				}
-			}
-			
-			
+			}	
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}

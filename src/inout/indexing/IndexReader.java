@@ -14,14 +14,15 @@ public class IndexReader <V extends Number> implements Runnable {
 	private boolean running = false;
 	private String mode;
 	private BufferedReader reader;
+	private Thread thread;
 	private Map<List<Integer>, V> indices;
 	
 	public IndexReader(BufferedReader reader, String mode) {
 		this.reader = reader;
 		this.mode = mode;
 		this.indices = new HashMap<>();
-		Thread thread = new Thread(this);
-		thread.start();
+		this.thread = new Thread(this);
+		this.thread.start();
 	}
 		
 	public void run() {
@@ -54,8 +55,12 @@ public class IndexReader <V extends Number> implements Runnable {
 				}
 				try {
 					current_line = reader.readLine().trim();
-					System.out.println(current_line);
-				} catch (NullPointerException npe) { this.setRunning(false); break; }
+					//System.out.println(current_line);
+				} catch (NullPointerException npe) {
+					//System.out.println("I am reader nr " + this.getID() + " and I finished my job");
+					this.setRunning(false);
+					break;
+				}
 			}
 		} catch(IOException ioe) {
 			ioe.printStackTrace();
@@ -76,6 +81,14 @@ public class IndexReader <V extends Number> implements Runnable {
 	
 	public long getID() {
 		return Thread.currentThread().getId();
+	}
+	
+	public void join() {
+		try {
+			this.thread.join();
+		} catch (InterruptedException ie) {
+			ie.printStackTrace();
+		}
 	}
 	
 	
