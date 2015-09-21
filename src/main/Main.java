@@ -15,8 +15,8 @@ public class Main {
 	
 	public static void main(String[] args) {
 
-		LanguageModel lm = new LanguageModel(3, "./rsc/paths.xml");
-		lm.flipDebug();
-		lm.getSequenceProbability("Caro ist ganz nett .");
+		LanguageModel lm = new LanguageModel(3, "./rsc/paths.xml", "back-off", false);
+		//lm.flipDebug();
+		lm.getSequenceProbability("David schreibt keinen schönen Code .");
 	}
 }

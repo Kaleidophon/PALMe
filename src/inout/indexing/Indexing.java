@@ -44,6 +44,7 @@ public class Indexing <V extends Number> implements Serializable {
 	
 	// ------------------------------------------------- Constructor -------------------------------------------------
 	
+	/** Default constructor: Load frequency data, create indices and save them */
 	public Indexing(Map<String, V> data, String FREQS_IN_PATH, String LEX_IN_PATH) {
 		create_lexicons = true;
 		this.FREQS_IN_PATH = FREQS_IN_PATH;
@@ -57,16 +58,7 @@ public class Indexing <V extends Number> implements Serializable {
 		}
 	}
 	
-	protected Indexing(String FREQS_IN_PATH, String LEX_IN_PATH) {
-		this.LEX_IN_PATH = LEX_IN_PATH;
-		this.FREQS_IN_PATH = FREQS_IN_PATH;
-	}
-	
-	protected Indexing(Map<List<Integer>, V> indexed_data, String FREQS_IN_PATH) {
-		this.indices = indexed_data;
-		this.FREQS_IN_PATH = FREQS_IN_PATH;
-	}
-	
+	/** Constructor to load an Indexing from already computed data */
 	public Indexing(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
 		this(FREQS_IN_PATH, LEX_IN_PATH);
 		this.setMode();
@@ -74,6 +66,7 @@ public class Indexing <V extends Number> implements Serializable {
 		this.load(FREQS_IN_PATH, LEX_IN_PATH, zipped);
 	}
 	
+	/** Constructor to dump already indexed data */
 	public Indexing(Map<List<Integer>, V> indexed_data, String FREQS_IN_PATH, boolean zipped) {
 		this(indexed_data, FREQS_IN_PATH);
 		this.setMode();
@@ -81,6 +74,7 @@ public class Indexing <V extends Number> implements Serializable {
 		this.dump(this.FREQS_IN_PATH, zipped);
 	}
 	
+	/** Dummy constructor */
 	public Indexing() {
 		// Making this constructor intentionally relatively useless
 		this.indices = null;
@@ -92,6 +86,18 @@ public class Indexing <V extends Number> implements Serializable {
 		this.mode = null;
 		this.prefix = null;
 		this.n = 0;
+	}
+	
+	/** Constructor corresponding to the one loading; also called by subclasses */
+	protected Indexing(String FREQS_IN_PATH, String LEX_IN_PATH) {
+		this.LEX_IN_PATH = LEX_IN_PATH;
+		this.FREQS_IN_PATH = FREQS_IN_PATH;
+	}
+	
+	/** Constructor corresponding to the one dumpinh; also called by subclasses */
+	protected Indexing(Map<List<Integer>, V> indexed_data, String FREQS_IN_PATH) {
+		this.indices = indexed_data;
+		this.FREQS_IN_PATH = FREQS_IN_PATH;
 	}
 	
 	// ------------------------------------------------- Main methods ------------------------------------------------
