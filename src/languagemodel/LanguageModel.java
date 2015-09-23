@@ -212,25 +212,29 @@ public class LanguageModel {
 		// Instantiate Indexing
 		switch (prob_indexing_path.getCoding()) {
 			case ("HEXADECIMAL"):
-				prob_indexing = new HexadecimalIndexing<Double>(prob_indexing_path.getDirectory(), lex_path.getDirectory(), prob_indexing_path.isZipped());
+				prob_indexing = new HexadecimalIndexing<Double>(prob_indexing_path.getDirectory(), lex_path.getDirectory(), prob_indexing_path.isZipped(), 4);
 				break;
 			case ("BINARY"):
-				prob_indexing = new BinaryIndexing<Double>(prob_indexing_path.getDirectory(), lex_path.getDirectory(), prob_indexing_path.isZipped());
+				prob_indexing = new BinaryIndexing<Double>(prob_indexing_path.getDirectory(), lex_path.getDirectory(), prob_indexing_path.isZipped(), 4);
 				break;
 			case ("DEFAULT"):
-				prob_indexing = new Indexing<Double>(prob_indexing_path.getDirectory(), lex_path.getDirectory(), prob_indexing_path.isZipped());
+				prob_indexing = new Indexing<Double>(prob_indexing_path.getDirectory(), lex_path.getDirectory(), prob_indexing_path.isZipped(), 4);
 				break;
 		}
 		return prob_indexing;
 	}
 	
 	private void setup() {
+		long startTime = System.nanoTime();
 		this.n_probabilities = new ArrayList<>();
 		this.lex = (BiMapLexicon) this.getProbIndexing(1).getLexicon();
 		
 		for (int i = 0; i < this.getN() - 1; i++) {
 			this.n_probabilities.add((Map<List<Integer>, Double>) this.getProbIndexing(i+1).getIndices());
 		}
+		long endTime = System.nanoTime();
+		long duration = (endTime - startTime);
+		System.out.println("Setting up language model took " + Math.round(duration / 10000000.0) / 100.0 + " s in total.");
 	}
 	
 	private void calculate() {

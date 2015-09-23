@@ -32,7 +32,7 @@ public class DataLoader {
 				freqs.put(key, value);
 				current_line = this.reader.next();
 			} while (this.reader.hasNext());
-		}  catch (NullPointerException | IOModeException | IOException e) {
+		}  catch (NullPointerException | IOModeException e) {
 			e.printStackTrace();
 		}
 		return freqs;

@@ -31,6 +31,13 @@ public class BinaryIndexing <V extends Number> extends Indexing {
 		this.load(FREQS_IN_PATH, LEX_IN_PATH, zipped);
 	}
 	
+	public BinaryIndexing(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped, int threads) {
+		super(FREQS_IN_PATH, LEX_IN_PATH);
+		this.setPrefix();
+		this.setMode();
+		this.loadParallelized(FREQS_IN_PATH, LEX_IN_PATH, zipped, threads);
+	}
+	
 	public BinaryIndexing(Map<List<Integer>, V> indexed_data, String FREQS_IN_PATH, boolean zipped) {
 		super(indexed_data, FREQS_IN_PATH);
 		this.setMode();

@@ -66,6 +66,14 @@ public class Indexing <V extends Number> implements Serializable {
 		this.load(FREQS_IN_PATH, LEX_IN_PATH, zipped);
 	}
 	
+	/** Constructor to load an Indexing from already computed data in a parallelized manner */
+	public Indexing(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped, int threads) {
+		this(FREQS_IN_PATH, LEX_IN_PATH);
+		this.setMode();
+		this.setPrefix();
+		this.loadParallelized(FREQS_IN_PATH, LEX_IN_PATH, zipped, threads);
+	}
+	
 	/** Constructor to dump already indexed data */
 	public Indexing(Map<List<Integer>, V> indexed_data, String FREQS_IN_PATH, boolean zipped) {
 		this(indexed_data, FREQS_IN_PATH);
@@ -197,6 +205,19 @@ public class Indexing <V extends Number> implements Serializable {
 		this.n = sample_key.size();
 	}
 	
+	public void loadParallelized(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped, int threads) {
+		try {
+			this.indices = this.readIndicesParallelized(FREQS_IN_PATH, zipped, this.getMode(), threads);
+			this.lexicon = new BiMapLexicon(this.readLexicon(LEX_IN_PATH, zipped));
+		} catch(IOException fnfe) {
+			fnfe.printStackTrace();
+		}
+		// Take sample to determine n
+		List<Integer> sample_key = this.getIndices().keySet().iterator().next();
+		this.n = sample_key.size();
+	}
+	
+	
 	public void validateState() throws IllegalArgumentException {
 		this.validateIndices();
 		this.validateLexicon();
@@ -238,6 +259,7 @@ public class Indexing <V extends Number> implements Serializable {
 	// ----------------------------------------------- Reading & Writing ---------------------------------------------
 	
 	protected Map<List<Integer>, V> readIndices(String INFILE_PATH, boolean zipped, String mode) throws FileNotFoundException{
+		
 		Map<List<Integer>, V> indices = new HashMap<>();
 		try {
 			BufferedReader reader;
@@ -276,6 +298,33 @@ public class Indexing <V extends Number> implements Serializable {
 					current_line = reader.readLine().trim();
 				}
 			} catch (NullPointerException npe) {}
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
+		return indices;
+	}
+
+	protected Map<List<Integer>, V> readIndicesParallelized(String INFILE_PATH, boolean zipped, String mode, int threads) throws FileNotFoundException {
+		Map<List<Integer>, V> indices = new HashMap<>();
+		List<IndexReader<V>> index_readers = new ArrayList<>();
+		
+		try {
+			BufferedReader reader;
+			if (zipped) {
+				GZIPInputStream gis = new GZIPInputStream(new FileInputStream(INFILE_PATH));
+				reader = new BufferedReader(new InputStreamReader(gis));
+			} else {
+				reader = new BufferedReader(new FileReader(INFILE_PATH));
+			}
+			for (int i = 0; i < threads; i++) {
+				index_readers.add(new IndexReader<V>(reader, mode));
+			}
+			for (IndexReader<V> index_reader : index_readers) {
+				index_reader.join();
+				if (!index_reader.isRunning()) {
+					indices.putAll(index_reader.getIndices());
+				}
+			}	
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
@@ -403,4 +452,7 @@ public class Indexing <V extends Number> implements Serializable {
 	private void setPrefix() {
 		this.prefix = "";
 	}
+	
+
+	
 }
