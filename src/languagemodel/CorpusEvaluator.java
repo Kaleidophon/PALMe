@@ -22,7 +22,7 @@ public class CorpusEvaluator extends Thread {
 		
 		while (cd.hasLeft()) {
 			line = cd.get();
-			System.out.println("Consumer #" + this.getID() + " analyzing " + line);
+			//System.out.println("Consumer #" + this.getID() + " analyzing " + line);
 			line_count++;
 			double prob = lm.getSequenceProbability(line);
 			total_prob += prob;

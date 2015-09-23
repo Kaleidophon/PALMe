@@ -30,7 +30,7 @@ public class Evaluation {
 		perplexity /= count;
 		System.out.println("Evaluating the " + lm.getMode() + " Language model with " + lm.getN() + "-grams took " + 
 								Math.round(duration / 10000000.0) / 100.0 + " s in total.");
-		System.out.println("Average perplexity is " + Math.round(perplexity * 100.0) / 100.0);
+		System.out.println("Average perplexity is " + Math.round(perplexity * 10000.0) / 10000.0);
 		return perplexity;
 	}
 	
@@ -74,7 +74,7 @@ public class Evaluation {
 		long duration = (endTime - startTime);
 		System.out.println("Evaluating the " + lm.getMode() + " Language model with " + lm.getN() + "-grams took " + 
 				Math.round(duration / 10000000.0) / 100.0 + " s in total.");
-		System.out.println("Average perplexity is " + Math.round(perplexity * 100.0) / 100.0);
+		System.out.println("Average perplexity is " + Math.round(perplexity * 10000.0) / 10000.0);
 		
 		return perplexity;
 	}

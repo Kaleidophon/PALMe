@@ -18,7 +18,7 @@ public class CorpusReader extends Thread {
 		try {
 			String current_line = reader.readLine().trim();
 			while(true) {
-				System.out.println("Producer #" + this.getID() + " pushing " + current_line);
+				//System.out.println("Producer #" + this.getID() + " pushing " + current_line);
 				this.getCorpusDepot().add(current_line);
 				try {
 					current_line = reader.readLine().trim();

@@ -8,25 +8,11 @@ public class CorpusDepot {
 	private boolean availiable = false;
 	
 	public synchronized String get() {
-		while (!this.isAvailable()) {
-			try {
-				wait();
-			} catch (InterruptedException e) {}
-		}
-		this.setAvailable(false);
-		notifyAll();
 		return this.contents.pop();	
 	}
 	
 	public synchronized void add(String s) {
-		while (this.isAvailable()) {
-			try {
-				wait();
-			} catch (InterruptedException e) {}
-		}
 		this.contents.push(s);
-		this.setAvailable(true);
-		notifyAll();
 	}
 	
 	public boolean isAvailable() {
