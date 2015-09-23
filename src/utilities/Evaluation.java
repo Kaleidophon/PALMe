@@ -50,17 +50,17 @@ public class Evaluation {
 		
 		for (int i = 0; i < n_of_producer; i++) {
 			producer.add(new CorpusReader(reader, cd));
-			System.out.println("Starting producer #" + producer.get(i).getId());
+			//System.out.println("Starting producer #" + producer.get(i).getId());
 		}
 		for (int i = 0; i < n_of_consumer; i++) {
 			consumer.add(new CorpusEvaluator(lm, cd));
-			System.out.println("Starting consumer #" + consumer.get(i).getId());
+			//System.out.println("Starting consumer #" + consumer.get(i).getId());
 		}
 		
 		for (CorpusEvaluator ce : consumer) {
 			try {
 				ce.join();
-				System.out.println("Consumer #" + ce.getID() + " has finished the job.");
+				//System.out.println("Consumer #" + ce.getID() + " has finished the job.");
 				if (!ce.isRunning()) {
 					perplexity += ce.getTotalProb();
 					count += ce.getLineCount();

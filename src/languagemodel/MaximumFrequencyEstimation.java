@@ -1,4 +1,4 @@
-package smoothing;
+package languagemodel;
 
 import inout.indexing.BinaryIndexing;
 import inout.indexing.HexadecimalIndexing;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
-public class MaximumFrequencyEstimation implements Smoothing {
+public class MaximumFrequencyEstimation implements ProbabilityCalculation {
 
 	public void calculateNgramProbabilities(int n, PathHandler ph) {
 		Indexing<Integer> current_freq_indexing = null;

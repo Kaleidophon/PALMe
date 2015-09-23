@@ -17,7 +17,7 @@ public class Main {
 		
 		LanguageModel lm = new LanguageModel(5, "./rsc/paths.xml", "fast back-off", true);
 		//lm.flipDebug();
-		Evaluation.evaluateLanguageModel(lm, "./rsc/corpora/dewiki_plain_1000k_test.txt");
+		//Evaluation.evaluateLanguageModel(lm, "./rsc/corpora/dewiki_plain_1000k_test.txt");
 		//lm.evaluateLanguageModel("./rsc/corpora/dewiki_plain_1000k_test.txt");
 		Evaluation.evaluateLanguageModelParallelized(lm, "./rsc/corpora/dewiki_plain_1000k_test.txt", 1, 3);
 	}

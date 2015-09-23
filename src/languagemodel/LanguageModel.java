@@ -1,8 +1,6 @@
 package languagemodel;
 
-import smoothing.*;
 import utilities.Toolbox;
-import inout.general.IO;
 import inout.indexing.BiMapLexicon;
 import inout.indexing.BinaryIndexing;
 import inout.indexing.HexadecimalIndexing;
@@ -22,7 +20,7 @@ import java.lang.IllegalArgumentException;
 public class LanguageModel {
 	
 	private final int n;
-	private Smoothing smoothing;
+	private ProbabilityCalculation smoothing;
 	private boolean validateState;
 	private PathHandler ph;
 	private String IN_PATH;
@@ -32,7 +30,7 @@ public class LanguageModel {
 	private List<Map<List<Integer>, Double>> n_probabilities;
 	private BiMapLexicon lex;
 	
-	public LanguageModel(int n, String IN_PATH, Smoothing smoothing, String mode, boolean normalization) {
+	public LanguageModel(int n, String IN_PATH, ProbabilityCalculation smoothing, String mode, boolean normalization) {
 		// Constructor to calculate n-gram probabilities based on n-gram frequencies
 		this.n = n;
 		this.IN_PATH = IN_PATH;
@@ -300,7 +298,7 @@ public class LanguageModel {
 		this.validateState = validateState;
 	}
 	
-	public Smoothing getSmoothing() {
+	public ProbabilityCalculation getSmoothing() {
 		return this.smoothing;
 	}
 	
