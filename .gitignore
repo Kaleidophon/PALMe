@@ -5,3 +5,13 @@ misc/*.xml
 .DS_Store
 /exp/**/~$*.xlsx
 *.class
+
+*.aux
+
+*.log
+
+*.pdf
+
+*.out
+
+*.toc

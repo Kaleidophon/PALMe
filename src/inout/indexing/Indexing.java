@@ -189,7 +189,6 @@ public class Indexing <V extends Number> implements Serializable {
 	}
 	
 	public void dump(String OUTFILE_PATH, boolean zipped) {
-		String ext = (zipped) ? ".gz" : ".txt";
 		this.writeIndices(this.indices, OUTFILE_PATH, zipped, this.getMode());
 	}
 	
@@ -307,7 +306,6 @@ public class Indexing <V extends Number> implements Serializable {
 	protected Map<List<Integer>, V> readIndicesParallelized(String INFILE_PATH, boolean zipped, String mode, int threads) throws FileNotFoundException {
 		Map<List<Integer>, V> indices = new HashMap<>();
 		List<IndexReader<V>> index_readers = new ArrayList<>();
-		
 		try {
 			BufferedReader reader;
 			if (zipped) {

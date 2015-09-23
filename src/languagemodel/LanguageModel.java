@@ -181,18 +181,65 @@ public class LanguageModel {
 		return probability;
 	}
 	
-	public double evaluateLanguageModel(String INPATH) {
-		double perplexity = 0.0;
-		int count = 0;
-		IO reader = new IO(INPATH, "out");
-		do {
-			if (!this.debug && count % 995 == 0) System.out.println("Sentence nr. " + count);
-			String line = reader.next();
-			perplexity += this.getSequenceProbability(line);
-			count++;
-			
-		} while(reader.hasNext());
-		return perplexity / count;
+	public synchronized double getSequenceProbabilityParallelized(String seq) {
+		// Initializing
+		double probability = 1.0;
+		long startTime = System.nanoTime();
+		List<String> tokens = new ArrayList<>();
+		tokens.addAll(Arrays.asList(seq.trim().split(" ")));
+		if (!tokens.contains("<s>") && !tokens.contains("</s")) {
+			tokens.add(0, "<s>");
+			tokens.add("</s>");
+		}
+		// Convert to array
+		String[] tokens_ = new String[tokens.size()];
+		tokens_ = tokens.toArray(tokens_);
+		
+		if (mode.equals("default")) {
+			if (tokens.size() < this.getN()) {
+				return 0.0;
+			}
+			Indexing<Double> prob_indexing = this.getProbIndexing(this.getN());
+			Map<List<Integer>, Double> probs = (Map<List<Integer>, Double>) prob_indexing.getIndices();
+			for (int i = 0; i < tokens_.length - this.getN() + 1; i++) {
+				String[] slice = Arrays.copyOfRange(tokens_, i, i + this.getN());
+				List<Integer> ids = this.translateToInt(slice, (BiMapLexicon) prob_indexing.getLexicon());
+				double prob = (probs.get(ids) == null) ? 0 : probs.get(ids);
+				if (this.debug) Toolbox.printArray(slice); System.out.println("Slice prob is " + prob);
+				probability *= prob;
+			}
+		} else if (mode.equals("fast back-off")) {
+			for (int i = 0; i <= tokens_.length; i++) {
+				for (int j = i - this.getN(); j != i; j++) {
+					try {
+						String[] slice = Arrays.copyOfRange(tokens_, j, i);
+						if(this.debug) Toolbox.printArray(slice);
+						List<Integer> ids = this.translateToInt(slice, this.lex);
+						Double prob = this.n_probabilities.get(slice.length-1).get(ids);
+						if (prob != null) {
+							if (this.debug) System.out.println("It's a match!");
+							probability *= prob;
+							break;
+						} else if (slice.length == 1 && prob == null) {
+							probability = 0;
+							break;
+						}
+					} catch(IndexOutOfBoundsException ioobe) {
+						continue;
+					}
+				}
+			}
+		} 
+		
+		long endTime = System.nanoTime();
+		long duration = (endTime - startTime);
+		if (this.getNormalization()) probability = Math.pow(probability, (1.0 / tokens.size()));
+		if (debug) {
+			System.out.println("Sequence probability for '" + seq + "' is " + probability + ".");
+			System.out.println("Calculating sequence probability with " + this.getMode() + " Language model and " + this.n + "-grams took " + 
+								Math.round(duration / 10000000.0) / 100.0 + " s in total.");
+		}
+		return probability;
 	}
 	
 	private Indexing<Double> getProbIndexing(int n) {
@@ -303,6 +350,10 @@ public class LanguageModel {
 		if (!this.mode.equals("fast back-off") && !this.mode.equals("default") && !this.mode.equals("efficient back-off")) {
 			throw new IllegalArgumentException("Illegal mode");
 		}
+	}
+	
+	public boolean debug() {
+		return this.debug;
 	}
 	
 	class WordNGrams {
