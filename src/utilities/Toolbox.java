@@ -80,6 +80,9 @@ public class Toolbox {
 	}
 	
 	public static <T> String listToString(List<T> l) {
+		if (l.size() == 0) {
+			return "{}";
+		}
 		String out = "{" + l.get(0);
 		for (int i = 1; i < l.size(); i++) {
 			out += ", " + l.get(i);
@@ -89,6 +92,9 @@ public class Toolbox {
 	}
 	
 	public static <T> String arrayToString(T[] a) {
+		if (a.length == 0) {
+			return "{}";
+		}
 		String out = "{" + a[0];
 		for (int i = 1; i < a.length; i++) {
 			out += ", " + a[i];

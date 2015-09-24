@@ -1,4 +1,4 @@
-package languagemodel;
+package utilities.eval;
 
 import java.util.Stack;
 
@@ -15,19 +15,7 @@ public class CorpusDepot {
 		this.contents.push(s);
 	}
 	
-	public boolean isAvailable() {
-		return this.availiable;
-	}
-	
-	public void setAvailable(boolean a) {
-		this.availiable = a;
-	}
-	
 	public boolean hasLeft() {
 		return !this.contents.empty();
-	}
-	
-	public long getID() {
-		return Thread.currentThread().getId();
 	}
 }

@@ -1,4 +1,4 @@
-package utilities;
+package utilities.eval;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -6,10 +6,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import languagemodel.CorpusDepot;
-import languagemodel.CorpusEvaluator;
-import languagemodel.CorpusReader;
-import languagemodel.LanguageModel;
+import languagemodel.model.LanguageModel;
 import inout.general.IO;
 
 public class Evaluation {

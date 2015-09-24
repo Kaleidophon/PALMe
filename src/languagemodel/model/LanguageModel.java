@@ -1,4 +1,4 @@
-package languagemodel;
+package languagemodel.model;
 
 import utilities.Toolbox;
 import inout.indexing.BiMapLexicon;
@@ -17,10 +17,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.lang.IllegalArgumentException;
 
+import languagemodel.calc.ProbabilityCalculation;
+
 public class LanguageModel {
 	
 	private final int n;
-	private ProbabilityCalculation smoothing;
+	private ProbabilityCalculation prob_calc;
 	private boolean validateState;
 	private PathHandler ph;
 	private String IN_PATH;
@@ -35,14 +37,13 @@ public class LanguageModel {
 		this.n = n;
 		this.IN_PATH = IN_PATH;
 		this.normalization = normalization;
+		this.mode = mode;
+		this.validateState = false;
 		this.checkIntegrity();
 		this.ph = new PathHandler(IN_PATH);
-		this.smoothing = smoothing;
-		this.validateState = false;
+		this.prob_calc = smoothing;
 		this.debug = false;
-		this.mode = mode;
 		if (debug) this.ph.printPaths();
-		this.calculate();
 	}
 	
 	public LanguageModel(int n, String IN_PATH, String mode, boolean normalization) {
@@ -241,6 +242,10 @@ public class LanguageModel {
 	}
 	
 	private Indexing<Double> getProbIndexing(int n) {
+		return this.getProbIndexing(n, 1);
+	}
+	
+	private Indexing<Double> getProbIndexing(int n, int threads) {
 		List<List<Path>> pathlists = new ArrayList<>();
 		pathlists.add(this.ph.getPathsWithN(n));
 		pathlists.add(this.ph.getPathsWithType("probability"));
@@ -257,13 +262,13 @@ public class LanguageModel {
 		// Instantiate Indexing
 		switch (prob_indexing_path.getCoding()) {
 			case ("HEXADECIMAL"):
-				prob_indexing = new HexadecimalIndexing<Double>(prob_indexing_path.getDirectory(), lex_path.getDirectory(), prob_indexing_path.isZipped(), 4);
+				prob_indexing = new HexadecimalIndexing<Double>(prob_indexing_path.getDirectory(), lex_path.getDirectory(), prob_indexing_path.isZipped(), threads);
 				break;
 			case ("BINARY"):
-				prob_indexing = new BinaryIndexing<Double>(prob_indexing_path.getDirectory(), lex_path.getDirectory(), prob_indexing_path.isZipped(), 4);
+				prob_indexing = new BinaryIndexing<Double>(prob_indexing_path.getDirectory(), lex_path.getDirectory(), prob_indexing_path.isZipped(), threads);
 				break;
 			case ("DEFAULT"):
-				prob_indexing = new Indexing<Double>(prob_indexing_path.getDirectory(), lex_path.getDirectory(), prob_indexing_path.isZipped(), 4);
+				prob_indexing = new Indexing<Double>(prob_indexing_path.getDirectory(), lex_path.getDirectory(), prob_indexing_path.isZipped(), threads);
 				break;
 		}
 		return prob_indexing;
@@ -282,8 +287,12 @@ public class LanguageModel {
 		System.out.println("Setting up language model took " + Math.round(duration / 10000000.0) / 100.0 + " s in total.");
 	}
 	
-	private void calculate() {
-		this.smoothing.calculateNgramProbabilities(this.getN(), this.getPathHandler());
+	public void calculate() {
+		this.prob_calc.calculateNgramProbabilities(this.getN(), this.getPathHandler());
+	}
+	
+	public void calculateParallelized(int producer, int consumer) {
+		this.prob_calc.calculateNgramProbabilitiesParallelized(this.getN(), this.getPathHandler(), producer, consumer);
 	}
 	
 	private List<Integer> translateToInt(String[] tokens, BiMapLexicon lex) {
@@ -299,7 +308,7 @@ public class LanguageModel {
 	}
 	
 	public ProbabilityCalculation getSmoothing() {
-		return this.smoothing;
+		return this.prob_calc;
 	}
 	
 	public int getN() {
@@ -345,7 +354,7 @@ public class LanguageModel {
 		if (m.group() == null) {
 			throw new IllegalArgumentException("Illegal path");
 		}
-		if (!this.mode.equals("fast back-off") && !this.mode.equals("default") && !this.mode.equals("efficient back-off")) {
+		if (!(this.mode.equals("fast back-off") || this.mode.equals("default") || this.mode.equals("efficient back-off"))) {
 			throw new IllegalArgumentException("Illegal mode");
 		}
 	}

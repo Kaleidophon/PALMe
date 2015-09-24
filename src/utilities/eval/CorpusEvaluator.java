@@ -1,4 +1,6 @@
-package languagemodel;
+package utilities.eval;
+
+import languagemodel.model.LanguageModel;
 
 public class CorpusEvaluator extends Thread {
 

@@ -1,4 +1,4 @@
-package languagemodel;
+package utilities.eval;
 
 import java.io.BufferedReader;
 import java.io.IOException;
