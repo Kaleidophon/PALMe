@@ -392,5 +392,4 @@ public class LanguageModel {
 			return this.ngrams.size();
 		}
 	}
-	
 }

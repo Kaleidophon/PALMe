@@ -19,7 +19,8 @@ public class Main {
 		
 		// Calculation
 		LanguageModel lm = new LanguageModel(2, "./rsc/paths.xml", new MaximumFrequencyEstimation(), "fast back-off", true);
-		lm.calculateParallelized(1, 3);
+		lm.calculate();
+		lm.calculateParallelized(2, 2);
 		
 		// Evaluation
 		//LanguageModel lm = new LanguageModel(3, "./rsc/paths.xml", "fast back-off", true);

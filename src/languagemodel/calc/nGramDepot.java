@@ -17,7 +17,7 @@ class nGramDepot {
 		this.contents.push(entry);
 	}
 	
-	public boolean hasLeft() {
+	public synchronized boolean hasLeft() {
 		return !this.contents.empty();
 	}
 }

@@ -200,6 +200,7 @@ public class MaximumFrequencyEstimation implements ProbabilityCalculation {
 		pathlists.add(ph.getPathsWithType("frequency"));
 		pathlists.add(ph.getPathsWithTask("read"));
 		Path freq_indexing_path = ph.intersection(pathlists).get(0);
+		System.out.println(freq_indexing_path.toString());
 		Indexing<Integer> freq_indexing = null;
 		
 		// Load lexicon

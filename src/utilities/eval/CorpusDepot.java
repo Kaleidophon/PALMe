@@ -15,7 +15,7 @@ public class CorpusDepot {
 		this.contents.push(s);
 	}
 	
-	public boolean hasLeft() {
+	public synchronized boolean hasLeft() {
 		return !this.contents.empty();
 	}
 }
