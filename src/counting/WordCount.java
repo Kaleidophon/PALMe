@@ -42,7 +42,7 @@ public class WordCount {
 	    
 	    private final static IntWritable one = new IntWritable(1);
 	    private Text ngram = new Text();
-	    private static int n = 1;
+	    private static int n = 4;
 	      
 	    public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 	    	StringTokenizer itr = new StringTokenizer(value.toString());
@@ -60,16 +60,24 @@ public class WordCount {
 	    
 	    /** Efficient Concatenation with StringBuilder */
 	    private String concat(List<String> stringlist) {
+	    	if (stringlist.size() == 1) {
+	    		return stringlist.get(0);
+	    	}
 	    	StringBuilder sb = new StringBuilder();
-	    	for (int i = 0; i < stringlist.size(); i++) {
+	    	for (int i = 0; i < stringlist.size()-1; i++) {
 	    		sb.append(stringlist.get(i) + " ");
 	    	}
+	    	sb.append(stringlist.get(stringlist.size()-1));
 	    	return sb.toString();
 	    }
 	    
 	    /** Setting the ngram length */
 	    public static void setN(int new_n) {
 	    	n = new_n;
+	    }
+	    
+	    public static int getN() {
+	    	return n;
 	    }
 	}
 	
@@ -156,12 +164,13 @@ public class WordCount {
 	    // Setting map and reduce tasks
 	    //conf.setNumMapTasks(5); // Not possible with code in line?
 	    int NUMBER_OF_REDUCERS = (int) REDUCER_CONSTANT * NUMBER_OF_NODES * MAX_NUMBER_OF_TASKS;
-	    System.out.println("Number of Reducers: " + NUMBER_OF_REDUCERS);
-	    job.setNumReduceTasks(5); // Placeholder
+	    //System.out.println("Number of Reducers: " + NUMBER_OF_REDUCERS);
+	    //job.setNumReduceTasks(5); // Placeholder
 	    
 	    job.setJarByClass(WordCount.class);
-	    TokenizerMapper.setN(Integer.parseInt(otherArgs[otherArgs.length-3])); // Set ngram length
 	    job.setMapperClass(TokenizerMapper.class);
+	    TokenizerMapper.setN(Integer.parseInt(otherArgs[otherArgs.length-3])); // Set ngram length
+	    System.out.println("n = " + TokenizerMapper.getN());
 	    if (otherArgs[otherArgs.length-2].equals("yes")) {
 	    	job.setCombinerClass(IntSumReducer.class);
 	    }

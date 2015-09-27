@@ -2,34 +2,51 @@ package inout.general;
 
 import java.io.*;
 
+/**
+ * Simple class for both file reading and writing.
+ * 
+ * @author Dennis Ulmer
+ */
 public class IO {
 	
 	private final String FILE_PATH;
 	private final String MODE;
 	private BufferedReader reader;
 	private BufferedWriter writer;
-	private String next_line;
-	private String current_line;
+	private String next_line; // Only used in reading mode
+	private String current_line; // Only used in reading mode
 	
+	/**
+	 * Simple constructor.
+	 * 
+	 * @param file_path File to be read or written into.
+	 * @param mode Whether class functions as a writer or a reader.
+	 */
 	public IO(String file_path, String mode) {
 		FILE_PATH = file_path;
 		MODE = mode;
-		
 		try {
-			if(mode == "out") {
+			if (mode.equals("out")) {
 				this.reader = new BufferedReader(new FileReader(FILE_PATH));
 				this.current_line = reader.readLine();
 				this.next_line = reader.readLine();
-			} else if(mode == "into") {
+			} else if (mode == "into") {
 				this.writer = new BufferedWriter(new FileWriter(FILE_PATH));
 			}
-		} catch(IOException ioe) {
+		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
 	}
 	
+	/**
+	 * Writes next line in writing mode.
+	 * Throws @exception {@link IOModeExpcetion} otherwise.
+	 * Also throws @exception IOException.
+	 * 
+	 * @param line Line to be written.
+	 */
 	public void next(String line) {
-		if(MODE != "into") {
+		if (!this.MODE.equals("into")) {
 			throw new IOModeException();
 		}
 		try {
@@ -40,8 +57,15 @@ public class IO {
 		}
 	}
 	
+	/**
+	 * Reads the next line in reading mode.
+	 * Throws @exception {@link IOModeExpcetion} otherwise.
+	 * Also throws @exception IOException.
+	 * 
+	 * @return Next line in the file.
+	 */
 	public String next() {
-		if(MODE != "out") {
+		if (!this.MODE.equals("out")) {
 			throw new IOModeException();
 		}
 		String tmp = this.current_line;
@@ -55,21 +79,27 @@ public class IO {
 		return tmp.trim();
 	}
 
+	/**
+	 * Closing open streams.
+	 * Throws @exception IOException.
+	 */
 	public void finish() {
 		try {
-			if(MODE == "into") {
+			if (!this.MODE.equals("into")) {
 				this.writer.close();
-			} else if(MODE == "out") {
+			} else if (MODE.equals("out")) {
 				this.reader.close();
 			}
-		} catch(IOException ioe) {
+		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
 	}
 	
+	/**
+	 * @return Whether there is a line left in a file to be read. 
+	 */
 	public boolean hasNext() {
-		boolean res = (this.current_line == null) ? false : true;
-		return res;
+		return (this.current_line == null) ? false : true;
 	}
 
 }
