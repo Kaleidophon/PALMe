@@ -1,16 +1,28 @@
 package inout.paths;
 
+import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Set;
 
+/**
+ * Class to manage all {@link Path}-objects created by a {@link PathParser}.
+ * Specific Paths can be accessed through a variety of methods collecting all Path with a shared trait or 
+ * {@link getPathsWithAttributes}, which allows very detailed querys.
+ * 
+ * @author Dennis Ulmer
+ */
 public class PathHandler {
 	
 	private List<Path> paths;
 	
 	// ------------------------------------------------- Constructors ------------------------------------------------
 	
+	/**
+	 * Default constructor.
+	 * 
+	 * @param PATHFILE_INPATH Path to Path-{@code .xml}.
+	 */
 	public PathHandler(String PATHFILE_INPATH) {
 		PathParser pp = new PathParser(PATHFILE_INPATH);
 		this.paths = pp.getPaths();
@@ -25,6 +37,15 @@ public class PathHandler {
 	
 	// ------------------------------------------------- Main methods ------------------------------------------------
 	
+	/**
+	 * Returns the first {@link Path}-object matching the specification.
+	 * The specification must have the following format:
+	 * (For an {@link Indexing}:) {raw / zipped} {default / binary / hexadecimal} {frequency / probability} indexing n {read / write}
+	 * (For a {@link Lexicon}:) {raw / zipped} lexicon
+	 * 
+	 * @param specification
+	 * @return {@link Path}
+	 */
 	public Path getFirstPathWithAttributes(String specification) {
 		List<Path> paths = this.getPathsWithAttributes(specification);
 		if (paths.size() == 0) {
@@ -33,6 +54,15 @@ public class PathHandler {
 		return this.getPathsWithAttributes(specification).get(0);
 	}
 	
+	/**
+	 * Returns a {@code List} of {@link Path}-objects matching the specification.
+	 * The specification must have the following format:
+	 * (For an {@link Indexing}:) {raw / zipped} {default / binary / hexadecimal} {frequency / probability} indexing n {read / write}
+	 * (For a {@link Lexicon}:) {raw / zipped} lexicon
+	 * 
+	 * @param specification
+	 * @return {@code List} of {@link Path}-objects
+	 */
 	public List<Path> getPathsWithAttributes(String specification) {
 		List<List<Path>> pathlists = new ArrayList<List<Path>>();
 		String[] parts = specification.split(" ");
@@ -93,6 +123,7 @@ public class PathHandler {
 		return this.intersection(pathlists);
 	}
 	
+	/** @return A {@code List} of {@link Path}-objects with a certain type */
 	public List<Path> getPathsWithType(String type) {
 		List<Path> results = new ArrayList<>();
 		for (Path p : this.paths) {
@@ -103,6 +134,7 @@ public class PathHandler {
 		return results;
 	}
 	
+	/** @return A {@code List} of {@link Path}-objects with a certain subtype */
 	public List<Path> getPathsWithSubtype(String subtype) {
 		List<Path> results = new ArrayList<>();
 		for (Path p : this.paths) {
@@ -118,6 +150,7 @@ public class PathHandler {
 		return results;
 	}
 	
+	/** @return A {@code List} of {@link Path}-objects with a certain directory */
 	public List<Path> getPathsWithDirectory(String dir) {
 		List<Path> results = new ArrayList<>();
 		for (Path p : this.paths) {
@@ -128,6 +161,7 @@ public class PathHandler {
 		return results;
 	}
 	
+	/** @return A {@code List} of {@link Path}-objects with a certain coding */
 	public List<Path> getPathsWithCoding(String coding) {
 		List<Path> results = new ArrayList<>();
 		for (Path p : this.paths) {
@@ -143,6 +177,7 @@ public class PathHandler {
 		return results;
 	}
 	
+	/** @return A {@code List} of {@link Path}-objects with a certain extension */
 	public List<Path> getPathsWithExtension(String ext) {
 		List<Path> results = new ArrayList<>();
 		for (Path p : this.paths) {
@@ -153,6 +188,7 @@ public class PathHandler {
 		return results;
 	}
 	
+	/** @return A {@code List} of {@link Path}-objects with a certain n-gram order */
 	public List<Path> getPathsWithN(int n) {
 		List<Path> results = new ArrayList<>();
 		for (Path p : this.paths) {
@@ -168,6 +204,7 @@ public class PathHandler {
 		return results;
 	}
 	
+	/** @return A {@code List} of {@link Path}-objects with a certain task type */
 	public List<Path> getPathsWithTask(String task) {
 		List<Path> results = new ArrayList<>();
 		for (Path p : this.paths) {
@@ -185,6 +222,7 @@ public class PathHandler {
 	
 	// ---------------------------------------------- Additional  methods --------------------------------------------
 	
+	/** @return The intersection of multiple lists containing {@link Path}-objects */
 	public List<Path> intersection(List<List<Path>> pathlists) {
 		Set<Path> intersection = new HashSet<>(pathlists.get(0));
 
@@ -194,6 +232,7 @@ public class PathHandler {
 		return new ArrayList<Path>(intersection);
 	}
 	
+	/** @return The intersection of two sets containing {@link Path}-objects */
 	private Set<Path> getIntersection(Set<Path> set1, Set<Path> set2) {
 	    boolean set1IsLarger = set1.size() > set2.size();
 	    Set<Path> cloneSet = new HashSet<Path>(set1IsLarger ? set2 : set1);
@@ -209,6 +248,7 @@ public class PathHandler {
 	
 	// ----------------------------------------------- Getter & Setter -----------------------------------------------
 	
+	/** @return All {@link Path}-objects */
 	public List<Path> getPaths() {
 		return this.paths;
 	}

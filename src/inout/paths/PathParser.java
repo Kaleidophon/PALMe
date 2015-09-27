@@ -8,12 +8,16 @@ import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
-import java.io.IOException;
 import java.util.regex.*;
 
 import inout.general.IO;
 import inout.general.IOModeException;
 
+/**
+ * Parses a {@code .xml}-file with {@link Path}-descriptions into {@link Path} objects.
+ * 
+ * @author Dennis Ulmer
+ */
 public class PathParser {
 	
 	private IO reader;
@@ -24,6 +28,11 @@ public class PathParser {
 	
 	// ------------------------------------------------- Constructors ------------------------------------------------
 	
+	/**
+	 * Default constructor.
+	 * 
+	 * @param PATHFILE_INPATH Path to .xml-file.
+	 */
 	public PathParser(String PATHFILE_INPATH) {
 		this.keywords = new HashSet<>(this.demanding_keywords);
 		this.keywords.addAll(this.non_demanding_keywords);
@@ -37,6 +46,9 @@ public class PathParser {
 	
 	// ------------------------------------------------- Main methods ------------------------------------------------
 	
+	/** Parses the {@code .xml}-file.
+	 *  @return {@code List} containing {@link Path}-objects.
+	 */
 	private List<Path> parsePaths() throws XMLParseException {
 		List<Path> paths = new ArrayList<>();
 		try {
@@ -145,6 +157,7 @@ public class PathParser {
 		return paths;
 	}
 	
+	/** Extracts attribues from a {@code .xml} tag */
 	private Map<String, String> extractAttributes(String tag) {
 		tag = tag.replace("<", "").replace(">", "").replace("\"", "");
 		Map<String, String> attributes = new HashMap<>();
@@ -159,10 +172,12 @@ public class PathParser {
 	
 	// ---------------------------------------------- Additional  methods --------------------------------------------
 	
+	/** Counts occurrences of a {@code String} within another {@code String}. */
 	private int countOccurrences(String s, String target) {
 		return (s.length() - s.replace(target, "").length()) / target.length();
 	}
 	
+	/** Finds all matches of a {@code regex} pattern within a {@code String} */
 	private List<String> findMatches(String s, String pattern) {
 		List<String> matches = new ArrayList<>();
 		Pattern r = Pattern.compile(pattern);
@@ -173,6 +188,7 @@ public class PathParser {
 		return matches;	
 	}
 	
+	/** @return Whether a {@code String} contains another {@code String} */
 	private boolean contains(String s, String target) {
 		for (int i = 0; i < s.length() - target.length() + 1; i++) {
 			if (s.substring(i, i + target.length()).equals(target)) {
@@ -182,10 +198,12 @@ public class PathParser {
 		return false;
 	}
 	
+	/** @return If a {@code .xml}-tag has attributes */
 	private boolean hasAttributes(String tag) {
 		return this.contains(tag, "=");
 	}
 	
+	/** @return The keyword of {@code .xml}-tag */
 	private String getKeyword(String tag) {
 		String keyword;
 		if (tag.indexOf(" ") == -1) {
@@ -198,18 +216,22 @@ public class PathParser {
 
 	// ----------------------------------------------- Getter & Setter -----------------------------------------------
 	
+	/** Sets keywords to be recognized by the {@code PathParser}. */
 	public void setKeywords(Set<String> keywords) {
 		this.keywords = keywords;
 	}
 	
+	/** Sets the demanding keywords to be recognized by the {@code PathParser}. */
 	public void setDemandingKeywords(Set<String> keywords) {
 		this.demanding_keywords = keywords;
 	}
 	
+	/** Sets the non-demanding keywords to be recognized by the {@code PathParser}. */
 	public void setNonDemandingKeywords(Set<String> keywords) {
 		this.non_demanding_keywords = keywords;
 	}
 	
+	/** @return A list of all parsed {@link Path}-objects. */
 	public List<Path> getPaths() {
 		return this.paths;
 	}
