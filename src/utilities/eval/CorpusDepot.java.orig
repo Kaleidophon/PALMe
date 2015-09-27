@@ -1,0 +1,45 @@
+package utilities.eval;
+
+import java.util.Stack;
+
+public class CorpusDepot {
+
+	private Stack<String> contents = new Stack<>();
+<<<<<<< HEAD
+	private boolean available = false;
+	
+	public synchronized String get() {
+		while (!this.available) {
+			try {
+				wait();
+			} catch (InterruptedException ie) {}
+		}
+		this.available = false;
+		notifyAll();
+=======
+	private boolean availiable = false;
+	
+	public synchronized String get() {
+>>>>>>> b4ae5c7f964eb37cd72430c8439f8b45ec1664e1
+		return this.contents.pop();	
+	}
+	
+	public synchronized void add(String s) {
+<<<<<<< HEAD
+		while (this.available) {
+			try {
+				wait();
+			} catch (InterruptedException ie) {}
+		}
+		this.contents.push(s);
+		this.available = true;
+		notifyAll();
+=======
+		this.contents.push(s);
+>>>>>>> b4ae5c7f964eb37cd72430c8439f8b45ec1664e1
+	}
+	
+	public synchronized boolean hasLeft() {
+		return !this.contents.empty();
+	}
+}

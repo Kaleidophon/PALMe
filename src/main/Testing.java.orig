@@ -1,5 +1,6 @@
 package main;
 
+import inout.*;
 import inout.general.DataLoader;
 import inout.indexing.BinaryIndexing;
 import inout.indexing.HexadecimalIndexing;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 
+<<<<<<< HEAD
 import utilities.eval.Evaluation;
 import languagemodel.calc.ProbabilityCalculation;
 import languagemodel.model.LanguageModel;
@@ -16,6 +18,22 @@ import languagemodel.model.LanguageModel;
 public class Testing {
 	
 	public static void createTestData(int n) {
+=======
+public class Testing {
+
+	public static void main(String[] args) {
+		createTestData(3);
+		createTestData(4);
+		createTestData(5);
+		/*int n = 5;
+		for (int c = 0; c <= 5; c++) {
+			timeIndexing(c, "./rsc/indices/" + n + "/", false, 10);
+			timeIndexing(c, "./rsc/indices/" + n + "/", true, 10);
+		}*/
+	}
+	
+	private static void createTestData(int n) {
+>>>>>>> b4ae5c7f964eb37cd72430c8439f8b45ec1664e1
 		List<Indexing> indexings = new ArrayList<>();
 		System.out.println("Reading frequencies...");
 		DataLoader dl = new DataLoader("./rsc/freqs/" + n + "/res.txt");
@@ -46,7 +64,11 @@ public class Testing {
 		}
 	}
 	
+<<<<<<< HEAD
 	public static <V extends Number> void timeIndexingLoading(int mode, String IN_PATH, String LEX_PATH, boolean zipped, int iterations, int threads) {
+=======
+	private static void timeIndexing(int mode, String IN_PATH, String LEX_PATH, boolean para, int iterations) {
+>>>>>>> b4ae5c7f964eb37cd72430c8439f8b45ec1664e1
 		System.out.println("Path: " + IN_PATH + " | Mode: " + mode);
 		DataLoader dl = new DataLoader();
 		long[] durations = new long[iterations];
@@ -54,6 +76,7 @@ public class Testing {
 		
 		switch(mode) {
 			case(0): 
+<<<<<<< HEAD
 				experiment_name = (zipped) ? "Timing zipped Indexing loading" : "Timing unzipped Indexing loading"; 
 				break;
 			case(1): 
@@ -93,11 +116,53 @@ public class Testing {
 					} else {
 						indexing3 = new HexadecimalIndexing<>(LEX_PATH, IN_PATH, zipped);
 					}
+=======
+				experiment_name = (para) ? "Loading zipped Indexing" : "Loading unzipped Indexing"; 
+				break;
+			case(1): 
+				experiment_name = (para) ? "Loading zipped Binary Indexing" : "Loading unzipped Binary Indexing"; 
+				break;
+			case(2): 
+				experiment_name = (para) ? "Loading zipped Hexadecimal Indexing" : "Loading unzipped Hexadecimal Indexing"; 
+				break;
+			case(3): 
+				experiment_name = (para) ? "Loading validated serialized Indexing" : "Loading unvalidated serizalied Indexing"; 
+				break;
+			case(4):
+				experiment_name = (para) ? "Loading validated serialized Binary Indexing" : "Loading unvalidated serizalied Binary Indexing"; 
+				break;
+			case(5): 
+				experiment_name = (para) ? "Loading validated serialized Hexadecimal Indexing" : "Loading unvalidated Hexadecimal Indexing"; 
+				break;
+		}
+		
+		for (int i = 0; i < iterations; i++) {
+			long startTime = System.nanoTime();
+			switch (mode) {
+				case (0):
+					Indexing<Integer> indexing1 = new Indexing<>(LEX_PATH, IN_PATH, para);
+					break;
+				case (2):
+					Indexing indexing2 = new BinaryIndexing(LEX_PATH, IN_PATH, para);
+					break;
+				case (3):
+					Indexing indexing3 = new HexadecimalIndexing(LEX_PATH, IN_PATH, para);
+					break;
+				case (4):
+					//Indexing<Integer> indexing4 = dl.loadIndexing(IN_PATH + "index.ser", para);
+					break;
+				case (5):
+					//Indexing indexing5 = dl.loadIndexing(IN_PATH + "bin_index.ser", para);
+					break;
+				case (6):
+					//Indexing indexing6 = dl.loadIndexing(IN_PATH + "hex_index.ser", para);
+>>>>>>> b4ae5c7f964eb37cd72430c8439f8b45ec1664e1
 					break;
 			}
 			long endTime = System.nanoTime();
 			long duration = (endTime - startTime);
 			durations[i] = duration;
+<<<<<<< HEAD
 			System.out.println("Iteration #" + (i+1) + " took " + duration + " s.");
 		}
 		System.out.println(experiment_name + " took " + average(durations) / 1000000000.0 + " seconds on average.");
@@ -147,6 +212,8 @@ public class Testing {
 			long duration = (endTime - startTime);
 			durations[i] = duration;
 			System.out.println("Iteration #" + (i+1) + " took " + duration + " s.");
+=======
+>>>>>>> b4ae5c7f964eb37cd72430c8439f8b45ec1664e1
 		}
 		System.out.println(experiment_name + " took " + average(durations) / 1000000000.0 + " seconds on average.");
 	}

@@ -1,0 +1,47 @@
+package languagemodel.calc;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+
+class nGramDepot {
+
+	private Stack<Map.Entry<List<Integer>, Integer>> contents = new Stack<>();
+<<<<<<< HEAD
+	private boolean available = false;
+	
+	public synchronized Map.Entry<List<Integer>, Integer> get() {
+		while (!this.available) {
+			try {
+				wait();
+	        } catch (InterruptedException ie) {}
+		}
+		this.available = false;
+		notifyAll();
+=======
+	private boolean availiable = false;
+	
+	public synchronized Map.Entry<List<Integer>, Integer> get() {
+>>>>>>> b4ae5c7f964eb37cd72430c8439f8b45ec1664e1
+		return this.contents.pop();	
+	}
+	
+	public synchronized void add(Map.Entry<List<Integer>, Integer> entry) {
+<<<<<<< HEAD
+		while (this.available) {
+			try {
+				wait();
+			} catch (InterruptedException ie) {}
+		}
+		this.contents.push(entry);
+		this.available = true;
+		notifyAll();
+=======
+		this.contents.push(entry);
+>>>>>>> b4ae5c7f964eb37cd72430c8439f8b45ec1664e1
+	}
+	
+	public synchronized boolean hasLeft() {
+		return !this.contents.empty();
+	}
+}
