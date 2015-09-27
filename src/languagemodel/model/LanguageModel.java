@@ -348,7 +348,7 @@ public class LanguageModel {
 			throw new IllegalArgumentException("n must be greater/equals 1");
 		}
 		if (this.debug) System.out.println("'" + this.IN_PATH + "'");
-		Pattern r = Pattern.compile("((\\.(\\.?))?/[a-z_\\-\\s0-9\\.]+)+/paths\\.xml");
+		Pattern r = Pattern.compile("((\\.(\\.?))?/[a-z_\\-\\s0-9\\.]+)+/.*paths\\.xml");
 		Matcher m = r.matcher(this.IN_PATH);
 		m.matches();
 		if (m.group() == null) {

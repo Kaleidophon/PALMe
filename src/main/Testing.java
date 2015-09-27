@@ -4,6 +4,8 @@ import inout.general.DataLoader;
 import inout.indexing.BinaryIndexing;
 import inout.indexing.HexadecimalIndexing;
 import inout.indexing.Indexing;
+import inout.paths.Path;
+import inout.paths.PathHandler;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -15,32 +17,44 @@ import languagemodel.model.LanguageModel;
 
 public class Testing {
 	
-	public static void createTestData(int n) {
-		List<Indexing> indexings = new ArrayList<>();
+	public static void main(String[] args) {
+		createTestData(2, "./rsc/create_freqs_paths.xml");
+	}
+	
+	public static <V extends Number> void createTestData(int n, String IN_PATH) {
+		PathHandler ph = new PathHandler(IN_PATH);
+		// Load lexicon
+		Path lex_path = ph.getFirstPathWithAttributes("zipped lexicon");
+		if (lex_path == null) {
+			lex_path = ph.getFirstPathWithAttributes("raw lexicon");
+		}
+				
+		
+		List<Indexing<V>> indexings = new ArrayList<>();
 		System.out.println("Reading frequencies...");
 		DataLoader dl = new DataLoader("./rsc/freqs/" + n + "/res.txt");
 		Map<String, Integer> freqs = dl.readFrequencies();
-		indexings.add(new Indexing<Integer>());
-		indexings.add(new BinaryIndexing<Integer>());
-		indexings.add(new HexadecimalIndexing<Integer>());
+		indexings.add(new Indexing<V>());
+		indexings.add(new BinaryIndexing<V>());
+		indexings.add(new HexadecimalIndexing<V>());
 		
-		for (Indexing indexing : indexings) {
+		for (Indexing<V> indexing : indexings) {
+			String specification = "";
 			if (indexing instanceof BinaryIndexing) {
 				System.out.println("Create new "  + indexing.getClass().getName() + " for n = " + n);
-				indexing = new BinaryIndexing(freqs, "./rsc/indices/", "./rsc/indices/lexicons/lexicon.gz");
-				System.out.println(indexing.getClass().getName());
+				indexing = new BinaryIndexing(freqs, "./rsc/indices/", lex_path.getDirectory());
+				specification = "binary frequency indexing " + n + " write";
 			} else if (indexing instanceof HexadecimalIndexing) {
 				System.out.println("Create new "  + indexing.getClass().getName() + " for n = " + n);
-				indexing = new HexadecimalIndexing(freqs, "./rsc/indices/", "./rsc/indices/lexicons/lexicon.gz");
-				System.out.println(indexing.getClass().getName());
+				indexing = new HexadecimalIndexing(freqs, "./rsc/indices/", lex_path.getDirectory());
+				specification = "hexadecimal frequency indexing " + n + " write";
 			} else if (indexing instanceof Indexing) {
 				System.out.println("Create new "  + indexing.getClass().getName() + " for n = " + n);
-				indexing = new Indexing<Integer>(freqs, "./rsc/indices/", "./rsc/indices/lexicons/lexicon.gz");
-				System.out.println(indexing.getClass().getName());
+				indexing = new Indexing(freqs, "./rsc/indices/", lex_path.getDirectory());
+				specification = "default frequency indexing " + n + " write";
 			}
-			System.out.println("Dumping...");
-			indexing.dump("./rsc/indices/", false);
-			indexing.dump("./rsc/indices/", true);
+			indexing.dump(ph.getFirstPathWithAttributes("raw " + specification).getDirectory(), false);
+			indexing.dump(ph.getFirstPathWithAttributes("zipped " + specification).getDirectory(), true);
 			indexing = null;
 			//dl.dumpIndexing(indexing, "./rsc/indices/" + n + "/", true);
 		}
