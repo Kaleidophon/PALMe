@@ -22,7 +22,7 @@ public class ArrayLexicon implements Lexicon, Iterable {
 	// ------------------------------------------------- Constructor -------------------------------------------------
 	
 	/**
-	 * Constructor to create an instance from a String array.
+	 * Constructor to create an instance from a {@code String} array.
 	 * 
 	 * @param entries String array with lexicon entries.
 	 */
@@ -40,7 +40,7 @@ public class ArrayLexicon implements Lexicon, Iterable {
 	}
 	
 	/**
-	 * Constructor to converte a {@link ListLexicon} into an ArrayLexicon.
+	 * Constructor to convert a {@link ListLexicon} into an ArrayLexicon.
 	 * Throws @exception IncompleteLexiconException if list is empty.
 	 * 
 	 * @param listlex {@code ListLexicon} to be converted.
@@ -81,6 +81,16 @@ public class ArrayLexicon implements Lexicon, Iterable {
 		return new HashSet<String>(Arrays.asList(this.entries));
 	}
 	
+	/** @return Value of corresponding key */
+	public String getValue(int key) {
+		return this.entries[key];
+	}
+	
+	/** @return Key to corresponding value. */
+	public int getKey(String value) {
+		return Arrays.asList(this.entries).indexOf(value);
+	}
+	
 	/** @return An {@code Iterator} over all of the entries. */
 	public Iterator<String> iterator() {
 		return new ArrayIterator(this.entries);
@@ -91,16 +101,6 @@ public class ArrayLexicon implements Lexicon, Iterable {
 	/** @return All entries as a {@code String} array. */
 	public String[] getEntries() {
 		return this.entries;
-	}
-	
-	/** @return Value of corresponding key */
-	public String getValue(int key) {
-		return this.entries[key];
-	}
-	
-	/** @return Key to corresponding value. */
-	public int getKey(String value) {
-		return Arrays.asList(this.entries).indexOf(value);
 	}
 	
 	/** @return Size of Lexicon. */

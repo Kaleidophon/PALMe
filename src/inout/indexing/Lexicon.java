@@ -1,6 +1,5 @@
 package inout.indexing;
 
-import java.util.List;
 import java.util.Set;
 
 public interface Lexicon <T> extends Iterable {

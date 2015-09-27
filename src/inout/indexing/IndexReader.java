@@ -9,6 +9,11 @@ import java.util.Map;
 
 import utilities.Toolbox;
 
+/**
+ * Reader to read a dumped indexing parallelized.
+ * 
+ * @author Dennis Ulmer
+ */
 public class IndexReader <V extends Number> implements Runnable {
 	
 	private boolean running = false;
@@ -19,6 +24,12 @@ public class IndexReader <V extends Number> implements Runnable {
 	
 	// ------------------------------------------------- Constructors ------------------------------------------------
 	
+	/**
+	 * Default constructor.
+	 * 
+	 * @param reader Reader for input file
+	 * @param mode Reading mode (default, binary, hexadecimal)
+	 */
 	public IndexReader(BufferedReader reader, String mode) {
 		this.reader = reader;
 		this.mode = mode;
@@ -29,6 +40,7 @@ public class IndexReader <V extends Number> implements Runnable {
 	
 	// ------------------------------------------------- Main methods ------------------------------------------------
 		
+	/** Method reading on line at a time */
 	public void run() {
 		this.setRunning(true);
 		try {
@@ -44,7 +56,7 @@ public class IndexReader <V extends Number> implements Runnable {
 					case ("default"): base = 10; break;
 				}
 				for (int i = 0; i < string_key_indices.length; i++) {
-					key_indices.add(Integer.parseInt(string_key_indices[i], base));
+					key_indices.add(Integer.parseInt(string_key_indices[i], base)); // decode every ID
 				}
 				try {
 					// Value is an integer
@@ -71,6 +83,7 @@ public class IndexReader <V extends Number> implements Runnable {
 		}
 	}
 	
+	/** Waiting method */
 	public void join() {
 		try {
 			this.thread.join();
@@ -81,18 +94,22 @@ public class IndexReader <V extends Number> implements Runnable {
 	
 	// ----------------------------------------------- Getter & Setter -----------------------------------------------
 	
+	/** Set running variable */
 	private void setRunning(boolean running) {
 		this.running = running;
 	}
 	
+	/** @return Whether reader is still running */
 	public boolean isRunning() {
 		return this.running;
 	}
 	
+	/** @return All read indices */
 	public Map<List<Integer>, V> getIndices() {
 		return this.indices;
 	}
 	
+	/** @return Thread ID */
 	public long getID() {
 		return Thread.currentThread().getId();
 	}

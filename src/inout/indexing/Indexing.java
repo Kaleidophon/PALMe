@@ -21,11 +21,20 @@ import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import inout.indexing.ArrayLexicon;
-import inout.indexing.ListLexicon;
 import inout.indexing.BiMapLexicon;
 import utilities.Toolbox;
 
+/**
+ * Indexing is a class to store n-gram frequencies and probabilites in a more efficient manner.
+ * <p>
+ * Normally, it would be stored in a format like
+ * <word 1> <word 2> ... <word n>	<value>
+ * <p>
+ * However, this makes the amount of disk space needed even bigger.
+ * Therefore, each word is given a unique ID instead. The ID can then be looked up in a lexicon.
+ * 
+ * @author Dennis Ulmer
+ */
 public class Indexing <V extends Number> implements Serializable {
 	
 	private Map<List<Integer>, V> indices;
@@ -39,12 +48,18 @@ public class Indexing <V extends Number> implements Serializable {
 	protected String mode;
 	protected String prefix;
 	
-	private boolean create_lexicons;
+	private boolean create_lexicons; // Can a lexicon be found or does it have to be created during the creation of the indices?
 	private int n;
 	
 	// ------------------------------------------------- Constructor -------------------------------------------------
 	
-	/** Default constructor: Load frequency data, create indices and save them */
+	/**
+	 * Default constructor: Load (frequency) data, create indices and save them.
+	 * 
+	 * @param data Data in form of {@code Map<Integer, Integer>} or {@code Map<Integer, Double>}
+	 * @param FREQS_IN_PATH Path to (frequency) data
+	 * @param LEX_IN_PATH Path to lexicon
+	 */
 	public Indexing(Map<String, V> data, String FREQS_IN_PATH, String LEX_IN_PATH) {
 		create_lexicons = true;
 		this.FREQS_IN_PATH = FREQS_IN_PATH;
@@ -52,13 +67,19 @@ public class Indexing <V extends Number> implements Serializable {
 		this.setMode();
 		this.setPrefix();
 		try {
-			this.createIndices(data, this.getMode());
+			this.createIndices(data);
 		} catch (IncompleteLexiconException ile) {
 			ile.printStackTrace();
 		}
 	}
 	
-	/** Constructor to load an Indexing from already computed data */
+	/**
+	 * Constructor to load an Indexing from already computed data.
+	 * 
+	 * @param FREQS_IN_PATH Path to data
+	 * @param LEX_IN_PATH Path to lexicon
+	 * @param zipped Is the data in an archive?
+	 */
 	public Indexing(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
 		this(FREQS_IN_PATH, LEX_IN_PATH);
 		this.setMode();
@@ -66,7 +87,14 @@ public class Indexing <V extends Number> implements Serializable {
 		this.load(FREQS_IN_PATH, LEX_IN_PATH, zipped);
 	}
 	
-	/** Constructor to load an Indexing from already computed data in a parallelized manner */
+	/**
+	 * Constructor to load an Indexing from already computed data in a parallelized manner.
+	 * 
+	 * @param FREQS_IN_PATH Path to data
+	 * @param LEX_IN_PATH Path to lexicon
+	 * @param zipped Is the data in an archive?
+	 * @param threads Number of threads to load data
+	 */
 	public Indexing(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped, int threads) {
 		this(FREQS_IN_PATH, LEX_IN_PATH);
 		this.setMode();
@@ -110,7 +138,13 @@ public class Indexing <V extends Number> implements Serializable {
 	
 	// ------------------------------------------------- Main methods ------------------------------------------------
 	
-	public void createIndices(Map<String, V> data, String mode) throws IncompleteLexiconException {
+	/**
+	 * Creates indices (= IDs) from frequencies stored in a {@code Map<String, Integer>}.
+	 * 
+	 * @param data Frequency data.
+	 * @throws IncompleteLexiconException thrown if lexicon is loaded and a key lookup fails
+	 */
+	public void createIndices(Map<String, V> data) throws IncompleteLexiconException {
 		Map<List<Integer>, V> indices = new HashMap<>();
 		BiMapLexicon lexicon = null;
 		data = Toolbox.sortByValues(data);
@@ -120,7 +154,7 @@ public class Indexing <V extends Number> implements Serializable {
 		try {
 			lexicon = new BiMapLexicon(this.readLexicon(this.LEX_IN_PATH, true));
 			this.create_lexicons = false;
-		} catch (IOException |  NullPointerException fnfe) {
+		} catch (IOException | NullPointerException fnfe) {
 			try {
 				lexicon = new BiMapLexicon(this.readLexicon(this.LEX_IN_PATH, false));
 				this.create_lexicons = false;
@@ -188,10 +222,23 @@ public class Indexing <V extends Number> implements Serializable {
 		this.lexicon = lexicon;
 	}
 	
+	/**
+	 * Dumps the data.
+	 * 
+	 * @param OUTFILE_PATH Path where data is to be stored.
+	 * @param zipped Should data be zipped?
+	 */
 	public void dump(String OUTFILE_PATH, boolean zipped) {
 		this.writeIndices(this.indices, OUTFILE_PATH, zipped, this.getMode());
 	}
 	
+	/**
+	 * Loads indexing data.
+	 * 
+	 * @param FREQS_IN_PATH Path to data
+	 * @param LEX_IN_PATH Path to lexicon
+	 * @param zipped Is the data in an archive?
+	 */
 	public void load(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped) {
 		try {
 			this.indices = this.readIndices(FREQS_IN_PATH, zipped, this.getMode());
@@ -204,6 +251,14 @@ public class Indexing <V extends Number> implements Serializable {
 		this.n = sample_key.size();
 	}
 	
+	/**
+	 * Loads indexing data with multiple threads
+	 * 
+	 * @param FREQS_IN_PATH Path to data
+	 * @param LEX_IN_PATH Path to lexicon
+	 * @param zipped Is the data in an archive?
+	 * @param threads Number of threads
+	 */
 	public void loadParallelized(String FREQS_IN_PATH, String LEX_IN_PATH, boolean zipped, int threads) {
 		try {
 			this.indices = this.readIndicesParallelized(FREQS_IN_PATH, zipped, this.getMode(), threads);
@@ -216,12 +271,17 @@ public class Indexing <V extends Number> implements Serializable {
 		this.n = sample_key.size();
 	}
 	
-	
+	/**
+	 * Checks integrity of the current indexing.
+	 * 
+	 * @throws IllegalArgumentException
+	 */
 	public void validateState() throws IllegalArgumentException {
 		this.validateIndices();
 		this.validateLexicon();
 	}
 	
+	/** Checks integrity of the current lexicon. */
 	private void validateLexicon() {
 		Set<Integer> keys = this.lexicon.keySet();
 		if (!(keys.size() > 0)) {
@@ -237,6 +297,7 @@ public class Indexing <V extends Number> implements Serializable {
 		}
 	}
 	
+	/** Checks integrity of the current indices */
 	private void validateIndices() {
 		Set<List<Integer>> keys = this.indices.keySet();
 		if (!(keys.size() > 0)) {
@@ -257,7 +318,16 @@ public class Indexing <V extends Number> implements Serializable {
 	
 	// ----------------------------------------------- Reading & Writing ---------------------------------------------
 	
-	protected Map<List<Integer>, V> readIndices(String INFILE_PATH, boolean zipped, String mode) throws FileNotFoundException{
+	/**
+	 * Reads indices from an existing file.
+	 * 
+	 * @param INFILE_PATH Path to file
+	 * @param zipped Is the data in an archive?
+	 * @param mode Mode to read data (default, binary, hexadecimal)
+	 * @return A {@code Map<List<Integer>, Integer} or {@code Map<List<Integer>, Double} with the data
+	 * @throws FileNotFoundException
+	 */
+	protected Map<List<Integer>, V> readIndices(String INFILE_PATH, boolean zipped, String mode) throws FileNotFoundException {
 		
 		Map<List<Integer>, V> indices = new HashMap<>();
 		try {
@@ -303,6 +373,16 @@ public class Indexing <V extends Number> implements Serializable {
 		return indices;
 	}
 
+	/**
+	 * Reads indices from an existing file.
+	 * 
+	 * @param INFILE_PATH Path to file
+	 * @param zipped Is the data in an archive?
+	 * @param mode Mode to read data (default, binary, hexadecimal)
+	 * @param threads Number of threads
+	 * @return A {@code Map<List<Integer>, Integer} or {@code Map<List<Integer>, Double} with the data
+	 * @throws FileNotFoundException
+	 */
 	protected Map<List<Integer>, V> readIndicesParallelized(String INFILE_PATH, boolean zipped, String mode, int threads) throws FileNotFoundException {
 		Map<List<Integer>, V> indices = new HashMap<>();
 		List<IndexReader<V>> index_readers = new ArrayList<>();
@@ -314,11 +394,12 @@ public class Indexing <V extends Number> implements Serializable {
 			} else {
 				reader = new BufferedReader(new FileReader(INFILE_PATH));
 			}
+			// Adding readers
 			for (int i = 0; i < threads; i++) {
 				index_readers.add(new IndexReader<V>(reader, mode));
 			}
 			for (IndexReader<V> index_reader : index_readers) {
-				index_reader.join();
+				index_reader.join(); // Wait for completion
 				if (!index_reader.isRunning()) {
 					indices.putAll(index_reader.getIndices());
 				}
@@ -329,6 +410,14 @@ public class Indexing <V extends Number> implements Serializable {
 		return indices;
 	}
 	
+	/**
+	 * Reads lexicon from an existing file. 
+	 * 
+	 * @param INFILE_PATH Path to file
+	 * @param zipped Is the data in an archive?
+	 * @return Lexicon as {@code List<String>}
+	 * @throws IOException
+	 */
 	protected List<String> readLexicon(String INFILE_PATH, boolean zipped) throws IOException {
 		List<String> lexicon_entries = new ArrayList<>();
 		BufferedReader reader;
@@ -346,6 +435,14 @@ public class Indexing <V extends Number> implements Serializable {
 		return lexicon_entries;
 	}
 	
+	/**
+	 * Writes indices into a file.
+	 * 
+	 * @param data Data to be written as a {@code Map<List<Integer>, Integer>} or {@code Map<List<Integer>, Double>}
+	 * @param OUTFILE_PATH Directory where indices are to be written.
+	 * @param zipped Should the file be in an archive?
+	 * @param mode Mode the data is to be written in (default, binary, hexadecimal)
+	 */
 	protected void writeIndices(Map<List<Integer>, V> data, String OUTFILE_PATH, boolean zipped, String mode) {
 		try {
 			BufferedWriter writer;
@@ -360,6 +457,7 @@ public class Indexing <V extends Number> implements Serializable {
 				String[] new_key = new String[key.size()];
 				for (int i = 0; i < key.size(); i++) {
 					switch (mode) {
+						// Convert IDs
 						case ("binary"): 
 							new_key[i] = Integer.toBinaryString(key.get(i)); 
 							break;
@@ -374,6 +472,7 @@ public class Indexing <V extends Number> implements Serializable {
 				V value = data.get(key);
 				String new_value = "";
 				switch (mode) {
+					// Convert value
 					case ("binary"):
 						new_value = (value instanceof Double) ? Toolbox.doubleToBinary((Double) value) : Integer.toBinaryString((Integer) value);
 						break;
@@ -395,6 +494,13 @@ public class Indexing <V extends Number> implements Serializable {
 		} catch (Exception e) { e.printStackTrace(); }
 	}
 	
+	/**
+	 * Write lexicon into a file.
+	 * 
+	 * @param lexicon {@code Lexicon} to be written
+	 * @param OUTFILE_PATH Directory where the lexicon is to be written.
+	 * @param zipped Should the file be an archive?
+	 */
 	protected void writeLexicon(Lexicon lexicon, String OUTFILE_PATH, boolean zipped) {
 		try {
 			BufferedWriter writer;
@@ -419,38 +525,43 @@ public class Indexing <V extends Number> implements Serializable {
 		
 	// ----------------------------------------------- Getter & Setter -----------------------------------------------
 	
+	/** @return Indices as a {@code Map<List<Integer>, Integer>} or {@code Map<List<Integer>, Double>} */
 	public Map<List<Integer>, ? extends Number> getIndices() {
 		return this.indices;
 	}
 	
+	/** @return Current {@code Lexicon} */
 	public Lexicon getLexicon() {
 		return this.lexicon;
 	}
 	
+	/** @return Whether lexicons have to be created */
 	public boolean createLexicons() {
 		return this.create_lexicons;
 	}
 	
+	/** @return Order of n-grams */
 	public int getN() {
 		return this.n;
 	}
 	
+	/** @return Mode (default, binary, hexadecimal) */
 	public String getMode() {
 		return this.mode;
 	}
 	
+	/** Sets mode to default for indexing writing and loading. */
 	private void setMode() {
 		this.mode = "default";
 	}
 	
+	/** @return Prefix for file writing */
 	public String getPrefix() {
 		return this.prefix;
 	}
 	
+	/** Sets file prefix to default for indexing writing. */
 	private void setPrefix() {
 		this.prefix = "";
-	}
-	
-
-	
+	}	
 }
