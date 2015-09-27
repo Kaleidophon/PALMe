@@ -10,8 +10,12 @@ import languagemodel.model.LanguageModel;
 import inout.general.IO;
 
 public class Evaluation {
-
+	
 	public static double evaluateLanguageModel(LanguageModel lm, String IN_PATH) {
+		return evaluateLanguageModel(lm, IN_PATH, false);
+	}
+
+	public static double evaluateLanguageModel(LanguageModel lm, String IN_PATH, boolean debug) {
 		double perplexity = 0.0;
 		long startTime = System.nanoTime();
 		int count = 0;
@@ -25,13 +29,19 @@ public class Evaluation {
 		long endTime = System.nanoTime();
 		long duration = (endTime - startTime);
 		perplexity /= count;
-		System.out.println("Evaluating the " + lm.getMode() + " Language model with " + lm.getN() + "-grams took " + 
-								Math.round(duration / 10000000.0) / 100.0 + " s in total.");
-		System.out.println("Average perplexity is " + Math.round(perplexity * 10000.0) / 10000.0);
+		if (debug) {
+			System.out.println("Evaluating the " + lm.getMode() + " Language model with " + lm.getN() + "-grams took " + 
+					Math.round(duration / 10000000.0) / 100.0 + " s in total.");
+			System.out.println("Average perplexity is " + Math.round(perplexity * 10000.0) / 10000.0);
+		}
 		return perplexity;
 	}
 	
 	public static double evaluateLanguageModelParallelized(LanguageModel lm, String IN_PATH, int n_of_producer, int n_of_consumer) {
+		return evaluateLanguageModelParallelized(lm, IN_PATH, n_of_producer, n_of_consumer, false);
+	}
+	
+	public static double evaluateLanguageModelParallelized(LanguageModel lm, String IN_PATH, int n_of_producer, int n_of_consumer, boolean debug) {
 		double perplexity = 0.0;
 		int count = 0;
 		long startTime = System.nanoTime();
@@ -69,10 +79,11 @@ public class Evaluation {
 		
 		long endTime = System.nanoTime();
 		long duration = (endTime - startTime);
-		System.out.println("Evaluating the " + lm.getMode() + " Language model with " + lm.getN() + "-grams took " + 
-				Math.round(duration / 10000000.0) / 100.0 + " s in total.");
-		System.out.println("Average perplexity is " + Math.round(perplexity * 10000.0) / 10000.0);
-		
+		if (debug) {
+			System.out.println("Evaluating the " + lm.getMode() + " Language model with " + lm.getN() + "-grams took " + 
+					Math.round(duration / 10000000.0) / 100.0 + " s in total.");
+			System.out.println("Average perplexity is " + Math.round(perplexity * 10000.0) / 10000.0);
+		}
 		return perplexity;
 	}
 }

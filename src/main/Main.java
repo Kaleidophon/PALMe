@@ -18,9 +18,10 @@ public class Main {
 		//Indexing<Double> index = new HexadecimalIndexing<>(p.getDirectory(), ph.getFirstPathWithAttributes("zipped lexicon").getDirectory(), p.isZipped());
 		
 		// Calculation
-		LanguageModel lm = new LanguageModel(2, "./rsc/paths.xml", new MaximumFrequencyEstimation(), "fast back-off", true);
+		LanguageModel lm = new LanguageModel(5, "./rsc/paths.xml", new MaximumFrequencyEstimation(), "fast back-off", true);
 		lm.calculate();
-		lm.calculateParallelized(2, 2);
+		System.out.println("");
+		lm.calculateParallelized(1, 3);
 		
 		// Evaluation
 		//LanguageModel lm = new LanguageModel(3, "./rsc/paths.xml", "fast back-off", true);

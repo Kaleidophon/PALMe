@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/Users/dennisulmer/Desktop/Projekt/jars/cli.jar"/>
+	<classpathentry kind="lib" path="/Users/dennisulmer/Desktop/Projekt/jars/common.jar"/>
+	<classpathentry kind="lib" path="/Users/dennisulmer/Desktop/Projekt/jars/mapreduce.jar"/>
+	<classpathentry kind="lib" path="/Users/dennisulmer/Desktop/Projekt/jars/guava-18.0.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

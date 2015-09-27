@@ -35,7 +35,7 @@ public class MaximumFrequencyEstimation implements ProbabilityCalculation {
 			System.out.println("Calculating Probabilites for n = " + (i+1) + "...");
 			long startTime = System.nanoTime();
 			
-			current_freq_indexing = this.getFreqIndexing(n+1, ph);
+			current_freq_indexing = this.getFreqIndexing(i+1, ph);
 			
 			Map<List<Integer>, Integer> freqs = (Map<List<Integer>, Integer>) current_freq_indexing.getIndices();
 			Map<List<Integer>, Double> probs = new HashMap<>();
@@ -106,7 +106,7 @@ public class MaximumFrequencyEstimation implements ProbabilityCalculation {
 			times.add(duration);
 			System.out.println("Calculating probabilities for n = " + (i+1) + " took " + duration / 1000000000.0 + " s in total.");
 		}
-		System.out.print("Total time for all probabilites was " + this.sum(times) / 1000000000.0 + " s in total.");
+		System.out.print("Total time for all probabilites was " + this.sum(times) / 1000000000.0 + " s in total.\n");
 	}
 	
 	public void calculateNgramProbabilitiesParallelized(int n, PathHandler ph, int n_of_producer, int n_of_consumer) {
@@ -119,12 +119,12 @@ public class MaximumFrequencyEstimation implements ProbabilityCalculation {
 		}
 		
 		for (int i = 0; i < n; i++) {
-			System.out.println("Calculating Probabilites for n = " + (i+1) + "...");
+			System.out.println("Calculating Probabilites parallelized for n = " + (i+1) + "...");
 			
 			Map<List<Integer>, Double> probs = new HashMap<>();
 			long startTime = System.nanoTime();
 			
-			current_freq_indexing = this.getFreqIndexing(n+1, ph);
+			current_freq_indexing = this.getFreqIndexing(i+1, ph);
 			
 			int total = 0;
 			if (i == 0) {
@@ -187,7 +187,7 @@ public class MaximumFrequencyEstimation implements ProbabilityCalculation {
 			times.add(duration);
 			System.out.println("Calculating probabilities for n = " + (i+1) + " took " + duration / 1000000000.0 + " s in total.");
 		}	
-		System.out.print("Total time for all probabilites was " + this.sum(times) / 1000000000.0 + " s in total.");
+		System.out.print("Total time for all probabilites was " + this.sum(times) / 1000000000.0 + " s in total.\n");
 	}
 	
 	private Indexing<Integer> getFreqIndexing(int n, PathHandler ph) {
@@ -200,7 +200,6 @@ public class MaximumFrequencyEstimation implements ProbabilityCalculation {
 		pathlists.add(ph.getPathsWithType("frequency"));
 		pathlists.add(ph.getPathsWithTask("read"));
 		Path freq_indexing_path = ph.intersection(pathlists).get(0);
-		System.out.println(freq_indexing_path.toString());
 		Indexing<Integer> freq_indexing = null;
 		
 		// Load lexicon

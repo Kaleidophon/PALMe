@@ -32,7 +32,7 @@ public class LanguageModel {
 	private List<Map<List<Integer>, Double>> n_probabilities;
 	private BiMapLexicon lex;
 	
-	public LanguageModel(int n, String IN_PATH, ProbabilityCalculation smoothing, String mode, boolean normalization) {
+	public LanguageModel(int n, String IN_PATH, ProbabilityCalculation prob_calc, String mode, boolean normalization) {
 		// Constructor to calculate n-gram probabilities based on n-gram frequencies
 		this.n = n;
 		this.IN_PATH = IN_PATH;
@@ -41,7 +41,7 @@ public class LanguageModel {
 		this.validateState = false;
 		this.checkIntegrity();
 		this.ph = new PathHandler(IN_PATH);
-		this.prob_calc = smoothing;
+		this.prob_calc = prob_calc;
 		this.debug = false;
 		if (debug) this.ph.printPaths();
 	}
@@ -284,7 +284,7 @@ public class LanguageModel {
 		}
 		long endTime = System.nanoTime();
 		long duration = (endTime - startTime);
-		System.out.println("Setting up language model took " + Math.round(duration / 10000000.0) / 100.0 + " s in total.");
+		if (debug) System.out.println("Setting up language model took " + Math.round(duration / 10000000.0) / 100.0 + " s in total.");
 	}
 	
 	public void calculate() {
@@ -307,7 +307,7 @@ public class LanguageModel {
 		this.validateState = validateState;
 	}
 	
-	public ProbabilityCalculation getSmoothing() {
+	public ProbabilityCalculation getProbabilityCalculation() {
 		return this.prob_calc;
 	}
 	
