@@ -17,9 +17,13 @@ import languagemodel.model.LanguageModel;
 
 public class Testing {
 	
+	// ----------------------------------------------------- Main ----------------------------------------------------
+	
 	public static void main(String[] args) {
 		createTestData(2, "./rsc/create_freqs_paths.xml");
 	}
+	
+	// ------------------------------------------------- Main methods ------------------------------------------------
 	
 	public static <V extends Number> void createTestData(int n, String IN_PATH) {
 		PathHandler ph = new PathHandler(IN_PATH);
@@ -164,6 +168,8 @@ public class Testing {
 		}
 		System.out.println(experiment_name + " took " + average(durations) / 1000000000.0 + " seconds on average.");
 	}
+	
+	// ---------------------------------------------- Additional  methods --------------------------------------------
 	
 	private static double average(long[] a) {
 		long sum = 0;

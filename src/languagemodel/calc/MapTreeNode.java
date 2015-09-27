@@ -13,6 +13,8 @@ public class MapTreeNode<K extends List, V> {
 	V value;
 	List<MapTreeNode<K, V>> children;
 	
+	// ------------------------------------------------- Constructors ------------------------------------------------
+	
 	public MapTreeNode(K key, V value) {
 		this.key = key;
 		this.value = value;
@@ -25,17 +27,7 @@ public class MapTreeNode<K extends List, V> {
 		this.children = new ArrayList<>();
 	}
 	
-	public V getValue() {
-		return this.value;
-	}
-	
-	public K getKey() {
-		return this.key;
-	}
-	
-	public List<MapTreeNode<K, V>> getChildren() {
-		return this.children;
-	}
+	// ------------------------------------------------- Main methods ------------------------------------------------
 	
 	public void add(MapTreeNode<K, V> node) {
 		System.out.println("Adding " + Toolbox.listToString(node.getKey()) + "...");
@@ -47,6 +39,29 @@ public class MapTreeNode<K extends List, V> {
 			System.out.println("Added successfully.");
 			this.children.add(node);
 		}
+	}
+	
+	public V getValue() {
+		return this.value;
+	}
+	
+	public K getKey() {
+		return this.key;
+	}
+	
+	public MapTreeNode<K, V> getChildWithKey(K key) {
+		for (MapTreeNode<K, V> child : this.getChildren()) {
+			if (child.getKey().equals(key)) {
+				return child;
+			}
+		}
+		return null;
+	}
+	
+	// ---------------------------------------------- Additional  methods --------------------------------------------
+	
+	public List<MapTreeNode<K, V>> getChildren() {
+		return this.children;
 	}
 	
 	public int numberOfChildren() {
@@ -68,14 +83,5 @@ public class MapTreeNode<K extends List, V> {
 			}
 		}
 		return keys;
-	}
-	
-	public MapTreeNode<K, V> getChildWithKey(K key) {
-		for (MapTreeNode<K, V> child : this.getChildren()) {
-			if (child.getKey().equals(key)) {
-				return child;
-			}
-		}
-		return null;
 	}
 }

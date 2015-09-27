@@ -16,6 +16,8 @@ public class IO {
 	private String next_line; // Only used in reading mode
 	private String current_line; // Only used in reading mode
 	
+	// ------------------------------------------------- Constructor -------------------------------------------------
+	
 	/**
 	 * Simple constructor.
 	 * 
@@ -37,6 +39,8 @@ public class IO {
 			ioe.printStackTrace();
 		}
 	}
+	
+	// ------------------------------------------------- Main methods ------------------------------------------------
 	
 	/**
 	 * Writes next line in writing mode.

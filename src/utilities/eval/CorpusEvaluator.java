@@ -10,11 +10,15 @@ public class CorpusEvaluator extends Thread {
 	private double total_prob;
 	private boolean running;
 	
+	// ------------------------------------------------- Constructors ------------------------------------------------
+	
 	public CorpusEvaluator(LanguageModel lm, CorpusDepot cd) {
 		this.lm = lm;
 		this.cd = cd;
 		this.start();
 	}
+	
+	// ------------------------------------------------- Main methods ------------------------------------------------
 	
 	public void run() {
 		this.setRunning(true);
@@ -34,6 +38,8 @@ public class CorpusEvaluator extends Thread {
 		this.total_prob = total_prob;
 		this.setRunning(false);
 	}
+	
+	// ----------------------------------------------- Getter & Setter -----------------------------------------------
 	
 	public int getLineCount() {
 		return this.line_count;

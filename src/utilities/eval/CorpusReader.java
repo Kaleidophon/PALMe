@@ -8,11 +8,15 @@ public class CorpusReader extends Thread {
 	private BufferedReader reader;
 	private CorpusDepot cd;
 	
+	// ------------------------------------------------- Constructors ------------------------------------------------
+
 	public CorpusReader(BufferedReader reader, CorpusDepot cd) {
 		this.reader = reader;
 		this.cd = cd;
 		this.start();
 	}
+	
+	// ------------------------------------------------- Main methods ------------------------------------------------
 	
 	public void run() {
 		try {
@@ -30,6 +34,8 @@ public class CorpusReader extends Thread {
 			ioe.printStackTrace();
 		}
 	}
+	
+	// ----------------------------------------------- Getter & Setter -----------------------------------------------
 	
 	public CorpusDepot getCorpusDepot() {
 		return this.cd;

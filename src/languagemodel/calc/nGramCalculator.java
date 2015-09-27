@@ -16,6 +16,8 @@ public class nGramCalculator extends Thread {
 	nGramDepot ngd;
 	Map<List<Integer>, Double> probs;
 	
+	// ------------------------------------------------- Constructors ------------------------------------------------
+	
 	public nGramCalculator(int n, Indexing<Integer> last_indexing, nGramDepot ngd) {
 		this.n = n;
 		this.last_indexing = last_indexing;
@@ -32,6 +34,8 @@ public class nGramCalculator extends Thread {
 		this.probs = new HashMap<>();
 		start();
 	}
+	
+	// ------------------------------------------------- Main methods ------------------------------------------------
 	
 	public void run() {
 		this.setRunning(true);
@@ -70,12 +74,14 @@ public class nGramCalculator extends Thread {
 		this.setRunning(false);
 	}
 	
-	public void setRunning(boolean r) {
-		this.running = r;
-	}
+	// ----------------------------------------------- Getter & Setter -----------------------------------------------
 	
 	public boolean isRunning() {
 		return this.running;
+	}
+	
+	public void setRunning(boolean r) {
+		this.running = r;
 	}
 	
 	public int getN() {

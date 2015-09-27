@@ -18,6 +18,8 @@ import java.util.zip.GZIPOutputStream;
 
 public class BinaryIndexing <V extends Number> extends Indexing {
 	
+	// ------------------------------------------------- Constructors ------------------------------------------------
+	
 	public BinaryIndexing(Map<String, V> data, String FREQS_IN_PATH, String LEX_IN_PATH) {
 		super(data, FREQS_IN_PATH, LEX_IN_PATH);
 		this.setPrefix();
@@ -50,6 +52,8 @@ public class BinaryIndexing <V extends Number> extends Indexing {
 		this.setPrefix();
 		this.setMode();
 	}
+	
+	// ----------------------------------------------- Getter & Setter -----------------------------------------------
 	
 	private void setMode() {
 		this.mode = "binary";

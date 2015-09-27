@@ -7,6 +7,8 @@ public class CorpusDepot {
 	private Stack<String> contents = new Stack<>();
 	private boolean available = false;
 	
+	// ------------------------------------------------- Main methods ------------------------------------------------
+	
 	public synchronized String get() {
 		while (!this.available) {
 			try {

@@ -11,6 +11,8 @@ public class ListLexicon implements Lexicon, Iterable {
 	
 	private List<String> entries;
 	
+	// ------------------------------------------------- Constructors ------------------------------------------------
+	
 	public ListLexicon(List<String> entries) {
 		this.entries = entries;
 	}
@@ -23,12 +25,19 @@ public class ListLexicon implements Lexicon, Iterable {
 		this.entries = new ArrayList<>(100000);
 	}
 	
-	public List<String> getEntries() {
-		return this.entries;
-	}
+	
+	// ------------------------------------------------- Main methods ------------------------------------------------
 	
 	public void addEntry(String entry) {
 		this.entries.add(entry);
+	}
+	
+	public void put(int key, String value) {
+		if (key != this.getLexiconSize()) {
+			throw new IllegalArgumentException("This lexicon key cannot be set: " + key);
+		} else {
+			this.entries.add(value);
+		}
 	}
 	
 	public String getValue(int key) {
@@ -39,9 +48,7 @@ public class ListLexicon implements Lexicon, Iterable {
 		return this.entries.indexOf(value);
 	}
 	
-	public int getLexiconSize() {
-		return this.entries.size();
-	}
+	// ---------------------------------------------- Additional  methods --------------------------------------------
 	
 	public boolean containsKey(int key) {
 		if (key < this.getLexiconSize()) {
@@ -54,6 +61,14 @@ public class ListLexicon implements Lexicon, Iterable {
 		return this.entries.contains(value);
 	}
 	
+	public List<String> getEntries() {
+		return this.entries;
+	}
+	
+	public int getLexiconSize() {
+		return this.entries.size();
+	}
+	
 	public Set<Integer> keySet() {
 		List<Integer> key_list = new ArrayList<>();
 		for (int i = 0; i < this.getLexiconSize(); i++) {
@@ -64,14 +79,6 @@ public class ListLexicon implements Lexicon, Iterable {
 	
 	public Set<String> valueSet() {
 		return new HashSet<String>(this.entries);
-	}
-	
-	public void put(int key, String value) {
-		if (key != this.getLexiconSize()) {
-			throw new IllegalArgumentException("This lexicon key cannot be set: " + key);
-		} else {
-			this.entries.add(value);
-		}
 	}
 	
 	public Iterator<String> iterator() {

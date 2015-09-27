@@ -18,6 +18,8 @@ import java.util.zip.GZIPOutputStream;
 
 public class HexadecimalIndexing <V extends Number> extends Indexing {
 	
+	// ------------------------------------------------- Constructors ------------------------------------------------
+	
 	public HexadecimalIndexing(Map<String, V> data, String FREQS_IN_PATH, String LEX_IN_PATH) {
 		super(data, FREQS_IN_PATH, LEX_IN_PATH);
 		this.setPrefix();
@@ -48,6 +50,8 @@ public class HexadecimalIndexing <V extends Number> extends Indexing {
 	public HexadecimalIndexing() {
 		super();
 	}
+	
+	// ----------------------------------------------- Getter & Setter -----------------------------------------------
 	
 	private void setMode() {
 		this.mode = "hexadecimal";

@@ -21,6 +21,8 @@ import java.util.Stack;
 import java.util.TreeMap;
 
 public class MaximumFrequencyEstimation implements ProbabilityCalculation {
+	
+	// ------------------------------------------------- Main methods ------------------------------------------------
 
 	public void calculateNgramProbabilities(int n, PathHandler ph) {
 		Indexing<Integer> current_freq_indexing = null;
@@ -189,6 +191,8 @@ public class MaximumFrequencyEstimation implements ProbabilityCalculation {
 		}	
 		System.out.print("Total time for all probabilites was " + this.sum(times) / 1000000000.0 + " s in total.\n");
 	}
+	
+	// ---------------------------------------------- Additional  methods --------------------------------------------
 	
 	private Indexing<Integer> getFreqIndexing(int n, PathHandler ph) {
 		return this.getFreqIndexing(n, ph, 1);

@@ -9,6 +9,8 @@ class nGramDepot {
 	private Stack<Map.Entry<List<Integer>, Integer>> contents = new Stack<>();
 	private boolean available = false;
 	
+	// ------------------------------------------------- Main methods ------------------------------------------------
+	
 	public synchronized Map.Entry<List<Integer>, Integer> get() {
 		while (!this.available) {
 			try {

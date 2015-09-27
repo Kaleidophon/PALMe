@@ -32,6 +32,8 @@ public class LanguageModel {
 	private List<Map<List<Integer>, Double>> n_probabilities;
 	private BiMapLexicon lex;
 	
+	// ------------------------------------------------- Constructors ------------------------------------------------
+	
 	public LanguageModel(int n, String IN_PATH, ProbabilityCalculation prob_calc, String mode, boolean normalization) {
 		// Constructor to calculate n-gram probabilities based on n-gram frequencies
 		this.n = n;
@@ -57,6 +59,16 @@ public class LanguageModel {
 		this.ph = new PathHandler(IN_PATH);
 		if (debug) this.ph.printPaths();
 		if (mode.equals("fast back-off")) { setup(); }
+	}
+	
+	// ------------------------------------------------- Main methods ------------------------------------------------
+	
+	public void calculate() {
+		this.prob_calc.calculateNgramProbabilities(this.getN(), this.getPathHandler());
+	}
+	
+	public void calculateParallelized(int producer, int consumer) {
+		this.prob_calc.calculateNgramProbabilitiesParallelized(this.getN(), this.getPathHandler(), producer, consumer);
 	}
 	
 	public double getSequenceProbability(String seq) {
@@ -241,6 +253,8 @@ public class LanguageModel {
 		return probability;
 	}
 	
+	// ---------------------------------------------- Additional  methods --------------------------------------------
+	
 	private Indexing<Double> getProbIndexing(int n) {
 		return this.getProbIndexing(n, 1);
 	}
@@ -287,14 +301,6 @@ public class LanguageModel {
 		if (debug) System.out.println("Setting up language model took " + Math.round(duration / 10000000.0) / 100.0 + " s in total.");
 	}
 	
-	public void calculate() {
-		this.prob_calc.calculateNgramProbabilities(this.getN(), this.getPathHandler());
-	}
-	
-	public void calculateParallelized(int producer, int consumer) {
-		this.prob_calc.calculateNgramProbabilitiesParallelized(this.getN(), this.getPathHandler(), producer, consumer);
-	}
-	
 	private List<Integer> translateToInt(String[] tokens, BiMapLexicon lex) {
 		List<Integer> ids = new ArrayList<>();
 		for (int i = 0; i < tokens.length; i++) {
@@ -302,6 +308,32 @@ public class LanguageModel {
 		}
 		return ids;
 	}
+	
+	public void flipDebug() {
+		this.debug = (this.debug) ? false : true;
+	}
+	
+	public void flipNormalization() {
+		this.normalization = (this.normalization) ? false : true;
+	}
+	
+	private void checkIntegrity() {
+		if (this.getN() < 1) {
+			throw new IllegalArgumentException("n must be greater/equals 1");
+		}
+		if (this.debug) System.out.println("'" + this.IN_PATH + "'");
+		Pattern r = Pattern.compile("((\\.(\\.?))?/[a-z_\\-\\s0-9\\.]+)+/.*paths\\.xml");
+		Matcher m = r.matcher(this.IN_PATH);
+		m.matches();
+		if (m.group() == null) {
+			throw new IllegalArgumentException("Illegal path");
+		}
+		if (!(this.mode.equals("fast back-off") || this.mode.equals("default") || this.mode.equals("efficient back-off"))) {
+			throw new IllegalArgumentException("Illegal mode");
+		}
+	}
+	
+	// ----------------------------------------------- Getter & Setter -----------------------------------------------
 	
 	public void setValidateState(boolean validateState) {
 		this.validateState = validateState;
@@ -323,14 +355,6 @@ public class LanguageModel {
 		return this.ph;
 	}
 	
-	public void flipDebug() {
-		this.debug = (this.debug) ? false : true;
-	}
-	
-	public void flipNormalization() {
-		this.normalization = (this.normalization) ? false : true;
-	}
-	
 	public void setDebug(boolean debug) {
 		this.debug = debug;
 	}
@@ -343,25 +367,11 @@ public class LanguageModel {
 		return this.normalization;
 	}
 	
-	private void checkIntegrity() {
-		if (this.getN() < 1) {
-			throw new IllegalArgumentException("n must be greater/equals 1");
-		}
-		if (this.debug) System.out.println("'" + this.IN_PATH + "'");
-		Pattern r = Pattern.compile("((\\.(\\.?))?/[a-z_\\-\\s0-9\\.]+)+/.*paths\\.xml");
-		Matcher m = r.matcher(this.IN_PATH);
-		m.matches();
-		if (m.group() == null) {
-			throw new IllegalArgumentException("Illegal path");
-		}
-		if (!(this.mode.equals("fast back-off") || this.mode.equals("default") || this.mode.equals("efficient back-off"))) {
-			throw new IllegalArgumentException("Illegal mode");
-		}
-	}
-	
 	public boolean debug() {
 		return this.debug;
 	}
+	
+	// ------------------------------------------------ Nested classes -----------------------------------------------
 	
 	class WordNGrams {
 		

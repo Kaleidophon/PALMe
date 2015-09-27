@@ -11,6 +11,8 @@ import inout.general.IO;
 
 public class Evaluation {
 	
+	// ------------------------------------------------- Main methods ------------------------------------------------
+	
 	public static double evaluateLanguageModel(LanguageModel lm, String IN_PATH) {
 		return evaluateLanguageModel(lm, IN_PATH, false);
 	}

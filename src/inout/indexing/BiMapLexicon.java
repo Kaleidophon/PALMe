@@ -13,6 +13,8 @@ public class BiMapLexicon implements Lexicon, Iterable {
 	
 	private BiMap<Integer, String> entries;
 	
+	// ------------------------------------------------- Constructor -------------------------------------------------
+	
 	public BiMapLexicon() {
 		this.entries = HashBiMap.create();
 	}
@@ -47,8 +49,10 @@ public class BiMapLexicon implements Lexicon, Iterable {
 		}
 	}
 	
-	public Map<Integer, String> getEntries() {
-		return this.entries;
+	// ------------------------------------------------- Main methods ------------------------------------------------
+	
+	public void put(int key, String value) {
+		this.entries.put(key, value);
 	}
 	
 	public String getValue(int key) {
@@ -57,6 +61,12 @@ public class BiMapLexicon implements Lexicon, Iterable {
 	
 	public int getKey(String value) {
 		return this.entries.inverse().get(value);
+	}
+	
+	// ---------------------------------------------- Additional  methods --------------------------------------------
+	
+	public Map<Integer, String> getEntries() {
+		return this.entries;
 	}
 	
 	public int getLexiconSize() {
@@ -73,10 +83,6 @@ public class BiMapLexicon implements Lexicon, Iterable {
 	
 	public Set<Integer> keySet() {
 		return this.entries.keySet();
-	}
-	
-	public void put(int key, String value) {
-		this.entries.put(key, value);
 	}
 	
 	public Set<String> valueSet() {

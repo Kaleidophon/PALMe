@@ -22,6 +22,8 @@ public class PathParser {
 	private Set<String> non_demanding_keywords = new HashSet<>(Arrays.asList(new String[]{"path"}));
 	private Set<String> keywords;
 	
+	// ------------------------------------------------- Constructors ------------------------------------------------
+	
 	public PathParser(String PATHFILE_INPATH) {
 		this.keywords = new HashSet<>(this.demanding_keywords);
 		this.keywords.addAll(this.non_demanding_keywords);
@@ -33,9 +35,7 @@ public class PathParser {
 		}
 	}
 	
-	public List<Path> getPaths() {
-		return this.paths;
-	}
+	// ------------------------------------------------- Main methods ------------------------------------------------
 	
 	private List<Path> parsePaths() throws XMLParseException {
 		List<Path> paths = new ArrayList<>();
@@ -145,17 +145,19 @@ public class PathParser {
 		return paths;
 	}
 	
-	public void setKeywords(Set<String> keywords) {
-		this.keywords = keywords;
+	private Map<String, String> extractAttributes(String tag) {
+		tag = tag.replace("<", "").replace(">", "").replace("\"", "");
+		Map<String, String> attributes = new HashMap<>();
+		String[] parts = tag.split(" ");
+		for (String part : parts) {
+			if (this.contains(part, "=")) {
+				attributes.put(part.split("=")[0], part.split("=")[1]);
+			}
+		}
+		return attributes;
 	}
 	
-	public void setDemandingKeywords(Set<String> keywords) {
-		this.demanding_keywords = keywords;
-	}
-	
-	public void setNonDemandingKeywords(Set<String> keywords) {
-		this.non_demanding_keywords = keywords;
-	}
+	// ---------------------------------------------- Additional  methods --------------------------------------------
 	
 	private int countOccurrences(String s, String target) {
 		return (s.length() - s.replace(target, "").length()) / target.length();
@@ -171,16 +173,6 @@ public class PathParser {
 		return matches;	
 	}
 	
-	private String getKeyword(String tag) {
-		String keyword;
-		if (tag.indexOf(" ") == -1) {
-			keyword = tag.substring(tag.indexOf("<") + 1, tag.indexOf(">"));
-		} else {
-			keyword = tag.substring(tag.indexOf("<") + 1, tag.indexOf(" "));
-		}
-		return keyword;
-	}
-	
 	private boolean contains(String s, String target) {
 		for (int i = 0; i < s.length() - target.length() + 1; i++) {
 			if (s.substring(i, i + target.length()).equals(target)) {
@@ -194,17 +186,31 @@ public class PathParser {
 		return this.contains(tag, "=");
 	}
 	
-	private Map<String, String> extractAttributes(String tag) {
-		tag = tag.replace("<", "").replace(">", "").replace("\"", "");
-		Map<String, String> attributes = new HashMap<>();
-		String[] parts = tag.split(" ");
-		for (String part : parts) {
-			if (this.contains(part, "=")) {
-				attributes.put(part.split("=")[0], part.split("=")[1]);
-			}
+	private String getKeyword(String tag) {
+		String keyword;
+		if (tag.indexOf(" ") == -1) {
+			keyword = tag.substring(tag.indexOf("<") + 1, tag.indexOf(">"));
+		} else {
+			keyword = tag.substring(tag.indexOf("<") + 1, tag.indexOf(" "));
 		}
-		return attributes;
+		return keyword;
+	}
+
+	// ----------------------------------------------- Getter & Setter -----------------------------------------------
+	
+	public void setKeywords(Set<String> keywords) {
+		this.keywords = keywords;
 	}
 	
+	public void setDemandingKeywords(Set<String> keywords) {
+		this.demanding_keywords = keywords;
+	}
 	
+	public void setNonDemandingKeywords(Set<String> keywords) {
+		this.non_demanding_keywords = keywords;
+	}
+	
+	public List<Path> getPaths() {
+		return this.paths;
+	}
 }

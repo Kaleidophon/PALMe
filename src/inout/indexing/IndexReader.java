@@ -17,6 +17,8 @@ public class IndexReader <V extends Number> implements Runnable {
 	private Thread thread;
 	private Map<List<Integer>, V> indices;
 	
+	// ------------------------------------------------- Constructors ------------------------------------------------
+	
 	public IndexReader(BufferedReader reader, String mode) {
 		this.reader = reader;
 		this.mode = mode;
@@ -24,6 +26,8 @@ public class IndexReader <V extends Number> implements Runnable {
 		this.thread = new Thread(this);
 		this.thread.start();
 	}
+	
+	// ------------------------------------------------- Main methods ------------------------------------------------
 		
 	public void run() {
 		this.setRunning(true);
@@ -67,6 +71,16 @@ public class IndexReader <V extends Number> implements Runnable {
 		}
 	}
 	
+	public void join() {
+		try {
+			this.thread.join();
+		} catch (InterruptedException ie) {
+			ie.printStackTrace();
+		}
+	}
+	
+	// ----------------------------------------------- Getter & Setter -----------------------------------------------
+	
 	private void setRunning(boolean running) {
 		this.running = running;
 	}
@@ -82,14 +96,4 @@ public class IndexReader <V extends Number> implements Runnable {
 	public long getID() {
 		return Thread.currentThread().getId();
 	}
-	
-	public void join() {
-		try {
-			this.thread.join();
-		} catch (InterruptedException ie) {
-			ie.printStackTrace();
-		}
-	}
-	
-	
 }
