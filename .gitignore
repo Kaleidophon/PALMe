@@ -15,3 +15,5 @@ misc/*.xml
 *.out
 
 *.toc
+
+*.prefs
