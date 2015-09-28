@@ -42,7 +42,7 @@ public class WordCount {
 	    
 	    private final static IntWritable one = new IntWritable(1);
 	    private Text ngram = new Text();
-	    private static int n = 5;
+	    private static int n = 2;
 	      
 	    public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 	    	StringTokenizer itr = new StringTokenizer(value.toString());
@@ -171,6 +171,8 @@ public class WordCount {
 	    job.setMapperClass(TokenizerMapper.class);
 	    TokenizerMapper.setN(Integer.parseInt(otherArgs[otherArgs.length-3])); // Set ngram length
 	    System.out.println("n = " + TokenizerMapper.getN());
+	    System.out.println("Combiner = " + otherArgs[otherArgs.length-2]);
+	    System.out.println("Custom Partitioner = " + otherArgs[otherArgs.length-1]);
 	    if (otherArgs[otherArgs.length-2].equals("yes")) {
 	    	job.setCombinerClass(IntSumReducer.class);
 	    }
