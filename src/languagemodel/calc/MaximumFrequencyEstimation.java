@@ -1,15 +1,5 @@
 package languagemodel.calc;
 
-import inout.indexing.BinaryIndexing;
-import inout.indexing.HexadecimalIndexing;
-import inout.indexing.IndexReader;
-import inout.indexing.Indexing;
-import inout.paths.Path;
-import inout.paths.PathHandler;
-import utilities.Toolbox;
-import utilities.eval.CorpusEvaluator;
-import utilities.eval.CorpusReader;
-
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -17,13 +7,27 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.Stack;
-import java.util.TreeMap;
 
+import inout.indexing.BinaryIndexing;
+import inout.indexing.HexadecimalIndexing;
+import inout.indexing.Indexing;
+import inout.paths.Path;
+import inout.paths.PathHandler;
+import utilities.Toolbox;
+
+/**
+ * A {@link ProbabilityCalculation}-function that computes n-gram probabilities based on n-gram and (n-1)-gram frequencies.
+ * Basically, the probability p for a sequence w0 w1 ... wn is p(w0, w1, ... wn) = #(w0, w1, ... wn) / #(w0, w1, ... wn-1),
+ * where #(...) is the frequency count of a sequence.
+ * For unigrams it is p(w) = #(w) / TOTAL, where TOTAL is the total number of tokens.
+ * 
+ * @author Dennis Ulmer
+ */
 public class MaximumFrequencyEstimation implements ProbabilityCalculation {
 	
 	// ------------------------------------------------- Main methods ------------------------------------------------
 
+	/** Calculates n-gram probabilities. */
 	public void calculateNgramProbabilities(int n, PathHandler ph) {
 		Indexing<Integer> current_freq_indexing = null;
 		Indexing<Integer> last_freq_indexing = null;
@@ -111,6 +115,7 @@ public class MaximumFrequencyEstimation implements ProbabilityCalculation {
 		System.out.print("Total time for all probabilites was " + this.sum(times) / 1000000000.0 + " s in total.\n");
 	}
 	
+	/** Calculates n-gram probabilites parallelized, using producer and consumer. */
 	public void calculateNgramProbabilitiesParallelized(int n, PathHandler ph, int n_of_producer, int n_of_consumer) {
 		Indexing<Integer> current_freq_indexing = null;
 		Indexing<Integer> last_freq_indexing = null;
@@ -194,10 +199,12 @@ public class MaximumFrequencyEstimation implements ProbabilityCalculation {
 	
 	// ---------------------------------------------- Additional  methods --------------------------------------------
 	
+	/** @return A frequency {@link Indexing} with n-grams */
 	private Indexing<Integer> getFreqIndexing(int n, PathHandler ph) {
 		return this.getFreqIndexing(n, ph, 1);
 	}
 	
+	/** @return A frequency {@link Indexing} with n-grams. Loading is parallelized. */
 	private Indexing<Integer> getFreqIndexing(int n, PathHandler ph, int threads) {
 		List<List<Path>> pathlists = new ArrayList<>();
 		pathlists.add(ph.getPathsWithN(n));
@@ -227,6 +234,7 @@ public class MaximumFrequencyEstimation implements ProbabilityCalculation {
 		return freq_indexing;
 	}
 	
+	/** @return Sum of a {@code List<Long>} */
 	public Long sum(List<Long> list) {
 	     Long sum = (long) 0; 
 	     for (Long l : list)

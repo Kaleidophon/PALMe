@@ -7,6 +7,11 @@ import java.util.Map;
 import utilities.Toolbox;
 import inout.indexing.Indexing;
 
+/**
+ * Class that retrieves a n-gram from a {@link nGramDepot} and calculates its probability.
+ * 
+ * @author Dennis Ulmer
+ */
 public class nGramCalculator extends Thread {
 
 	int n;
@@ -18,6 +23,13 @@ public class nGramCalculator extends Thread {
 	
 	// ------------------------------------------------- Constructors ------------------------------------------------
 	
+	/**
+	 * Default constructor.
+	 * 
+	 * @param n	N-gram order
+	 * @param last_indexing	Indexing for n-1
+	 * @param ngd {@link nGramDepot}-object
+	 */
 	public nGramCalculator(int n, Indexing<Integer> last_indexing, nGramDepot ngd) {
 		this.n = n;
 		this.last_indexing = last_indexing;
@@ -26,6 +38,14 @@ public class nGramCalculator extends Thread {
 		start();
 	}
 	
+	/**
+	 * Constructor for unigrams.
+	 * 
+	 * @param n N-gram order (n = 1)
+	 * @param last_indexing Here Obsolete (= null)
+	 * @param ngd {@link nGramDepot}-object
+	 * @param total Total number of tokens
+	 */
 	public nGramCalculator(int n, Indexing<Integer> last_indexing, nGramDepot ngd, int total) {
 		this.total = total;
 		this.n = n;
@@ -37,6 +57,7 @@ public class nGramCalculator extends Thread {
 	
 	// ------------------------------------------------- Main methods ------------------------------------------------
 	
+	/** Main method that calculates the probability of a n-gram */
 	public void run() {
 		this.setRunning(true);
 		while (this.ngd.hasLeft()) {
@@ -76,22 +97,27 @@ public class nGramCalculator extends Thread {
 	
 	// ----------------------------------------------- Getter & Setter -----------------------------------------------
 	
+	/** @return If thread is still running? */
 	public boolean isRunning() {
 		return this.running;
 	}
 	
+	/** Sets running */
 	public void setRunning(boolean r) {
 		this.running = r;
 	}
 	
+	/** @return N-gram order */
 	public int getN() {
 		return this.n;
 	}
 	
+	/** @return A {@code Map<List<Integer>, Double>} of n-gram probabilities */
 	public Map<List<Integer>, Double> getProbs() {
 		return this.probs;
 	}
 	
+	/** @return Current thread ID */
 	public long getID() {
 		return Thread.currentThread().getId();
 	}

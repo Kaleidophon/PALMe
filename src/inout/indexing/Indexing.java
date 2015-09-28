@@ -147,7 +147,7 @@ public class Indexing <V extends Number> implements Serializable {
 	public void createIndices(Map<String, V> data) throws IncompleteLexiconException {
 		Map<List<Integer>, V> indices = new HashMap<>();
 		BiMapLexicon lexicon = null;
-		data = Toolbox.sortByValues(data);
+		// data = Toolbox.sortByValues(data);
 		this.create_lexicons = true;
 		
 		// Determine whether there is a pre-existing lexicon AND reversed lexicon of same format
