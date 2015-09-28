@@ -11,18 +11,26 @@ import java.util.List;
 import java.util.Map;
 import java.lang.StringBuilder;
 
+/**
+ * Class to provide some often needed methods used by other classes.
+ * 
+ * @author Dennis Ulmer
+ */
 public class Toolbox {
 	
 	// -------------------------------------------------- Conversions ------------------------------------------------
 	
+	/** Cast a generic Number type to an integer */
 	public static <V extends Number> V intCast(Integer i) {
 		return (V) i;
 	}
 	
+	/** Cast a generic Number type to a double */
 	public static <V extends Number> V doubleCast(Double d)  {
 		return (V) d;
 	}	
 	
+	/** Convert a string into a double */
 	public static Double stringToDouble(String input, int base) {
 		if (base == 10) {
 			return Double.parseDouble(input);
@@ -30,16 +38,19 @@ public class Toolbox {
 		return Double.longBitsToDouble(Long.parseLong(input, base));
 	}
 	
+	/** Convert a double into a Hex-String */
 	public static String doubleToHex(Double d) {
 		return Long.toHexString(Double.doubleToRawLongBits(d));
 	}
 	
+	/** Convert a double into a binary String */
 	public static String doubleToBinary(Double d) {
 		return Long.toBinaryString(Double.doubleToRawLongBits(d));
 	}
 	
 	// -------------------------------------------------- String methods ---------------------------------------------
 	
+	/** Convert a {@code List} to a String. */
 	public static <T> String listToString(List<T> l) {
 		if (l.size() == 0) {
 			return "{}";
@@ -52,6 +63,7 @@ public class Toolbox {
 		return out;
 	}
 	
+	/** Convert an array tp a String. */
 	public static <T> String arrayToString(T[] a) {
 		if (a.length == 0) {
 			return "{}";
@@ -64,6 +76,7 @@ public class Toolbox {
 		return out;
 	}
 	
+	/** Joins all elements of a {@code List} into a String, divided by a custom delimiter */
 	public static <T> String njoin(String delimiter, List<T> a) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(a.get(0));
@@ -73,6 +86,7 @@ public class Toolbox {
 		return sb.toString();
 	}
 	
+	/** Joins all elements of an array into a String, divided by a custom delimiter */
 	public static <T> String njoin(String delimiter, T[] a) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(a[0]);
@@ -84,16 +98,19 @@ public class Toolbox {
 	
 	// -------------------------------------------------- Screen output ----------------------------------------------
 	
+	/** Prints a String representation of a {@code List} */
 	public static <T> void printList(List<T> l) {
 		System.out.println(listToString(l));
 	}
 	
+	/** Prints a String representation of an array */
 	public static <T> void printArray(T[] a) {
 		System.out.println(arrayToString(a));
 	}
 	
 	// -------------------------------------------- Operations on data structures ------------------------------------
 	
+	/** Sorts a HashMap by values. */
 	public static <K, V> HashMap<K, V> sortByValues(Map<K, V> map) { 
 		List<V> list = new LinkedList(map.entrySet());
 
@@ -111,6 +128,7 @@ public class Toolbox {
 	    return sortedHashMap;
 	}
 	
+	/** Removes the Last element from a list. */
 	public static List<Integer> pop(List<Integer> l) {
 		List<Integer> clone = new ArrayList<>(l);
 		clone.remove(clone.size()-1);

@@ -1,13 +1,5 @@
 package languagemodel.model;
 
-import utilities.Toolbox;
-import inout.indexing.BiMapLexicon;
-import inout.indexing.BinaryIndexing;
-import inout.indexing.HexadecimalIndexing;
-import inout.indexing.Indexing;
-import inout.paths.Path;
-import inout.paths.PathHandler;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,8 +9,28 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.lang.IllegalArgumentException;
 
+import utilities.Toolbox;
+import inout.indexing.BiMapLexicon;
+import inout.indexing.BinaryIndexing;
+import inout.indexing.HexadecimalIndexing;
+import inout.indexing.Indexing;
+import inout.paths.Path;
+import inout.paths.PathHandler;
 import languagemodel.calc.ProbabilityCalculation;
 
+/**
+ * This class serves two purposes. 
+ * a) Calculate the probability for n-grams.
+ * b) Provide an environment to compute the probability of a sequence.
+ * <p>
+ * Therefore, it has multiple modes:
+ * - "default": n-grams are used to compute probability
+ * - "fast back-off": If n-gram isn't found, it looks for a suitable (n-1)-gram. It loads every n-gram layer into memory in fast mode
+ * - "efficient back-off": If n-gram isn't found, it looks for a suitable (n-1)-gram. It loads only the currently needed n-gram layer into memory
+ * in efficient mode (makes it very slow for long sequences)
+ * 
+ * @author Dennis Ulmer
+ */
 public class LanguageModel {
 	
 	private final int n;
@@ -34,8 +46,8 @@ public class LanguageModel {
 	
 	// ------------------------------------------------- Constructors ------------------------------------------------
 	
+	/** Constructor to calculate n-gram probabilities based on n-gram frequencies */
 	public LanguageModel(int n, String IN_PATH, ProbabilityCalculation prob_calc, String mode, boolean normalization) {
-		// Constructor to calculate n-gram probabilities based on n-gram frequencies
 		this.n = n;
 		this.IN_PATH = IN_PATH;
 		this.normalization = normalization;
@@ -48,8 +60,8 @@ public class LanguageModel {
 		if (debug) this.ph.printPaths();
 	}
 	
+	/** Constructor to load already calculated n-gram probabilities */
 	public LanguageModel(int n, String IN_PATH, String mode, boolean normalization) {
-		// Constructor to load already computated n-gram probabilities
 		this.n = n;
 		this.IN_PATH = IN_PATH;
 		this.debug = false;
@@ -63,14 +75,17 @@ public class LanguageModel {
 	
 	// ------------------------------------------------- Main methods ------------------------------------------------
 	
+	/** Calculates n-gram probabilities. */
 	public void calculate() {
 		this.prob_calc.calculateNgramProbabilities(this.getN(), this.getPathHandler());
 	}
 	
+	/** Calculates n-gram probabilities parallelized */
 	public void calculateParallelized(int producer, int consumer) {
 		this.prob_calc.calculateNgramProbabilitiesParallelized(this.getN(), this.getPathHandler(), producer, consumer);
 	}
 	
+	/** Returns the probability of a sequence. See class description for an explanation of the different modes. */
 	public double getSequenceProbability(String seq) {
 		// Initializing
 		double probability = 1.0;
@@ -192,6 +207,8 @@ public class LanguageModel {
 		return probability;
 	}
 	
+	/** Returns the probability of a sequence, calculated parallelized.
+	 * See class description for an explanation of the different modes. */
 	public synchronized double getSequenceProbabilityParallelized(String seq) {
 		// Initializing
 		double probability = 1.0;
@@ -255,10 +272,12 @@ public class LanguageModel {
 	
 	// ---------------------------------------------- Additional  methods --------------------------------------------
 	
+	/** @return A probability {@link Indexing} with n-grams */
 	private Indexing<Double> getProbIndexing(int n) {
 		return this.getProbIndexing(n, 1);
 	}
 	
+	/** @return A probability {@link Indexing} with n-grams. Loading is parallelized */
 	private Indexing<Double> getProbIndexing(int n, int threads) {
 		List<List<Path>> pathlists = new ArrayList<>();
 		pathlists.add(this.ph.getPathsWithN(n));
@@ -288,6 +307,7 @@ public class LanguageModel {
 		return prob_indexing;
 	}
 	
+	/** Loads all n-gram layers. Only evoked in "fast back-off" mode. */
 	private void setup() {
 		long startTime = System.nanoTime();
 		this.n_probabilities = new ArrayList<>();
@@ -301,6 +321,7 @@ public class LanguageModel {
 		if (debug) System.out.println("Setting up language model took " + Math.round(duration / 10000000.0) / 100.0 + " s in total.");
 	}
 	
+	/** Translates a list of tokens to their corresponding IDs. */
 	private List<Integer> translateToInt(String[] tokens, BiMapLexicon lex) {
 		List<Integer> ids = new ArrayList<>();
 		for (int i = 0; i < tokens.length; i++) {
@@ -309,14 +330,17 @@ public class LanguageModel {
 		return ids;
 	}
 	
+	/** Change debug mode */
 	public void flipDebug() {
 		this.debug = (this.debug) ? false : true;
 	}
 	
+	/** Change normalization mode */
 	public void flipNormalization() {
 		this.normalization = (this.normalization) ? false : true;
 	}
 	
+	/** Checks all language model parameters. */
 	private void checkIntegrity() {
 		if (this.getN() < 1) {
 			throw new IllegalArgumentException("n must be greater/equals 1");
@@ -335,44 +359,60 @@ public class LanguageModel {
 	
 	// ----------------------------------------------- Getter & Setter -----------------------------------------------
 	
+	/** Set if language model parameters should be checked.*/
 	public void setValidateState(boolean validateState) {
 		this.validateState = validateState;
 	}
 	
+	/** @return {@link ProbabilityCalculation} function. */
 	public ProbabilityCalculation getProbabilityCalculation() {
 		return this.prob_calc;
 	}
 	
+	/** @return highest n-gram order */
 	public int getN() {
 		return this.n;
 	}
 
+	/** @return Current language model mode */
 	public String getMode() {
 		return this.mode;
 	}
 	
+	/** @return Current {@link PathHandler} */
 	public PathHandler getPathHandler() {
 		return this.ph;
 	}
 	
+	/** Set debug mode. */
 	public void setDebug(boolean debug) {
 		this.debug = debug;
 	}
 	
+	/** Set normalization */
 	public void setNormalization(boolean norm) {
 		this.normalization = norm;
 	}
 	
+	/** @return Whether normalization is on or off */
 	public boolean getNormalization() {
 		return this.normalization;
 	}
 	
+	/** @return Whether debug mode is on or off */
 	public boolean debug() {
 		return this.debug;
 	}
 	
 	// ------------------------------------------------ Nested classes -----------------------------------------------
 	
+	/**
+	 * Class to store all possible n-grams for a word in a sequence for the "efficient back-off" mode of {@link LanguageModel}.
+	 * <p>
+	 * Imagine a sequence like "<s> The dog bites the postman . <s>"
+	 * A {@code WordNGrams}-object for postman with n = 4 would then contain
+	 * {"dog bites the postman", "bites the postman", "the postman", "postman"}.
+	 * */
 	class WordNGrams {
 		
 		private int n;

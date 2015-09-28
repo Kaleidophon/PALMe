@@ -9,14 +9,24 @@ import java.util.List;
 import languagemodel.model.LanguageModel;
 import inout.general.IO;
 
+/**
+ * Class that calculates the perplexity of a {@link LanguageModel} with a corpus.
+ * The perplexity is the average probability of every sentence in corpus.
+ * The goal should be to achieve a high perplexity, s.t. the probability for sentence in the corpus is very high on average
+ * (= the model is good at predicting sentences).
+ * 
+ * @author Dennis Ulmer
+ */
 public class Evaluation {
 	
 	// ------------------------------------------------- Main methods ------------------------------------------------
 	
+	/** Calculates the perplexity of a {@link LanguageModel} with a corpus. */
 	public static double evaluateLanguageModel(LanguageModel lm, String IN_PATH) {
 		return evaluateLanguageModel(lm, IN_PATH, false);
 	}
 
+	/** Calculates the perplexity of a {@link LanguageModel} with an optional debug mode. */
 	public static double evaluateLanguageModel(LanguageModel lm, String IN_PATH, boolean debug) {
 		double perplexity = 0.0;
 		long startTime = System.nanoTime();
@@ -39,10 +49,12 @@ public class Evaluation {
 		return perplexity;
 	}
 	
+	/** Calculates the perplexity of a {@link LanguageModel} with a corpus parallelized. */
 	public static double evaluateLanguageModelParallelized(LanguageModel lm, String IN_PATH, int n_of_producer, int n_of_consumer) {
 		return evaluateLanguageModelParallelized(lm, IN_PATH, n_of_producer, n_of_consumer, false);
 	}
 	
+	/** Calculates the perplexity of a {@link LanguageModel} with a corpus parallelized with an optional debug mode. */
 	public static double evaluateLanguageModelParallelized(LanguageModel lm, String IN_PATH, int n_of_producer, int n_of_consumer, boolean debug) {
 		double perplexity = 0.0;
 		int count = 0;
@@ -75,7 +87,6 @@ public class Evaluation {
 					count += ce.getLineCount();
 				}
 			} catch (InterruptedException ie) {}
-			
 		}
 		perplexity /= count;
 		

@@ -3,6 +3,11 @@ package utilities.eval;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+/** 
+ * Class to read a line from a corpus and add it to the stack of {@link CorpusDepot}.
+ * 
+ * @author Dennis Ulmer
+ */
 public class CorpusReader extends Thread {
 
 	private BufferedReader reader;
@@ -10,6 +15,7 @@ public class CorpusReader extends Thread {
 	
 	// ------------------------------------------------- Constructors ------------------------------------------------
 
+	/** Defautl constructor */
 	public CorpusReader(BufferedReader reader, CorpusDepot cd) {
 		this.reader = reader;
 		this.cd = cd;
@@ -18,6 +24,7 @@ public class CorpusReader extends Thread {
 	
 	// ------------------------------------------------- Main methods ------------------------------------------------
 	
+	/** Main method to read a single line at a time */
 	public void run() {
 		try {
 			String current_line = reader.readLine().trim();
@@ -37,10 +44,12 @@ public class CorpusReader extends Thread {
 	
 	// ----------------------------------------------- Getter & Setter -----------------------------------------------
 	
+	/** @return Current {@link CorpusDepot} */
 	public CorpusDepot getCorpusDepot() {
 		return this.cd;
 	}
 	
+	/** @return current thread ID */
 	public long getID() {
 		return Thread.currentThread().getId();
 	}
