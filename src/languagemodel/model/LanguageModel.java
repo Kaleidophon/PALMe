@@ -19,14 +19,14 @@ import inout.paths.PathHandler;
 import languagemodel.calc.ProbabilityCalculation;
 
 /**
- * This class serves two purposes. 
- * a) Calculate the probability for n-grams.
- * b) Provide an environment to compute the probability of a sequence.
+ * This class serves two purposes. <p>
+ * a) Calculate the probability for n-grams. <p>
+ * b) Provide an environment to compute the probability of a sequence. <p>
  * <p>
- * Therefore, it has multiple modes:
- * - "default": n-grams are used to compute probability
- * - "fast back-off": If n-gram isn't found, it looks for a suitable (n-1)-gram. It loads every n-gram layer into memory in fast mode
- * - "efficient back-off": If n-gram isn't found, it looks for a suitable (n-1)-gram. It loads only the currently needed n-gram layer into memory
+ * Therefore, it has multiple modes: <p>
+ * - "default": n-grams are used to compute probability <p>
+ * - "fast back-off": If n-gram isn't found, it looks for a suitable (n-1)-gram. It loads every n-gram layer into memory in fast mode <p>
+ * - "efficient back-off": If n-gram isn't found, it looks for a suitable (n-1)-gram. It loads only the currently needed n-gram layer into memory <p>
  * in efficient mode (makes it very slow for long sequences)
  * 
  * @author Dennis Ulmer

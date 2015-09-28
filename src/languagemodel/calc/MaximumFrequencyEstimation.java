@@ -16,10 +16,10 @@ import inout.paths.PathHandler;
 import utilities.Toolbox;
 
 /**
- * A {@link ProbabilityCalculation}-function that computes n-gram probabilities based on n-gram and (n-1)-gram frequencies.
- * Basically, the probability p for a sequence w0 w1 ... wn is p(w0, w1, ... wn) = #(w0, w1, ... wn) / #(w0, w1, ... wn-1),
- * where #(...) is the frequency count of a sequence.
- * For unigrams it is p(w) = #(w) / TOTAL, where TOTAL is the total number of tokens.
+ * A {@link ProbabilityCalculation}-function that computes n-gram probabilities based on n-gram and (n-1)-gram frequencies. <p>
+ * Basically, the probability p for a sequence w0 w1 ... wn is p(w0, w1, ... wn) = #(w0, w1, ... wn) / #(w0, w1, ... wn-1), <p>
+ * where #(...) is the frequency count of a sequence. <p>
+ * For unigrams it is p(w) = #(w) / TOTAL, where TOTAL is the total number of tokens. <p>
  * 
  * @author Dennis Ulmer
  */

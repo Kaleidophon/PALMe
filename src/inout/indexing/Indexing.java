@@ -27,8 +27,8 @@ import utilities.Toolbox;
 /**
  * Indexing is a class to store n-gram frequencies and probabilites in a more efficient manner.
  * <p>
- * Normally, it would be stored in a format like
- * <word 1> <word 2> ... <word n>	<value>
+ * Normally, it would be stored in a format like <p>
+ * word 1 word 2 ... word n		value <p>
  * <p>
  * However, this makes the amount of disk space needed even bigger.
  * Therefore, each word is given a unique ID instead. The ID can then be looked up in a lexicon.
