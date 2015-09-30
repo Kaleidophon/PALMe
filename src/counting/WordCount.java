@@ -37,12 +37,57 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
 public class WordCount {
-
-	public static class TokenizerMapper extends Mapper<Object, Text, Text, IntWritable>{
+	
+public static class allNGramMapper extends Mapper<Object, Text, Text, IntWritable>{
 	    
 	    private final static IntWritable one = new IntWritable(1);
 	    private Text ngram = new Text();
-	    private static int n = 2;
+	    private static int n = 3;
+	      
+	    public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+	    	StringTokenizer itr = new StringTokenizer(value.toString());
+	    	List<String> tokens = new ArrayList<>();
+	    	// Collecting all sentence tokens
+	    	while (itr.hasMoreTokens()) {
+	    		tokens.add(itr.nextToken());
+	    	}
+	    	// Emitting ngrams
+	    	for (int i = n-1; i < tokens.size(); i++) {
+	    		for (int j = 0; j < i; j++) {
+	    			ngram.set(concat(tokens.subList(j, i+1)));
+		    		context.write(ngram, one);
+	    		}
+	    	}
+	    }
+	    
+	    /** Efficient Concatenation with StringBuilder */
+	    private String concat(List<String> stringlist) {
+	    	if (stringlist.size() == 1) {
+	    		return stringlist.get(0);
+	    	}
+	    	StringBuilder sb = new StringBuilder();
+	    	for (int i = 0; i < stringlist.size()-1; i++) {
+	    		sb.append(stringlist.get(i) + " ");
+	    	}
+	    	sb.append(stringlist.get(stringlist.size()-1));
+	    	return sb.toString();
+	    }
+	    
+	    /** Setting the ngram length */
+	    public static void setN(int new_n) {
+	    	n = new_n;
+	    }
+	    
+	    public static int getN() {
+	    	return n;
+	    }
+	}
+
+	public static class nGramMapper extends Mapper<Object, Text, Text, IntWritable>{
+	    
+	    private final static IntWritable one = new IntWritable(1);
+	    private Text ngram = new Text();
+	    private static int n = 3;
 	      
 	    public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 	    	StringTokenizer itr = new StringTokenizer(value.toString());
@@ -150,7 +195,7 @@ public class WordCount {
 		
 		Configuration conf = new Configuration();
 	    String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-	    final int NUMBER_OF_NODES = 24;
+	    final int NUMBER_OF_NODES = 31;
 	    final int MAX_NUMBER_OF_TASKS = 1000;
 	    final double REDUCER_CONSTANT = 0.95; // or 1.75
 	    
@@ -165,21 +210,22 @@ public class WordCount {
 	    //conf.setNumMapTasks(5); // Not possible with code in line?
 	    int NUMBER_OF_REDUCERS = (int) REDUCER_CONSTANT * NUMBER_OF_NODES * MAX_NUMBER_OF_TASKS;
 	    //System.out.println("Number of Reducers: " + NUMBER_OF_REDUCERS);
-	    //job.setNumReduceTasks(5); // Placeholder
+	    job.setNumReduceTasks(12); // Placeholder
 	    
 	    job.setJarByClass(WordCount.class);
-	    job.setMapperClass(TokenizerMapper.class);
-	    TokenizerMapper.setN(Integer.parseInt(otherArgs[otherArgs.length-3])); // Set ngram length
-	    System.out.println("n = " + TokenizerMapper.getN());
+	    job.setMapperClass(nGramMapper.class);
+	    nGramMapper.setN(Integer.parseInt(otherArgs[otherArgs.length-3])); // Set ngram length
+	    System.out.println("n = " + nGramMapper.getN());
 	    System.out.println("Combiner = " + otherArgs[otherArgs.length-2]);
 	    System.out.println("Custom Partitioner = " + otherArgs[otherArgs.length-1]);
+	    System.out.println("Number of reducers = " + NUMBER_OF_NODES);
 	    if (otherArgs[otherArgs.length-2].equals("yes")) {
 	    	job.setCombinerClass(IntSumReducer.class);
 	    }
 	    
 	    if (otherArgs[otherArgs.length-1].equals("yes")) {
 	    	job.setPartitionerClass(CustomPartitioner.class);
-	    	CustomPartitioner.setNumberOfReducers(NUMBER_OF_REDUCERS);
+	    	//CustomPartitioner.setNumberOfReducers(NUMBER_OF_REDUCERS);
 	    }
 	    job.setReducerClass(IntSumReducer.class);
 	    job.setOutputKeyClass(Text.class);

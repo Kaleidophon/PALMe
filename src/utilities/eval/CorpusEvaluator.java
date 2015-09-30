@@ -12,7 +12,7 @@ public class CorpusEvaluator extends Thread {
 
 	private LanguageModel lm;
 	private CorpusDepot cd;
-	private int line_count;
+	private int count;
 	private double total_prob;
 	private boolean running;
 	
@@ -31,18 +31,18 @@ public class CorpusEvaluator extends Thread {
 	public void run() {
 		this.setRunning(true);
 		String line = "";
-		int line_count = 0;
+		int count = 0;
 		double total_prob = 0.0;
 		
 		while (cd.hasLeft()) {
 			line = cd.get();
 			//System.out.println("Consumer #" + this.getID() + " analyzing " + line);
-			line_count++;
+			count += line.split(" ").length;
 			double prob = lm.getSequenceProbability(line);
 			total_prob += prob;
 			//System.out.println("Total: " + total_prob + " | Count: " + line_count);
 		}
-		this.line_count = line_count;
+		this.count = count;
 		this.total_prob = total_prob;
 		this.setRunning(false);
 	}
@@ -50,8 +50,8 @@ public class CorpusEvaluator extends Thread {
 	// ----------------------------------------------- Getter & Setter -----------------------------------------------
 	
 	/** Return the number of lines processed by this object */
-	public int getLineCount() {
-		return this.line_count;
+	public int getWordCount() {
+		return this.count;
 	}
 	
 	/** Get the sum of all probabilities computed by this object */

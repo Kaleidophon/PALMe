@@ -36,7 +36,7 @@ public class Evaluation {
 			if (lm.debug() && count % 995 == 0) System.out.println("Sentence nr. " + count);
 			String line = reader.next();
 			perplexity += lm.getSequenceProbability(line);
-			count++;
+			count += line.split(" ").length;
 		} while(reader.hasNext());
 		long endTime = System.nanoTime();
 		long duration = (endTime - startTime);
@@ -84,7 +84,7 @@ public class Evaluation {
 				//System.out.println("Consumer #" + ce.getID() + " has finished the job.");
 				if (!ce.isRunning()) {
 					perplexity += ce.getTotalProb();
-					count += ce.getLineCount();
+					count += ce.getWordCount();
 				}
 			} catch (InterruptedException ie) {}
 		}

@@ -7,6 +7,7 @@ import inout.indexing.Indexing;
 import inout.paths.Path;
 import inout.paths.PathHandler;
 import utilities.eval.Evaluation;
+import languagemodel.calc.MaximumFrequencyEstimation;
 import languagemodel.calc.ProbabilityCalculation;
 import languagemodel.model.LanguageModel;
 
@@ -24,7 +25,7 @@ public class Testing {
 	// ----------------------------------------------------- Main ----------------------------------------------------
 	
 	public static void main(String[] args) {
-		createTestData(2, "./rsc/create_freqs_paths.xml");
+		timeLanguageModelEvaluation(5, "./rsc/paths.xml", "./rsc/corpora/dewiki_plain_1000k_test.txt", 25);
 	}
 	
 	// ------------------------------------------------- Main methods ------------------------------------------------
@@ -69,25 +70,48 @@ public class Testing {
 	}
 	
 	/** Times the duration of loading an {@link Indexing}-object. */
-	public static <V extends Number> void timeIndexingLoading(int mode, String IN_PATH, String LEX_PATH, boolean zipped, int iterations, int threads) {
+	public static <V extends Number> void timeIndexingLoading(int n, int mode, String IN_PATH, int iterations, int threads) {
 		System.out.println("Path: " + IN_PATH + " | Mode: " + mode);
-		DataLoader dl = new DataLoader();
+		PathHandler ph = new PathHandler(IN_PATH);
+		// Load lexicon
+		Path lex_path = ph.getFirstPathWithAttributes("zipped lexicon");
+		if (lex_path == null) {
+			lex_path = ph.getFirstPathWithAttributes("raw lexicon");
+		}	
 		long[] durations = new long[iterations];
 		String experiment_name = "";
+		String specification = "";
+		//{raw / zipped} {default / binary / hexadecimal} {frequency / probability} indexing n {read / write}
 		
 		switch(mode) {
 			case(0): 
-				experiment_name = (zipped) ? "Timing zipped Indexing loading" : "Timing unzipped Indexing loading"; 
+				experiment_name = "Timing unzipped Indexing loading"; 
+				specification = "raw default frequency indexing " + n + " read";
 				break;
 			case(1): 
-				experiment_name = (zipped) ? "Timing zipped Binary Indexing loading" : "Timing unzipped Binary Indexing loading"; 
+				experiment_name = "Timing unzipped Binary Indexing loading"; 
+				specification = "raw binary frequency indexing " + n + " read";
 				break;
 			case(2): 
-				experiment_name = (zipped) ? "Timing zipped Hexadecimal Indexing loading" : "Timing unzipped Hexadecimal Indexing loading"; 
+				experiment_name = "Timing unzipped Hexadecimal Indexing loading"; 
+				specification = "raw hexadecimal frequency indexing " + n + " read";
+				break;
+			case(3): 
+				experiment_name = "Timing zipped Indexing loading"; 
+				specification = "zipped default frequency indexing " + n + " read";
+				break;
+			case(4): 
+				experiment_name = "Timing zipped Binary Indexing loading"; 
+				specification = "zipped binary frequency indexing " + n + " read";
+				break;
+			case(5): 
+				experiment_name = "Timing zipped Hexadecimal Indexing loading"; 
+				specification = "zipped hexadecimal frequency indexing " + n + " read";
 				break;
 		}
 		
-		if (threads > 1) experiment_name = experiment_name.substring(0, 6) + " parallelized" + experiment_name.substring(7, experiment_name.length());
+		if (threads > 1) experiment_name = experiment_name.substring(0, 6) + " parallelized " + experiment_name.substring(7, experiment_name.length());
+		Path p = ph.getFirstPathWithAttributes(specification);
 		
 		for (int i = 0; i < iterations; i++) {
 			System.out.println("Starting iteration #" + (i+1) + "...");
@@ -96,50 +120,74 @@ public class Testing {
 				case (0):
 					Indexing<V> indexing1 = null;
 					if (threads > 1) {
-						indexing1 = new Indexing<>(LEX_PATH, IN_PATH, zipped, threads);
+						indexing1 = new Indexing<>(p.getDirectory(), lex_path.getDirectory(), p.isZipped(), threads);
 					} else {
-						indexing1 = new Indexing<>(LEX_PATH, IN_PATH, zipped);
+						indexing1 = new Indexing<>(p.getDirectory(), lex_path.getDirectory(), p.isZipped());
+					}
+					break;
+				case (1):
+					Indexing<V> indexing2 = null;
+					if (threads > 1) {
+						indexing2 = new BinaryIndexing<>(p.getDirectory(), lex_path.getDirectory(), p.isZipped(), threads);
+					} else {
+						indexing2 = new BinaryIndexing<>(p.getDirectory(), lex_path.getDirectory(), p.isZipped());
 					}
 					break;
 				case (2):
-					Indexing<V> indexing2 = null;
+					Indexing<V> indexing3 = null;
 					if (threads > 1) {
-						indexing2 = new BinaryIndexing<>(LEX_PATH, IN_PATH, zipped, threads);
+						indexing3 = new HexadecimalIndexing<>(p.getDirectory(), lex_path.getDirectory(), p.isZipped(), threads);
 					} else {
-						indexing2 = new BinaryIndexing<>(LEX_PATH, IN_PATH, zipped);
+						indexing3 = new HexadecimalIndexing<>(p.getDirectory(), lex_path.getDirectory(), p.isZipped());
 					}
 					break;
 				case (3):
-					Indexing<V> indexing3 = null;
+					Indexing<V> indexing4 = null;
 					if (threads > 1) {
-						indexing3 = new HexadecimalIndexing<>(LEX_PATH, IN_PATH, zipped, threads);
+						indexing4 = new Indexing<>(p.getDirectory(), lex_path.getDirectory(), p.isZipped(), threads);
 					} else {
-						indexing3 = new HexadecimalIndexing<>(LEX_PATH, IN_PATH, zipped);
+						indexing4 = new Indexing<>(p.getDirectory(), lex_path.getDirectory(), p.isZipped());
+					}
+					break;
+				case (4):
+					Indexing<V> indexing5 = null;
+					if (threads > 1) {
+						indexing5 = new BinaryIndexing<>(p.getDirectory(), lex_path.getDirectory(), p.isZipped(), threads);
+					} else {
+						indexing5 = new BinaryIndexing<>(p.getDirectory(), lex_path.getDirectory(), p.isZipped());
+					}
+					break;
+				case (5):
+					Indexing<V> indexing6 = null;
+					if (threads > 1) {
+						indexing6 = new HexadecimalIndexing<>(p.getDirectory(), lex_path.getDirectory(), p.isZipped(), threads);
+					} else {
+						indexing6 = new HexadecimalIndexing<>(p.getDirectory(), lex_path.getDirectory(), p.isZipped());
 					}
 					break;
 			}
 			long endTime = System.nanoTime();
 			long duration = (endTime - startTime);
 			durations[i] = duration;
-			System.out.println("Iteration #" + (i+1) + " took " + duration + " s.");
+			System.out.println("Iteration #" + (i+1) + " took " + duration / 1000000000.0 + " s.");
 		}
 		System.out.println(experiment_name + " took " + average(durations) / 1000000000.0 + " seconds on average.");
 	}
 	
 	/** Times the calculation of n-gram probabilities. */
 	public static void timeProbabilityCalculation(int n, String IN_PATH, ProbabilityCalculation prob_calc, int iterations) {
-		testProbabilityCalculationTime(n, IN_PATH, prob_calc, 0, 0, iterations);
+		timeProbabilityCalculation(n, IN_PATH, prob_calc, 0, 0, iterations);
 	}
 	
 	/** Times the parallel calculation of n-gram probabilities. */
-	public static void testProbabilityCalculationTime(int n, String IN_PATH, ProbabilityCalculation prob_calc, int producer, int consumer, int iterations) {
-		LanguageModel lm = new LanguageModel(n, IN_PATH, prob_calc, "fast back-off", true);
+	public static void timeProbabilityCalculation(int n, String IN_PATH, ProbabilityCalculation prob_calc, int producer, int consumer, int iterations) {
 		long[] durations = new long[iterations];
 		String experiment_name = (producer == 0 && consumer == 0) ? "Default " : "Parallelized ";
 		experiment_name += "language model probability calculation";
 		
 		for (int i = 0; i < iterations; i++) {
 			System.out.println("Starting iteration #" + (i+1) + "...");
+			LanguageModel lm = new LanguageModel(n, IN_PATH, prob_calc, "fast back-off", true);
 			long startTime = System.nanoTime();
 			if (producer == 0 && consumer == 0) {
 				lm.calculate();
@@ -149,14 +197,19 @@ public class Testing {
 			long endTime = System.nanoTime();
 			long duration = (endTime - startTime);
 			durations[i] = duration;
-			System.out.println("Iteration #" + (i+1) + " took " + duration + " s.");
+			System.out.println("Iteration #" + (i+1) + " took " + duration / 1000000000.0 + " s.");
+			lm = null;
 		}
 		System.out.println(experiment_name + " took " + average(durations) / 1000000000.0 + " seconds on average.");
 	}
 	
+	public static void timeLanguageModelEvaluation(int n, String IN_PATH, String TEST_INPATH, int iterations) {
+		timeLanguageModelEvaluation(n, IN_PATH, TEST_INPATH, 0, 0, iterations);
+	}
+	
 	/** Times the evaluation of a {@link LanguageModel}. */
-	public static void timeLanguageModelEvaluation(int n, String IN_PATH, String mode, String TEST_INPATH, int producer, int consumer, int iterations) {
-		LanguageModel lm = new LanguageModel(n, IN_PATH,"fast back-off", true);
+	public static void timeLanguageModelEvaluation(int n, String IN_PATH, String TEST_INPATH, int producer, int consumer, int iterations) {
+		LanguageModel lm = new LanguageModel(n, IN_PATH, "fast back-off", true);
 		long[] durations = new long[iterations];
 		String experiment_name = (producer == 0 && consumer == 0) ? "Default " : "Parallelized ";
 		experiment_name += "language model evaluation";
@@ -172,7 +225,7 @@ public class Testing {
 			long endTime = System.nanoTime();
 			long duration = (endTime - startTime);
 			durations[i] = duration;
-			System.out.println("Iteration #" + (i+1) + " took " + duration + " s.");
+			System.out.println("Iteration #" + (i+1) + " took " + duration / 1000000000.0 + " s.");
 		}
 		System.out.println(experiment_name + " took " + average(durations) / 1000000000.0 + " seconds on average.");
 	}

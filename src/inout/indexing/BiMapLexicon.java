@@ -45,7 +45,7 @@ public class BiMapLexicon implements Lexicon, Iterable {
 	public BiMapLexicon(List<String> entry_list) {
 		this.entries = HashBiMap.create();
 		for (int i = 0; i < entry_list.size(); i++) {
-			this.entries.put(i, entry_list.get(i));
+			this.entries.forcePut(i, entry_list.get(i));
 		}
 	}
 	

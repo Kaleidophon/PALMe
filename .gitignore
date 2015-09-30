@@ -23,3 +23,7 @@ misc/*.xml
 *.orig
 
 *.orig
+
+*.blg
+
+*.bbl
