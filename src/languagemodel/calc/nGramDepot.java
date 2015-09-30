@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Stack;
 
 /**
- * Class that stores n-grams for a parallelized probability calculation by {@link MaximumFrequencyEstimation}.
+ * Class that stores n-grams for a parallelized probability calculation by {@link MaximumLikelihoodEstimation}.
  * N-grams are provided by {@link nGramSupplier} and are used by {@link nGramCalculator}.
  * 
  * @author Dennis Ulmer

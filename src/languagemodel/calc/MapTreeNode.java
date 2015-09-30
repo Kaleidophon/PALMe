@@ -8,7 +8,7 @@ import java.util.Set;
 import utilities.Toolbox;
 
 /**
- * @deprecated Class used to parallelize the calculation of n-gram probabilities in {@link MaximumFrequencyEstimation}.
+ * @deprecated Class used to parallelize the calculation of n-gram probabilities in {@link MaximumLikelihoodEstimation}.
  * The idea was to build up a tree, where the depth of a node corresponds to the length of a n-gram. The children
  * of a node thereby share the beginning of their IDs (= words). A tree would then look something like this:
  * <p>

@@ -7,7 +7,7 @@ import inout.indexing.Indexing;
 import inout.paths.Path;
 import inout.paths.PathHandler;
 import utilities.eval.Evaluation;
-import languagemodel.calc.MaximumFrequencyEstimation;
+import languagemodel.calc.MaximumLikelihoodEstimation;
 import languagemodel.calc.ProbabilityCalculation;
 import languagemodel.model.LanguageModel;
 

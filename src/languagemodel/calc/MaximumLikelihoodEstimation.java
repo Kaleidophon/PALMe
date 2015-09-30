@@ -23,7 +23,7 @@ import utilities.Toolbox;
  * 
  * @author Dennis Ulmer
  */
-public class MaximumFrequencyEstimation implements ProbabilityCalculation {
+public class MaximumLikelihoodEstimation implements ProbabilityCalculation {
 	
 	// ------------------------------------------------- Main methods ------------------------------------------------
 

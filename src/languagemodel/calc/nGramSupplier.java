@@ -6,7 +6,7 @@ import java.util.Map;
 import inout.indexing.Indexing;
 
 /**
- * Used in {@link MaximumFrequencyEstimation} to calculate n-gram probabilities parallelized.
+ * Used in {@link MaximumLikelihoodEstimation} to calculate n-gram probabilities parallelized.
  * This class acts as a producer and puts available n-grams onto a stack in {@link nGramDepot}.
  * 
  * @author Dennis Ulmer

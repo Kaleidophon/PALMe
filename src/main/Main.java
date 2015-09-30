@@ -6,7 +6,7 @@ import inout.paths.Path;
 import inout.paths.PathHandler;
 import utilities.eval.Evaluation;
 import languagemodel.*;
-import languagemodel.calc.MaximumFrequencyEstimation;
+import languagemodel.calc.MaximumLikelihoodEstimation;
 import languagemodel.model.LanguageModel;
 
 public class Main {
@@ -18,7 +18,7 @@ public class Main {
 		//Indexing<Double> index = new HexadecimalIndexing<>(p.getDirectory(), ph.getFirstPathWithAttributes("zipped lexicon").getDirectory(), p.isZipped());
 		
 		// Calculation
-		LanguageModel lm = new LanguageModel(5, "./rsc/paths.xml", new MaximumFrequencyEstimation(), "fast back-off", true);
+		LanguageModel lm = new LanguageModel(5, "./rsc/paths.xml", new MaximumLikelihoodEstimation(), "fast back-off", true);
 		lm.calculate();
 		System.out.println("");
 		lm.calculateParallelized(1, 3);
